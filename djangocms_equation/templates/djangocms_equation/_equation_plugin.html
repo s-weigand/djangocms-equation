@@ -1,1 +1,9 @@
-<span class="katex"> $$ {{instance.tex_code}} $$</span>
+{% comment %} {% extends "djangocms_equation/base.html" %}
+{% load static %}
+
+{% load cms_tags %} {% endcomment %}
+<span class="katex {% if instance.is_inline %}inline{% endif %}">
+    ${% if not instance.is_inline %}${% endif %}
+        {{instance.tex_code}}
+    ${% if not instance.is_inline %}${% endif %}
+</span>

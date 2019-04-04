@@ -1,9 +1,12 @@
-{% extends "base.html" %}
+
+{% extends "cms/content.html" %}
 {% load static %}
+
+{% comment %} {% extends "base.html" %}
+{% load static %} {% endcomment %}
 
 {% block extrahead %}
     {{ block.super }}
-    {% comment %} {% addtoblock "css" %} {% endcomment %}
     <link
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/katex@0.10.1/dist/katex.min.css"
@@ -19,13 +22,55 @@
       crossorigin="anonymous"
     ></script>
 
-    <!-- To automatically render math in text elements, include the auto-render extension: -->
-    <script
-      defer
-      src="https://cdn.jsdelivr.net/npm/katex@0.10.1/dist/contrib/auto-render.min.js"
-      integrity="sha384-kWPLUVMOks5AQFrykwIup5lo0m3iMkkHrD0uJ4H5cjeGihAutqP0yW0J6dpFiVkI"
-      crossorigin="anonymous"
-      onload="renderMathInElement(document.body);"
-    ></script>
+
+
+<!-- To automatically render math in text elements, include the auto-render extension: -->
+<script
+    defer
+    src="https://cdn.jsdelivr.net/npm/katex@0.10.1/dist/contrib/auto-render.min.js"
+    integrity="sha384-kWPLUVMOks5AQFrykwIup5lo0m3iMkkHrD0uJ4H5cjeGihAutqP0yW0J6dpFiVkI"
+    crossorigin="anonymous"
+    onload='renderMathInElement(
+          document.body,
+          {
+              delimiters: [
+                  {left: "$$", right: "$$", display: true},
+                  {left: "\\[", right: "\\]", display: true},
+                  {left: "$", right: "$", display: false},
+                  {left: "\\(", right: "\\)", display: false}
+              ]
+          }
+      );'
+></script>
+
+    <script>
+
+    document.addEventListener("DOMContentLoaded", function(event) {
+      console.log("page loaded");
+      let cms_btn = document.querySelector(".cms-toolbar-item-cms-mode-switcher a");
+      const render_all = () => {
+        // TODO:
+        // needs to be done for ".model-equationpluginmodel a" aswell
+          let structure_side_bar = document.querySelector(".cms-structure-content")
+          // check if the element is visible
+          if (structure_side_bar.offsetParent !== null){
+
+          console.log("cms_btn clicked => rendering all")
+        renderMathInElement(structure_side_bar, {
+        throwOnError: false
+      });}
+      else{
+          console.log("need delay")
+          setTimeout(render_all, 100);
+      }}
+      console.log(cms_btn)
+      cms_btn.onclick = render_all
+
+    });
+    </script>
 {% endblock %}
-{% comment %} {% endaddtoblock %} {% endcomment %}
+
+
+{% block content %}
+    {% block form_content %}{% endblock %}
+{% endblock %}

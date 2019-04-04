@@ -14,10 +14,15 @@ from cms.models import CMSPlugin
 class EquationPluginModel(CMSPlugin):
     tex_code = models.CharField(
         _("tex_code"),
-        # widget=forms.Textarea,
         max_length=256,
         blank=True,
         help_text=_("Insert you LaTeX code here."),
+    )
+    is_inline = models.BooleanField(
+        _("is_inline"),
+        blank=True,
+        default=0,
+        help_text=_("Select if the equation should be inline."),
     )
 
     def __str__(self):

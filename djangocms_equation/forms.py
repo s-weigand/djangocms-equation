@@ -8,7 +8,8 @@ from .models import EquationPluginModel
 
 
 class EquationForm(forms.ModelForm):
-    tex_code = forms.CharField(widget=forms.Textarea(attrs={'rows': '5'}))
+    tex_code = forms.CharField(widget=forms.Textarea(attrs={'rows': '2'}))
+    # is_inline = forms.BooleanField()
 
     class Meta:
         model = EquationPluginModel
@@ -16,4 +17,14 @@ class EquationForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # self.tex_code.widget_attrs.({'rows': '5'})
+
+
+class EquationFormTextEdit(EquationForm):
+    is_inline = forms.BooleanField(required=False, widget=forms.CheckboxInput)
+
+    class Meta:
+        model = EquationPluginModel
+        fields = ["tex_code", "is_inline"]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
