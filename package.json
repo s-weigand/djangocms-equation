@@ -7,11 +7,15 @@
     "test": "tests"
   },
   "scripts": {
-    "build": "npm run build:css && npm run build:js ",
+    "build": "npm run clean && npm run build:css && npm run build:js",
     "build:css": "parcel build --no-cache asset-src/css/change_form_template.scss --out-file change_form_template.css -d djangocms_equation/static/djangocms_equation/css --no-source-maps --public-url ./",
     "build:js": "npm run build:change_form_template_js && npm run build:render_template_js",
     "build:change_form_template_js": "parcel build --no-cache asset-src/ts/change_form_template.ts --out-file change_form_template.js -d djangocms_equation/static/djangocms_equation/js --no-source-maps --public-url ./",
-    "build:render_template_js": "parcel build --no-cache asset-src/ts/render_template.ts --out-file render_template.js -d djangocms_equation/static/djangocms_equation/js --no-source-maps --public-url ./"
+    "build:render_template_js": "parcel build --no-cache asset-src/ts/render_template.ts --out-file render_template.js -d djangocms_equation/static/djangocms_equation/js --no-source-maps --public-url ./",
+    "watch:css": "parcel watch asset-src/css/change_form_template.scss --out-file change_form_template.css -d djangocms_equation/static/djangocms_equation/css --public-url ./",
+    "watch:change_form_template_js": "parcel watch asset-src/ts/change_form_template.ts --out-file change_form_template.js -d djangocms_equation/static/djangocms_equation/js --public-url ./",
+    "watch:render_template_js": "parcel watch asset-src/ts/render_template.ts --out-file render_template.js -d djangocms_equation/static/djangocms_equation/js --public-url ./",
+    "clean": "rm -rf djangocms_equation/static/djangocms_equation/*"
   },
   "repository": {
     "type": "git",
@@ -21,6 +25,11 @@
     "djangocms",
     "equation"
   ],
+  "prettier": {
+    "trailingComma": "es5",
+    "semi": false,
+    "singleQuote": true
+  },
   "author": "Sebastian Weigand",
   "license": "Apache-2.0",
   "bugs": {
@@ -36,6 +45,9 @@
     "less": "^3.9.0",
     "parcel": "^1.12.3",
     "sass": "^1.17.4",
+    "tslint": "^5.15.0",
+    "tslint-config-prettier": "^1.18.0",
+    "tslint-config-standard": "^8.0.1",
     "typescript": "^3.4.1"
   }
 }

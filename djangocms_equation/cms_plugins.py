@@ -27,7 +27,7 @@ class EquationPlugin(CMSPluginBase):
     admin_preview = True
 
     def render(self, context, instance, placeholder):
-        if self.is_in_text_editor(instance):
+        if not self.is_in_text_editor(instance):
             instance.is_inline = False
         context.update({"instance": instance, "placeholder": placeholder})
         return context

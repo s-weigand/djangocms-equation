@@ -20,8 +20,10 @@ class EquationPluginModel(CMSPlugin):
     is_inline = models.BooleanField(
         _("is_inline"),
         blank=True,
-        default=0,
     )
 
     def __str__(self):
-        return "$${tex_code}$$".format(tex_code=self.tex_code)
+        if self.is_inline:
+            return "${tex_code}$".format(tex_code=self.tex_code)
+        else:
+            return "$${tex_code}$$".format(tex_code=self.tex_code)
