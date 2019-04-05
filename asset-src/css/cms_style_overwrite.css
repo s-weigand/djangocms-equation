@@ -1,0 +1,15 @@
+/*
+resets styles applyed by django-cms since it messes
+up the rendered equations
+*/
+.katex span {
+  font-size: unset;
+  line-height: unset;
+  vertical-align: unset;
+  margin: unset;
+  padding: unset;
+  border: unset;
+}
+#katex_live_render_out {
+  font-size: 1.8rem;
+}

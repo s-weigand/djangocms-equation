@@ -1,0 +1,5 @@
+// This is needed to be done with importing 'cms_style_overwrite.css'
+// because sass would else first apply katex.css and then append
+// the styles in this file.
+@import "./cms_style_overwrite.css";
+@import "../../node_modules/katex/dist/katex.css";

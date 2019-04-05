@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "allowSyntheticDefaultImports": true,
+    "module": "commonjs",
+    "lib": ["es2015", "es2016", "es2017", "dom"],
+    "declaration": true,
+    "outDir": "./djangocms_equation/static/djangocms_equation/js/",
+    "rootDir": "./asset-src/ts/",
+    "preserveConstEnums": true,
+    "removeComments": true,
+    "sourceMap": true,
+    "target": "es6",
+    /* Module Resolution Options */
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "baseUrl": "./djangocms_equation/js/",
+    // Strict type-checking options
+    "strict": true,
+    "noImplicitAny": true
+  },
+  "parcelTsPluginOptions": {
+    // If true type-checking is disabled
+    "transpileOnly": false
+  },
+  "include": ["./asset-src/ts/**/*"],
+  "exclude": [".git", "node_modules"]
+}

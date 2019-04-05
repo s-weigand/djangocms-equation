@@ -103,3 +103,7 @@ ENV/
 
 # VsCode config
 .vscode
+
+# js modules
+node_modules
+package-lock.json
