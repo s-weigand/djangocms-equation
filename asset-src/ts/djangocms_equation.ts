@@ -2,11 +2,11 @@ import { render } from 'katex'
 import renderMathInElement from 'katex/dist/contrib/auto-render'
 
 const debug_printer = (debug = true, ...args: any[]) => {
-  // if (process.env.NODE_ENV === "development" && debug) {
-  // Or, `process.env.NODE_ENV !== 'production'`
-  // Only runs in development and will be stripped from production build.
-  console.log(...args)
-  // }
+  if (process.env.NODE_ENV === 'development' && debug) {
+    // Or, `process.env.NODE_ENV !== 'production'`
+    // Only runs in development and will be stripped from production build.
+    console.log(...args)
+  }
 }
 
 const katex_delimiters_setting = {
@@ -60,7 +60,7 @@ export const init_render_main_page = (debug = true) => {
     debug_printer(debug, 'cms_btn is:', cms_btn)
     if (cms_btn !== null) {
       // somehow onclick doesn't work, onfocus will be the hotfix for now
-      cms_btn.onfocus  = render_on_show
+      cms_btn.onfocus = render_on_show
     }
   })
 }
