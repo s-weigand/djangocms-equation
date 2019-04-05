@@ -1,7 +1,8 @@
-{% comment %} {% extends "djangocms_equation/base.html" %}
-{% load static %}
 
-{% load cms_tags %} {% endcomment %}
+{% load sekizai_tags static %}
+{% addtoblock "css" %}<link rel="stylesheet" href="{% static 'djangocms_equation\css\change_form_template.css' %}">{% endaddtoblock %}
+{% addtoblock "js" %}<script src="{% static 'djangocms_equation\js\render_template.js' %}" ></script>{% endaddtoblock %}
+
 <span class="katex {% if instance.is_inline %}inline{% endif %}">
     ${% if not instance.is_inline %}${% endif %}
         {{instance.tex_code}}

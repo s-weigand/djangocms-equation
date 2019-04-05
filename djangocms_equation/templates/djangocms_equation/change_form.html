@@ -6,40 +6,6 @@
 
 <script src="{% static_with_version "cms/js/dist/bundle.admin.base.min.js" %}"></script>
 
-{% comment %}
-reset styles applyed by django-cms since it messes
-up the rendered equations
-{% endcomment %}
-{% comment %} <style>
-.katex span {
-    font-size: unset;
-    line-height: unset;
-    vertical-align: unset;
-    margin: unset;
-    padding: unset;
-    border: unset;
-}
-#katex_live_render_out{
-    font-size: 1.8rem;
-}
-</style>
-
-<link
-    rel="stylesheet"
-    href="https://cdn.jsdelivr.net/npm/katex@0.10.1/dist/katex.min.css"
-    integrity="sha384-dbVIfZGuN1Yq7/1Ocstc1lUEm+AT+/rCkibIcC/OmWo5f0EA48Vf8CytHzGrSwbQ"
-    crossorigin="anonymous"
-/>
-
-
-<!-- The loading of KaTeX is deferred to speed up page rendering -->
-<script
-    defer
-    src="https://cdn.jsdelivr.net/npm/katex@0.10.1/dist/katex.min.js"
-    integrity="sha384-2BKqo+exmr9su6dir+qCw08N2ZKRucY4PrGQPPWU1A7FtlCGjmEGFqXCv5nyM5Ij"
-    crossorigin="anonymous"
-></script> {% endcomment %}
-
 <link rel="stylesheet" href="{% static 'djangocms_equation\css\change_form_template.css' %}">
 <script src="{% static 'djangocms_equation\js\change_form_template.js' %}" ></script>
 
@@ -49,18 +15,6 @@ up the rendered equations
 $(document).ready(function () {
     console.log("change_form.html is loading")
 	CMS.API.Helpers.csrf('{{ csrf_token }}');
-    {% comment %} let tex_in = document.getElementById("id_tex_code");
-    let tex_out = document.getElementById("katex_live_render_out");
-    const render_text = () => {
-    let tex_code = tex_in.value;
-    console.log("tex_code to render: ", tex_code);
-    katex.render(tex_code, tex_out, {
-        throwOnError: false
-    });
-    };
-
-    tex_in.oninput = render_text;
-    render_text(); {% endcomment %}
 });
 })(CMS.$);
 </script>

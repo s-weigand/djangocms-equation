@@ -16,13 +16,11 @@ class EquationPluginModel(CMSPlugin):
         _("tex_code"),
         max_length=256,
         blank=True,
-        help_text=_("Insert you LaTeX code here."),
     )
     is_inline = models.BooleanField(
         _("is_inline"),
         blank=True,
         default=0,
-        help_text=_("Select if the equation should be inline."),
     )
 
     def __str__(self):
