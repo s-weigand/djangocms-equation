@@ -40,3 +40,8 @@ This package was created with Cookiecutter_ and the
 
 .. _Cookiecutter: https://github.com/audreyr/cookiecutter
 .. _`audreyr/cookiecutter-pypackage`: https://github.com/audreyr/cookiecutter-pypackage
+
+
+.. image:: https://badges.greenkeeper.io/s-weigand/djangocms-equation.svg
+   :alt: Greenkeeper badge
+   :target: https://greenkeeper.io/
