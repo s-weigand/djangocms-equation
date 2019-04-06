@@ -1,4 +1,7 @@
 # Config file for automatic testing at travis-ci.org
+sudo: false
+language: python
+cache: pip
 
 language: python
 python:
@@ -7,8 +10,41 @@ python:
   - 3.5
   - 2.7
 
+matrix:
+  fast_finish: true
+  include:
+    - python: 3.6
+      env: TOXENV=flake8
+      after_success:
+        - echo "done"
+
+    - python: 3.6
+      env: TOXENV=env_var_coverage
+
+    - python: 3.6
+      env: TOXENV=docs
+      after_success:
+        - echo "done"
+
+    - python: 3.6
+      env: TOXENV=docs-links
+      after_success:
+        - echo "done"
+
+    - language: python
+      sudo: required
+      dist: xenial
+      python: "3.7"
+      env: linux-py37
+
+  allow_failures:
+    #      this tests are allowed to fail since they rely external resources
+    - env: TOXENV=docs-links
+
 # Command to install dependencies, e.g. pip install -r requirements.txt --use-mirrors
-install: pip install -U tox-travis
+install:
+  - python -m pip install -U pip>=18.1
+  - pip install tox-travis coveralls
 
 # Command to run tests, e.g. python setup.py test
 script: tox
