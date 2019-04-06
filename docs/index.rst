@@ -1,5 +1,5 @@
 Welcome to djangocms-equation's documentation!
-======================================
+==============================================
 
 .. toctree::
    :maxdepth: 2

@@ -15,7 +15,7 @@ Types of Contributions
 Report Bugs
 ~~~~~~~~~~~
 
-Report bugs at https://github.com/s-weigand/djangocms_equation/issues.
+Report bugs at https://github.com/s-weigand/djangocms-equation/issues.
 
 If you are reporting a bug, please include:
 
@@ -45,7 +45,7 @@ articles, and such.
 Submit Feedback
 ~~~~~~~~~~~~~~~
 
-The best way to send feedback is to file an issue at https://github.com/s-weigand/djangocms_equation/issues.
+The best way to send feedback is to file an issue at https://github.com/s-weigand/djangocms-equation/issues.
 
 If you are proposing a feature:
 
@@ -67,7 +67,7 @@ Ready to contribute? Here's how to set up `djangocms_equation` for local develop
 3. Install your local copy into a virtualenv. Assuming you have virtualenvwrapper installed, this is how you set up your fork for local development::
 
     $ mkvirtualenv djangocms_equation
-    $ cd djangocms_equation/
+    $ cd djangocms-equation/
     $ python setup.py develop
 
 4. Create a branch for local development::
@@ -79,8 +79,6 @@ Ready to contribute? Here's how to set up `djangocms_equation` for local develop
 5. When you're done making changes, check that your changes pass flake8 and the
    tests, including testing other Python versions with tox::
 
-    $ flake8 djangocms_equation tests
-    $ python setup.py test or py.test
     $ tox
 
    To get flake8 and tox, just pip install them into your virtualenv.
@@ -102,8 +100,8 @@ Before you submit a pull request, check that it meets these guidelines:
 2. If the pull request adds functionality, the docs should be updated. Put
    your new functionality into a function with a docstring, and add the
    feature to the list in README.rst.
-3. The pull request should work for Python 2.7, 3.4, 3.5 and 3.6, and for PyPy. Check
-   https://travis-ci.org/s-weigand/djangocms_equation/pull_requests
+3. The pull request should work for Python 2.7, 3.5, 3.6 and 3.7. Check
+   https://travis-ci.org/s-weigand/djangocms-equation/pull_requests
    and make sure that the tests pass for all supported Python versions.
 
 Tips
