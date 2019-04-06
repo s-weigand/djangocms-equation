@@ -14,8 +14,8 @@ djangocms-equation
         :alt: Documentation Status
 
 
-.. image:: https://pyup.io/repos/github/s-weigand/djangocms_equation/shield.svg
-        :target: https://pyup.io/repos/github/s-weigand/djangocms_equation/
+.. image:: https://pyup.io/repos/github/s-weigand/djangocms-equation/shield.svg
+        :target: https://pyup.io/repos/github/s-weigand/djangocms-equation/
         :alt: Updates
 
 
