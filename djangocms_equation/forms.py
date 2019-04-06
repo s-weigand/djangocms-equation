@@ -33,7 +33,7 @@ class EquationForm(forms.ModelForm):
         choices=ALLOWED_FONT_SIZE_UNITS,
         initial="rem",
         required=True,
-        widget=forms.Select(attrs={"id": "djangocms_equation_font_size_unit"})
+        widget=forms.Select(attrs={"id": "djangocms_equation_font_size_unit"}),
     )
 
     class Meta:

@@ -1,5 +1,19 @@
 // This is needed to be done with importing 'cms_style_overwrite.css'
 // because sass would else first apply katex.css and then append
 // the styles in this file.
-@import "./cms_style_overwrite.css";
-@import "../../node_modules/katex/dist/katex.css";
+@import './cms_style_overwrite.scss';
+@import '../../node_modules/katex/dist/katex.css';
+
+#equationpluginmodel_form {
+  div.field-is_inline,
+  div.field-font_size_value,
+  div.field-font_size_unit {
+    width: 30%;
+    float: left;
+    margin-right: 2em;
+  }
+}
+
+body.popup.app-djangocms_equation.model-equationpluginmodel #content-main{
+  float: none;
+}
