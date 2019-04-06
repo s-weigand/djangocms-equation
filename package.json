@@ -7,6 +7,7 @@
     "test": "tests"
   },
   "scripts": {
+    "commit_ready":"npm run clean && npm run build",
     "build": "npm run clean && npm run build:css && npm run build:js",
     "build:css": "parcel build --no-cache asset-src/css/change_form_template.scss --out-file change_form_template.css -d djangocms_equation/static/djangocms_equation/css --no-source-maps --public-url ./",
     "build:js": "npm run build:change_form_template_js && npm run build:render_template_js",

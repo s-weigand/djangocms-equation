@@ -9,6 +9,17 @@
 <link rel="stylesheet" href="{% static 'djangocms_equation\css\change_form_template.css' %}">
 <script src="{% static 'djangocms_equation\js\change_form_template.js' %}" ></script>
 
+<style>
+/*
+resets styles applyed the html tag in djangocms_equation change_form
+this is needed so the preview for the font-size  in rem is properly
+rendered
+*/
+html{
+  font-size: unset;
+}
+</style>
+
 <script>
 (function($) {
 // CMS.$ will be passed for $
@@ -20,17 +31,13 @@ $(document).ready(function () {
 </script>
 {% endblock %}
 
-{% comment %} {% addtoblock "content" %} {% endcomment %}
 {% block content %}
     {{ block.super }}
 <br />
-{% comment %} <span class="katex"> {% endcomment %}
 <span class="katex" id="katex_live_render_out">
-Blub
+Error in live rendering, please file an issue at https://github.com/s-weigand/djangocms-equation/issues
 </span>
-{% comment %} </span> {% endcomment %}
 
 {% endblock %}
 
-{% comment %} {% endaddtoblock %} {% endcomment %}
 

@@ -10,9 +10,6 @@ up the rendered equations
   padding: unset;
   border: unset;
 }
-#katex_live_render_out {
-  font-size: 1.8rem;
-}
-span.katex.inline{
-font-size: 1rem;
+span.katex.inline {
+  font-size: 1rem;
 }

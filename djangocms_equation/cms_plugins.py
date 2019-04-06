@@ -23,10 +23,30 @@ class EquationPlugin(CMSPluginBase):
     change_form_template = "djangocms_equation/change_form.html"
     render_template = "djangocms_equation/_equation_plugin.html"
     text_enabled = True
+    text_editor_preview = True
     disable_child_plugins = True
     admin_preview = True
 
     def render(self, context, instance, placeholder):
+        """
+        Method that renders the Plugin with self.render_template and
+        the data in instance
+
+        Parameters
+        ----------
+        context : dict
+            [description]
+        instance : EquationPluginModel
+            Instance of the plugins Model
+        placeholder : str
+            [description]
+
+        Returns
+        -------
+        dict
+            [description]
+        """
+
         if not self.is_in_text_editor(instance):
             instance.is_inline = False
         context.update({"instance": instance, "placeholder": placeholder})
@@ -40,19 +60,19 @@ class EquationPlugin(CMSPluginBase):
 
     def is_in_text_editor(self, instance):
         """
-        Method to check if the plugin was added to a text area ('djangocms-text-ckeditor')
-        or to page as stand alone.
+        Method to check if the plugin was added to a text plugin ('djangocms-text-ckeditor')
+        or to page as stand alone element.
 
         Parameters
         ----------
         instance : EquationPluginModel
-            Instance of the plugin
+            Instance of the plugins Model
 
         Returns
         -------
         bool:
-            True if the plugin was added to a text area ('djangocms-text-ckeditor')
-            or False if it was added to page as stand alone.
+            True if the plugin was added to a text plugin ('djangocms-text-ckeditor')
+            or False if it was added to page as stand alone element.
         """
         parent_plugin = instance.get_parent()
         if parent_plugin is not None and parent_plugin.get_plugin_name() == "Text":
