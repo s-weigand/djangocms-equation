@@ -19,9 +19,6 @@ matrix:
         - echo "done"
 
     - python: 3.6
-      env: TOXENV=env_var_coverage
-
-    - python: 3.6
       env: TOXENV=docs
       after_success:
         - echo "done"
