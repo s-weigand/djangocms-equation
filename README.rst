@@ -18,6 +18,9 @@ djangocms-equation
         :target: https://pyup.io/repos/github/s-weigand/djangocms-equation/
         :alt: Updates
 
+.. image:: https://badges.greenkeeper.io/s-weigand/djangocms-equation.svg
+        :target: https://greenkeeper.io/
+
 
 
 DjangoCMS plugin to write equations, utilizing KaTeX
@@ -43,5 +46,5 @@ This package was created with Cookiecutter_ and the
 
 
 .. image:: https://badges.greenkeeper.io/s-weigand/djangocms-equation.svg
-   :alt: Greenkeeper badge
-   :target: https://greenkeeper.io/
+        :alt: Greenkeeper badge
+        :target: https://greenkeeper.io/
