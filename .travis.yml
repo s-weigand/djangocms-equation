@@ -18,7 +18,7 @@ matrix:
         - echo "done"
 
     - python: 3.6
-      env: TOXENV=docs
+      env: TOXENV=docs-create
       after_success:
         - echo "done"
 

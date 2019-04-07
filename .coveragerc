@@ -5,6 +5,7 @@ include = djangocms_equation/*
 # uncomment the above line if you want to see if all tests did run
 omit = setup.py
        djangocms_equation/__init__.py
+       djangocms_equation/templatetags/__init__.py
        djangocms_equation/migrations/*
        tests/__init__.py
 
