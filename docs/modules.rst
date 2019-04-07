@@ -2,11 +2,10 @@
 Source Documentation
 ====================
 
-.. currentmodule:: djangocms_equation
+.. currentmodule:: djangocms_equation.cms_plugins
 
-.. autosummary::
-    :toctree: api
+..  .. autosummary::
+    :nosignatures:
+    :toctree: api/
 
-    djangocms_equation.cms_plugins
-    djangocms_equation.forms
-    djangocms_equation.models
+    EquationPlugin

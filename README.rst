@@ -3,10 +3,10 @@ djangocms-equation
 ==================
 
 
-.. image:: https://img.shields.io/pypi/v/djangocms_equation.svg
-        :target: https://pypi.python.org/pypi/djangocms_equation
+.. .. image:: https://img.shields.io/pypi/v/djangocms-equation.svg
+           :target: https://pypi.python.org/pypi/djangocms-equation
 
-.. image:: https://travis-ci.org/s-weigand/djangocms-equation.svg?branch=master
+.. image:: https://api.travis-ci.org/s-weigand/djangocms-equation.svg?branch=master
         :target: https://travis-ci.org/s-weigand/djangocms-equation
 
 .. image:: https://readthedocs.org/projects/djangocms-equation/badge/?version=latest

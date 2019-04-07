@@ -2,14 +2,10 @@
 
 from __future__ import unicode_literals
 
-import sys
-
-from django.conf import settings
 from django.utils.translation import ugettext as _
 
 from cms.plugin_base import CMSPluginBase
 from cms.plugin_pool import plugin_pool
-from djangocms_text_ckeditor.cms_plugins import Text
 
 from .forms import EquationForm
 from .models import EquationPluginModel

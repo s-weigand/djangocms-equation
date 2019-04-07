@@ -4,8 +4,9 @@ from django import template
 
 register = template.Library()
 
-@register.filter(name='format_float_dot_delimiter')
-def format_float_dot_delimiter (value):
+
+@register.filter(name="format_float_dot_delimiter")
+def format_float_dot_delimiter(value):
     """
     Ensures that the float value has '.' as the decimal delimiter.
     This prevents errors caused by internationalisation where it is not wanted,
