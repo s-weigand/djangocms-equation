@@ -8,7 +8,7 @@ wheel>=0.32.1
 
 #docs
 sphinx-rtd-theme>=0.4.3
-Sphinx>=1.8.1, <2.0.0
+Sphinx==2.0.0
 coverage>=4.5.1
 
 # tests
