@@ -13,6 +13,7 @@ coverage>=4.5.1
 
 # tests
 pytest>=3.8.2
+djangocms-helper>=1.2
 pytest-cov>=2.5.1
 flake8>=3.5.0
 tox>=3.5.2
