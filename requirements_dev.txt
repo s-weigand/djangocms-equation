@@ -5,6 +5,7 @@ wheel>=0.32.1
 
 
 # setup dependencies
+django<=2.1
 
 #docs
 sphinx-rtd-theme>=0.4.3
