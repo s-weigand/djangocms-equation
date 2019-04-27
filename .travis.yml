@@ -13,11 +13,13 @@ python:
 
 env:
   - DJANGO="1.11"
+    - DJANGO_CMS="3.4"
+    - DJANGO_CMS="3.5"
+    - DJANGO_CMS="3.6"
   - DJANGO="2.0"
+    - DJANGO_CMS="3.6"
   - DJANGO="2.1"
-  - DJANGO_CMS="3.4"
-  - DJANGO_CMS="3.5"
-  - DJANGO_CMS="3.6"
+    - DJANGO_CMS="3.6"
 
 matrix:
   fast_finish: true
