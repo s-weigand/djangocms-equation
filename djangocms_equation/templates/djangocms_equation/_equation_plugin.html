@@ -1,7 +1,7 @@
 
 {% load sekizai_tags static djangocms_equation_tags %}
-{% addtoblock "css" %}<link rel="stylesheet" href="{% static 'djangocms_equation\css\change_form_template.css' %}">{% endaddtoblock %}
-{% addtoblock "js" %}<script src="{% static 'djangocms_equation\js\render_template.js' %}" ></script>{% endaddtoblock %}
+{% addtoblock "css" %}<link rel="stylesheet" href="{% static 'djangocms_equation/css/change_form_template.css' %}">{% endaddtoblock %}
+{% addtoblock "js" %}<script src="{% static 'djangocms_equation/js/render_template.js' %}" ></script>{% endaddtoblock %}
 
 <span class="katex {% if instance.is_inline %}inline{% endif %}"
       style="font-size:{{instance.font_size_value|format_float_dot_delimiter}}{{instance.font_size_unit}};">
