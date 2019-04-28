@@ -16,7 +16,7 @@ def format_float_dot_delimiter(value):
     Parameters
     ----------
     value : float
-        [description]
+        Arbitrary float value that should be formated
 
     Returns
     -------
