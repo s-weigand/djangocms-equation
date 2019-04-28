@@ -12,9 +12,11 @@ python:
   - 2.7
 
 env:
-  - DJANGO="1.11"
-  - DJANGO="2.0"
-  - DJANGO="2.1"
+  - DJANGO="1.11" CMS="3.4"
+  - DJANGO="1.11" CMS="3.5"
+  - DJANGO="1.11" CMS="3.6"
+  - DJANGO="2.0"  CMS="3.6"
+  - DJANGO="2.1"  CMS="3.6"
 
 matrix:
   fast_finish: true
