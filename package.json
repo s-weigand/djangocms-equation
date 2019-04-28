@@ -42,10 +42,10 @@
   },
   "devDependencies": {
     "@types/katex": "^0.10.1",
-    "@types/node": "^11.13.0",
+    "@types/node": "^11.13.8",
     "less": "^3.9.0",
     "parcel": "^1.12.3",
-    "sass": "^1.17.4",
+    "sass": "^1.19.0",
     "tslint": "^5.15.0",
     "tslint-config-prettier": "^1.18.0",
     "tslint-config-standard": "^8.0.1",
