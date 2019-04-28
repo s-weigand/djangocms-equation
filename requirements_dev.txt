@@ -3,18 +3,12 @@ bump2version>=0.5.10
 twine>=1.12.1
 wheel>=0.32.1
 
-
-# setup dependencies
-# django < 2.2
-
 #docs
 sphinx-rtd-theme>=0.4.3
 Sphinx>=1.8.1
-coverage>=4.5.1
 
 # tests
-pytest>=3.8.2
 djangocms-helper>=1.2
-pytest-cov>=2.5.1
-flake8>=3.5.0
+coverage>=4.5.1
 tox>=3.5.2
+mixer

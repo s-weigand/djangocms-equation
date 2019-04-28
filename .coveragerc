@@ -1,5 +1,6 @@
 [run]
 branch = True
+source = djangocms_equation
 include = djangocms_equation/*
           tests/*
 # uncomment the above line if you want to see if all tests did run

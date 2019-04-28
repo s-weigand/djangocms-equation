@@ -6,9 +6,6 @@
 # from djangocms_equation.cms_plugins import EquationPlugin
 
 
-def test_dummy():
-    assert True
-
 # from django.test import TestCase
 # from django.test.client import RequestFactory
 

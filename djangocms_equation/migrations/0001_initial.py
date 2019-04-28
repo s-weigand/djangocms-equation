@@ -11,20 +11,47 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('cms', '0022_auto_20180620_1551'),
+        ("cms", "__first__"),
+        # ('cms', '0022_auto_20180620_1551'),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='EquationPluginModel',
+            name="EquationPluginModel",
             fields=[
-                ('cmsplugin_ptr', models.OneToOneField(auto_created=True, on_delete=django.db.models.deletion.CASCADE, parent_link=True, primary_key=True, related_name='djangocms_equation_equationpluginmodel', serialize=False, to='cms.CMSPlugin')),
-                ('tex_code', models.CharField(blank=True, help_text='Insert you LaTeX code here.', max_length=256, verbose_name='tex_code')),
-                ('filename', models.CharField(blank=True, default='', help_text='Optional. Enter the filename, if there are multiple files and you only want to display one.', max_length=32, verbose_name='filename')),
+                (
+                    "cmsplugin_ptr",
+                    models.OneToOneField(
+                        auto_created=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        parent_link=True,
+                        primary_key=True,
+                        related_name="djangocms_equation_equationpluginmodel",
+                        serialize=False,
+                        to="cms.CMSPlugin",
+                    ),
+                ),
+                (
+                    "tex_code",
+                    models.CharField(
+                        blank=True,
+                        help_text="Insert you LaTeX code here.",
+                        max_length=256,
+                        verbose_name="tex_code",
+                    ),
+                ),
+                (
+                    "filename",
+                    models.CharField(
+                        blank=True,
+                        default="",
+                        help_text="Optional. Enter the filename, if there are multiple files and you only want to display one.",
+                        max_length=32,
+                        verbose_name="filename",
+                    ),
+                ),
             ],
-            options={
-                'abstract': False,
-            },
-            bases=('cms.cmsplugin',),
-        ),
+            options={"abstract": False},
+            bases=("cms.cmsplugin",),
+        )
     ]

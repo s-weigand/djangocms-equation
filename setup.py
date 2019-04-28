@@ -11,11 +11,7 @@ with open("README.rst") as readme_file:
 with open("HISTORY.rst") as history_file:
     history = history_file.read()
 
-requirements = ["django-cms>=3.4"]
-
-setup_requirements = ["pytest-runner"]
-
-test_requirements = ["pytest"]
+requirements = ["django-cms>=3.4", "django>=1.11"]
 
 setup(
     author="Sebastian Weigand",
@@ -46,13 +42,12 @@ setup(
     install_requires=requirements,
     license="Apache Software License 2.0",
     long_description=readme + "\n\n" + history,
+    long_description_content_type="text/x-rst",
     include_package_data=True,
     keywords="djangocms_equation",
     name="djangocms_equation",
     packages=find_packages(include=["djangocms_equation"]),
-    setup_requires=setup_requirements,
-    test_suite="tests",
-    tests_require=test_requirements,
+    test_suite="tests.settings.run",
     url="https://github.com/s-weigand/djangocms_equation",
     version="0.1.0",
     zip_safe=False,
