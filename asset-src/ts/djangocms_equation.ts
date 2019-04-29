@@ -20,8 +20,8 @@ const katex_delimiters_setting: RenderMathInElementOptions = {
   ],
 }
 
-const render_full_page = (): void => {
-  renderMathInElement(document.body, {
+export const render_full_page = (target=document.body): void => {
+  renderMathInElement(target, {
     ...katex_delimiters_setting,
   })
 }

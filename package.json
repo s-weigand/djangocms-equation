@@ -13,9 +13,9 @@
     "build:js": "npm run build:change_form_template_js && npm run build:render_template_js",
     "build:change_form_template_js": "parcel build --no-cache asset-src/ts/change_form_template.ts --out-file change_form_template.js -d djangocms_equation/static/djangocms_equation/js --no-source-maps --public-url ./",
     "build:render_template_js": "parcel build --no-cache asset-src/ts/render_template.ts --out-file render_template.js -d djangocms_equation/static/djangocms_equation/js --no-source-maps --public-url ./",
-    "watch:css": "parcel watch asset-src/css/change_form_template.scss --out-file change_form_template.css -d djangocms_equation/static/djangocms_equation/css --public-url ./ --no-minify",
-    "watch:change_form_template_js": "parcel watch asset-src/ts/change_form_template.ts --out-file change_form_template.js -d djangocms_equation/static/djangocms_equation/js --public-url ./ --no-minify",
-    "watch:render_template_js": "parcel watch asset-src/ts/render_template.ts --out-file render_template.js -d djangocms_equation/static/djangocms_equation/js --public-url ./ --no-minify",
+    "watch:css": "parcel watch asset-src/css/change_form_template.scss --out-file change_form_template.css -d djangocms_equation/static/djangocms_equation/css --public-url ./",
+    "watch:change_form_template_js": "parcel watch asset-src/ts/change_form_template.ts --out-file change_form_template.js -d djangocms_equation/static/djangocms_equation/js --public-url ./",
+    "watch:render_template_js": "parcel watch asset-src/ts/render_template.ts --out-file render_template.js -d djangocms_equation/static/djangocms_equation/js --public-url ./",
     "clean": "rm -rf djangocms_equation/static/djangocms_equation/*"
   },
   "repository": {
