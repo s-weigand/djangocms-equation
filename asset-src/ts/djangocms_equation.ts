@@ -20,7 +20,7 @@ const katex_delimiters_setting: RenderMathInElementOptions = {
   ],
 }
 
-export const render_full_page = (target=document.body): void => {
+export const render_full_page = (target = document.body): void => {
   renderMathInElement(target, {
     ...katex_delimiters_setting,
   })
@@ -96,7 +96,11 @@ export const init_live_editor_render = (debug = true): void => {
     ) as HTMLSpanElement
     const render_text = (): void => {
       if (tex_in !== null && tex_out !== null) {
-        let tex_code = tex_in.value
+        let tex_code: string = tex_in.value
+        let tex_code_lines: number = tex_code.split(/\r\n|\r|\n/).length
+        if(tex_code_lines>=2){
+          tex_in.setAttribute("rows", `${tex_code_lines}`)
+        }
         debug_printer(debug, 'tex_code to render: ', tex_code)
         render(tex_code, tex_out, {
           throwOnError: false,
