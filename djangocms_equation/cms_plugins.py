@@ -3,7 +3,6 @@
 from __future__ import unicode_literals
 
 from django.utils.translation import ugettext as _
-from django.conf import settings
 
 from cms.plugin_base import CMSPluginBase
 from cms.plugin_pool import plugin_pool
@@ -51,7 +50,6 @@ class EquationPlugin(CMSPluginBase):
 
     def icon_src(self, instance):
         return "djangocms_equation/img/LaTeX_logo.svg"
-        # return "https://upload.wikimedia.org/wikipedia/commons/thumb/9/92/LaTeX_logo.svg/320px-LaTeX_logo.svg.png"
 
     def icon_alt(self, instance):
         if self.is_in_text_editor(instance) and instance.is_inline:
