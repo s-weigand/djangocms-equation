@@ -4,10 +4,20 @@ import {
   render_full_page,
 } from './djangocms_equation'
 
-init_render_main_page(true)
+init_render_main_page(false)
 
 // just for debugging
 document.addEventListener('DOMContentLoaded', function(event) {
+  // RootIFrame
+  // document.querySelector("iframe")
+  // EditorIFrame
+  // document.querySelector("iframe").contentDocument.querySelector("iframe.cke_wysiwyg_frame cke_reset")
+
+
+
+  // document.querySelector("iframe").contentWindow.CKEDITOR
+  // CKEDITOR.scriptLoader
+
   const iframe_is_loaded = (iframe: HTMLIFrameElement | null) => {
     if (
       iframe !== null &&
@@ -37,7 +47,6 @@ document.addEventListener('DOMContentLoaded', function(event) {
     const ChildIFrame = ChildIFrameNode as HTMLIFrameElement
     if (ChildIFrame.classList.contains('.cke_wysiwyg_frame')) {
       const EditorIFrame = ChildIFrame
-      // }
 
       if (iframe_is_loaded(EditorIFrame)) {
         const EditorIFrameDocument = EditorIFrame.contentDocument as HTMLDocument
@@ -66,7 +75,7 @@ document.addEventListener('DOMContentLoaded', function(event) {
           )
           setTimeout(
             () =>
-              CKEditor_render_equation(
+              CKEditor_render_equation_normal(
                 ChildIFrameNode,
                 parentNode,
                 max_runs - 1
@@ -74,12 +83,21 @@ document.addEventListener('DOMContentLoaded', function(event) {
             500
           )
           // setTimeout(
-          //   () => CKEditor_render_equation(RootIFrame, max_runs - 1),
+          //   () => CKEditor_render_equation(RootIFrame, RootIFrame, max_runs - 1),
           //   500
           // )
         }
       }
     }
+    setTimeout(
+      () =>
+        CKEditor_render_equation_normal(
+          ChildIFrameNode,
+          parentNode,
+          max_runs - 1
+        ),
+      500
+    )
   }
 
   const CKEditor_bind_rerender = (
@@ -88,7 +106,15 @@ document.addEventListener('DOMContentLoaded', function(event) {
     max_runs: number
   ) => {
     debug_printer(true, ' running CKEditor_bind_rerender')
+
     const RootIFrameDocument = RootIFrame.contentDocument as HTMLDocument
+    debug_printer(
+      true,
+      '## btn is ',
+      RootIFrameDocument.querySelector(
+        '.cms-ckeditor-dialog .cke_dialog_ui_button_ok'
+      )
+    )
     let CKEditorDialogIFrame: HTMLIFrameElement | null = RootIFrameDocument.querySelector(
       '.cms-ckeditor-dialog iframe.cke_dialog_ui_html'
     ) as HTMLIFrameElement
@@ -107,7 +133,10 @@ document.addEventListener('DOMContentLoaded', function(event) {
             SaveEquationBtn.classList.add('listens-for-refresh')
             SaveEquationBtn.addEventListener('click', event => {
               debug_printer(true, 'Rerendering Equations in CKEditor')
-              setTimeout(() => CKEditor_render_equation(RootIFrame, parentNode, 5), 500)
+              setTimeout(
+                () => CKEditor_bind_rerender(RootIFrame, parentNode, 5),
+                500
+              )
             })
           }
         }
@@ -122,7 +151,7 @@ document.addEventListener('DOMContentLoaded', function(event) {
           CKEditorDialogIFrame
         )
         setTimeout(
-          () => CKEditor_render_equation(RootIFrame, parentNode, max_runs - 1),
+          () => CKEditor_bind_rerender(RootIFrame, parentNode, max_runs - 1),
           500
         )
       }
@@ -136,15 +165,25 @@ document.addEventListener('DOMContentLoaded', function(event) {
     date = new Date()
   ) => {
     debug_printer(true, ' running CKEditor_render_equation')
-    debug_printer(true, 'RootIFrame', RootIFrameNode)
+    debug_printer(true, 'RootIFrameNode', RootIFrameNode)
     const RootIFrame = RootIFrameNode as HTMLIFrameElement
+
     if (
       RootIFrame !== null &&
       RootIFrame.contentDocument !== null &&
       RootIFrame.contentDocument.body !== null
     ) {
-      const RootIFrameBody: Node = RootIFrame.contentDocument
-        .body as Node
+      const RootIFrameBody: Node = RootIFrame.contentDocument.body as Node
+      // add_mutation_observer({
+      //   targetBodyElement: RootIFrameBody,
+      //   nodeCallbacks: [
+      //     {
+      //       nodeName: 'IFRAME',
+      //       callbackFuncs: [CKEditor_render_equation_normal],
+      //     },
+      //   ],
+      //   debugName: 'RootIFrame observer',
+      // })
       const RootIFrame_mutation_observer_callback = (
         records: MutationRecord[]
       ) => {
@@ -154,6 +193,8 @@ document.addEventListener('DOMContentLoaded', function(event) {
 
           for (; i > -1; i--) {
             let AddedNode = AddedNodeList[i]
+            debug_printer(true, '###### new element added\n', AddedNode)
+            debug_printer(true, 'record.attributeName', record.type)
             if (AddedNode.nodeName === 'IFRAME') {
               debug_printer(true, '###### new iframe added\n', AddedNode)
               debug_printer(true, 'record.attributeName', record.type)
@@ -175,12 +216,14 @@ document.addEventListener('DOMContentLoaded', function(event) {
         RootIFrame_mutation_observer_callback
       )
 
-      RootIFrame_mutation_observer.observe(RootIFrame.contentDocument, {
+      RootIFrame_mutation_observer.observe(RootIFrameBody, {
         childList: true,
         subtree: true,
       })
+      let RootIFrame2 = document.querySelector('iframe') as HTMLElement
+      debug_printer(true, 'RootIFrameNode2', RootIFrame2)
       add_mutation_observer({
-        targetBodyElement: RootIFrameBody,
+        targetBodyElement: RootIFrame2,
         nodeCallbacks: [
           {
             nodeName: 'IFRAME',
@@ -189,33 +232,59 @@ document.addEventListener('DOMContentLoaded', function(event) {
         ],
         debugName: 'RootIFrameBody observer',
       })
-    }
-    // if (iframe_is_loaded(RootIFrame)) {
-    //     // CKEditor_render_equation_normal(RootIFrame, document.body,max_runs)
-    //   // CKEditor_bind_rerender(RootIFrame, max_runs)
-    // }
-    else {
-      if (max_runs >= 0) {
+      setTimeout(() => {
         debug_printer(
           true,
-          'max_runs=',
-          max_runs,
-          date,
-          '\niframe1 was null or content was null',
-          RootIFrame
+          'RootIFrameBody2 delayed',
+          document.querySelector('iframe')
         )
-        setTimeout(
-          () =>
-            CKEditor_render_equation(
-              RootIFrame,
-              document.body,
-              max_runs - 1,
-              date
-            ),
-          500
-        )
-      }
+      }, 200)
     }
+    // if (iframe_is_loaded(RootIFrame)) {
+    //   CKEditor_render_equation_normal(RootIFrame, document.body, max_runs)
+    //   // CKEditor_render_equation_normal(RootIFrame, max_runs)
+    //   // CKEditor_bind_rerender(RootIFrame, RootIFrame, max_runs)
+    //   // const dummyCallback = (newNode: Node, parentNode: Node) => {
+    //   //   // console.log("## running dummyCallback", newNode)
+    //   //   const classList: DOMTokenList = (newNode as HTMLDivElement).classList
+    //   //   if (
+    //   //     classList.contains('cke_dialog_body') ||
+    //   //     classList.contains('cms-ckeditor-dialog')
+    //   //   ) {
+    //   //     CKEditor_bind_rerender(RootIFrame, RootIFrame, max_runs)
+    //   //     console.log('###new DIV cke_dialog_body', newNode)
+    //   //     console.log('##classList', (newNode as HTMLDivElement).classList)
+    //   //   }
+    //   // }
+    //   // add_mutation_observer({
+    //   //   targetBodyElement: (RootIFrame.contentDocument as HTMLDocument).body,
+    //   //   nodeCallbacks: [
+    //   //     {
+    //   //       nodeName: 'DIV',
+    //   //       callbackFuncs: [dummyCallback],
+    //   //     },
+    //   //   ],
+    //   // })
+    // } else {
+    //   if (max_runs >= 0) {
+    //     debug_printer(
+    //       true,
+    //       'max_runs=',
+    //       max_runs,
+    //       date,
+    //       '\niframe1 was null or content was null',
+    //       RootIFrame
+    //     )
+    //     setTimeout(() => {
+    //       CKEditor_render_equation(
+    //         RootIFrame,
+    //         document.body,
+    //         max_runs - 1,
+    //         date
+    //       )
+    //     }, 500)
+    //   }
+    // }
   }
   // original from:
   // https://stackoverflow.com/a/49023264/3990615
@@ -269,9 +338,9 @@ document.addEventListener('DOMContentLoaded', function(event) {
       records.forEach(function(record: MutationRecord) {
         let AddedNodeList = record.addedNodes
         let i = AddedNodeList.length - 1
-
         for (; i > -1; i--) {
           let AddedNode = AddedNodeList[i]
+          // debug_printer(debug, `new element`, AddedNode)
           for (let nodeCallback of nodeCallbacks) {
             if (AddedNode.nodeName === nodeCallback.nodeName) {
               for (let callbackFunc of nodeCallback.callbackFuncs) {
@@ -281,7 +350,7 @@ document.addEventListener('DOMContentLoaded', function(event) {
                   AddedNode
                 )
 
-                callbackFunc(AddedNode, record.target)
+                callbackFunc(AddedNode, parentNode)
               }
             }
           }
