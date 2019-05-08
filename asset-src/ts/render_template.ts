@@ -13,8 +13,6 @@ document.addEventListener('DOMContentLoaded', function(event) {
   // EditorIFrame
   // document.querySelector("iframe").contentDocument.querySelector("iframe.cke_wysiwyg_frame cke_reset")
 
-
-
   // document.querySelector("iframe").contentWindow.CKEDITOR
   // CKEDITOR.scriptLoader
 
@@ -45,10 +43,14 @@ document.addEventListener('DOMContentLoaded', function(event) {
     //   'iframe.cke_wysiwyg_frame'
     // ) as HTMLIFrameElement
     const ChildIFrame = ChildIFrameNode as HTMLIFrameElement
-    if (ChildIFrame.classList.contains('.cke_wysiwyg_frame')) {
+    debug_printer(true, "ChildIFrame", ChildIFrame)
+    debug_printer(true, "ChildIFrame.classList", ChildIFrame.classList)
+    if (ChildIFrame.classList.contains('cke_wysiwyg_frame')) {
       const EditorIFrame = ChildIFrame
+      debug_printer(true, "EditorIFrame", EditorIFrame)
 
       if (iframe_is_loaded(EditorIFrame)) {
+        debug_printer(true, "EditorIFrame iframe_is_loaded")
         const EditorIFrameDocument = EditorIFrame.contentDocument as HTMLDocument
         const katex_spans:
           | NodeListOf<HTMLSpanElement>
@@ -89,15 +91,15 @@ document.addEventListener('DOMContentLoaded', function(event) {
         }
       }
     }
-    setTimeout(
-      () =>
-        CKEditor_render_equation_normal(
-          ChildIFrameNode,
-          parentNode,
-          max_runs - 1
-        ),
-      500
-    )
+    // setTimeout(
+    //   () =>
+    //     CKEditor_render_equation_normal(
+    //       ChildIFrameNode,
+    //       parentNode,
+    //       max_runs - 1
+    //     ),
+    //   500
+    // )
   }
 
   const CKEditor_bind_rerender = (
@@ -173,65 +175,29 @@ document.addEventListener('DOMContentLoaded', function(event) {
       RootIFrame.contentDocument !== null &&
       RootIFrame.contentDocument.body !== null
     ) {
-      const RootIFrameBody: Node = RootIFrame.contentDocument.body as Node
-      // add_mutation_observer({
-      //   targetBodyElement: RootIFrameBody,
-      //   nodeCallbacks: [
-      //     {
-      //       nodeName: 'IFRAME',
-      //       callbackFuncs: [CKEditor_render_equation_normal],
-      //     },
-      //   ],
-      //   debugName: 'RootIFrame observer',
-      // })
-      const RootIFrame_mutation_observer_callback = (
-        records: MutationRecord[]
-      ) => {
-        records.forEach(function(record: MutationRecord) {
-          let AddedNodeList = record.addedNodes
-          let i = AddedNodeList.length - 1
-
-          for (; i > -1; i--) {
-            let AddedNode = AddedNodeList[i]
-            debug_printer(true, '###### new element added\n', AddedNode)
-            debug_printer(true, 'record.attributeName', record.type)
-            if (AddedNode.nodeName === 'IFRAME') {
-              debug_printer(true, '###### new iframe added\n', AddedNode)
-              debug_printer(true, 'record.attributeName', record.type)
-              CKEditor_render_equation(AddedNode, document.body)
-            } else if (AddedNode.nodeName === 'DIV') {
-              if (
-                (AddedNode as HTMLDivElement).classList.contains(
-                  'cms-ckeditor-dialog'
-                )
-              ) {
-                debug_printer(true, '###### new div added\n', AddedNode)
-                debug_printer(true, 'record.attributeName', record.type)
-              }
-            }
-          }
+      RootIFrame.onload = () => {
+        const RootIFrameBody: Node = RootIFrame.contentDocument.body as Node
+        console.log('loaded RootIFrame', RootIFrame.contentDocument.body)
+        console.log('## spans', RootIFrame.contentDocument.querySelectorAll(".katex"))
+        console.log('## iframe', RootIFrame.contentDocument.querySelectorAll("iframe"))
+        add_mutation_observer({
+          targetBodyElement: RootIFrameBody,
+          nodeCallbacks: [
+            {
+              nodeName: 'IFRAME',
+              callbackFuncs: [CKEditor_render_equation_normal],
+            },
+            {
+              nodeName: 'DIV',
+              callbackFuncs: [(foo, bar)=>{console.log("#### div created\n",foo, bar)}],
+            },
+          ],
+          debugName: 'RootIFrameBody observer',
         })
+        // CKEditor_render_equation_normal(RootIFrame.contentDocument.querySelector("iframe"), RootIFrame)
       }
-      let RootIFrame_mutation_observer = new MutationObserver(
-        RootIFrame_mutation_observer_callback
-      )
-
-      RootIFrame_mutation_observer.observe(RootIFrameBody, {
-        childList: true,
-        subtree: true,
-      })
       let RootIFrame2 = document.querySelector('iframe') as HTMLElement
-      debug_printer(true, 'RootIFrameNode2', RootIFrame2)
-      add_mutation_observer({
-        targetBodyElement: RootIFrame2,
-        nodeCallbacks: [
-          {
-            nodeName: 'IFRAME',
-            callbackFuncs: [CKEditor_render_equation_normal],
-          },
-        ],
-        debugName: 'RootIFrameBody observer',
-      })
+      debug_printer(true, 'RootIFrameBody', RootIFrameBody)
       setTimeout(() => {
         debug_printer(
           true,
@@ -244,27 +210,27 @@ document.addEventListener('DOMContentLoaded', function(event) {
     //   CKEditor_render_equation_normal(RootIFrame, document.body, max_runs)
     //   // CKEditor_render_equation_normal(RootIFrame, max_runs)
     //   // CKEditor_bind_rerender(RootIFrame, RootIFrame, max_runs)
-    //   // const dummyCallback = (newNode: Node, parentNode: Node) => {
-    //   //   // console.log("## running dummyCallback", newNode)
-    //   //   const classList: DOMTokenList = (newNode as HTMLDivElement).classList
-    //   //   if (
-    //   //     classList.contains('cke_dialog_body') ||
-    //   //     classList.contains('cms-ckeditor-dialog')
-    //   //   ) {
-    //   //     CKEditor_bind_rerender(RootIFrame, RootIFrame, max_runs)
-    //   //     console.log('###new DIV cke_dialog_body', newNode)
-    //   //     console.log('##classList', (newNode as HTMLDivElement).classList)
-    //   //   }
-    //   // }
-    //   // add_mutation_observer({
-    //   //   targetBodyElement: (RootIFrame.contentDocument as HTMLDocument).body,
-    //   //   nodeCallbacks: [
-    //   //     {
-    //   //       nodeName: 'DIV',
-    //   //       callbackFuncs: [dummyCallback],
-    //   //     },
-    //   //   ],
-    //   // })
+    //   const dummyCallback = (newNode: Node, parentNode: Node) => {
+    //     // console.log("## running dummyCallback", newNode)
+    //     const classList: DOMTokenList = (newNode as HTMLDivElement).classList
+    //     if (
+    //       classList.contains('cke_dialog_body') ||
+    //       classList.contains('cms-ckeditor-dialog')
+    //     ) {
+    //       CKEditor_bind_rerender(RootIFrame, RootIFrame, max_runs)
+    //       console.log('###new DIV cke_dialog_body', newNode)
+    //       console.log('##classList', (newNode as HTMLDivElement).classList)
+    //     }
+    //   }
+    //   add_mutation_observer({
+    //     targetBodyElement: (RootIFrame.contentDocument as HTMLDocument).body,
+    //     nodeCallbacks: [
+    //       {
+    //         nodeName: 'DIV',
+    //         callbackFuncs: [dummyCallback],
+    //       },
+    //     ],
+    //   })
     // } else {
     //   if (max_runs >= 0) {
     //     debug_printer(
@@ -375,13 +341,13 @@ document.addEventListener('DOMContentLoaded', function(event) {
       subtree: true,
     },
   }: args_add_mutation_observer) => {
-    const callbackFunc = generateMutationCallback({
+    var callbackFunc = generateMutationCallback({
       nodeCallbacks,
       parentNode: targetBodyElement,
       debugName,
       debug,
     })
-    const mutation_observer = new MutationObserver(callbackFunc)
+    var mutation_observer = new MutationObserver(callbackFunc)
 
     mutation_observer.observe(targetBodyElement, observerSettings)
   }
@@ -392,6 +358,12 @@ document.addEventListener('DOMContentLoaded', function(event) {
     ],
     debugName: 'document.body observer',
   })
+  var dclick = new MouseEvent('dblclick', {
+    'view': window,
+    'bubbles': true,
+    'cancelable': true
+  });
+(document.querySelector("p span.katex") as HTMLSpanElement).dispatchEvent(dclick);
 
   // let body_mutation_observer = new MutationObserver(
   //   body_mutation_observer_callback
