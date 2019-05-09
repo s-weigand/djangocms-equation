@@ -28,229 +28,79 @@ document.addEventListener('DOMContentLoaded', function(event) {
     }
   }
 
-  // const CKEditor_render_equation_normal = (
-  //   RootIFrame: HTMLIFrameElement,
-  //   max_runs: number
-  // ) => {
   const CKEditor_render_equation_normal = (
     ChildIFrameNode: Node,
-    parentNode: Node,
-    max_runs: number = 5
+    debug = true
   ) => {
-    debug_printer(true, 'running CKEditor_render_equation_normal')
-    // const RootIFrameDocument = RootIFrame.contentDocument as HTMLDocument
-    // let EditorIFrame: HTMLIFrameElement | null = RootIFrameDocument.querySelector(
-    //   'iframe.cke_wysiwyg_frame'
-    // ) as HTMLIFrameElement
+    debug_printer(debug, 'running CKEditor_render_equation_normal')
     const ChildIFrame = ChildIFrameNode as HTMLIFrameElement
-    debug_printer(true, "ChildIFrame", ChildIFrame)
-    debug_printer(true, "ChildIFrame.classList", ChildIFrame.classList)
+    debug_printer(debug, 'ChildIFrame', ChildIFrame)
+    debug_printer(debug, 'ChildIFrame.classList', ChildIFrame.classList)
     if (ChildIFrame.classList.contains('cke_wysiwyg_frame')) {
       const EditorIFrame = ChildIFrame
-      debug_printer(true, "EditorIFrame", EditorIFrame)
+      debug_printer(debug, 'EditorIFrame', EditorIFrame)
 
-      if (iframe_is_loaded(EditorIFrame)) {
-        debug_printer(true, "EditorIFrame iframe_is_loaded")
-        const EditorIFrameDocument = EditorIFrame.contentDocument as HTMLDocument
-        const katex_spans:
-          | NodeListOf<HTMLSpanElement>
-          | [] = EditorIFrameDocument.querySelectorAll('cms-plugin span.katex')
-        if (katex_spans.length !== 0) {
-          let TextPluginBodyTag = EditorIFrameDocument.querySelector(
-            'body'
-          ) as HTMLBodyElement
-          render_full_page(TextPluginBodyTag)
-        }
-        debug_printer(
-          true,
-          'cms-plugin span.katex',
-          EditorIFrameDocument.querySelectorAll('cms-plugin span.katex')
-        )
+      EditorIFrame.onload = () => {
+        debug_printer(debug, 'EditorIFrame iframe_is_loaded')
+        const EditorIFrameBody = (EditorIFrame.contentDocument as HTMLDocument)
+          .body as HTMLBodyElement
+        render_spans(EditorIFrameBody)
+        add_mutation_observer({
+          targetBodyElement: EditorIFrameBody,
+          nodeCallbacks: [
+            {
+              nodeName: 'SPAN',
+              callbackFuncs: [
+                foo => {
+                  render_spans(EditorIFrameBody)
+                  console.log('#### new span', foo)
+                },
+              ],
+            },
+          ],
+          debugName: 'EditorIFrame observer',
+        })
+      }
+    }
+  }
+  const render_spans = (targetBody: HTMLBodyElement) => {
+    console.log('## ran render_spans')
+    if (targetBody.querySelectorAll('span.katex').length !== 0) {
+      render_full_page(targetBody)
+    }
+  }
+
+  const CKEditor_render_equation = (RootIFrameNode: Node, debug = true) => {
+    debug_printer(debug, '# running CKEditor_render_equation')
+    debug_printer(debug, '## RootIFrameNode', RootIFrameNode)
+    var RootIFrame = RootIFrameNode as HTMLIFrameElement
+
+    RootIFrame.onload = () => {
+      var RootIFrameBody = (RootIFrame.contentDocument as HTMLDocument).body
+      debug_printer(debug, '### RootIFrame loaded')
+      const ChildIFrame = RootIFrameBody.querySelector('iframe')
+      if (ChildIFrame !== null) {
+        debug_printer(debug, '#### ChildIFrame exists')
+        CKEditor_render_equation_normal(ChildIFrame)
       } else {
-        if (max_runs >= 0) {
-          debug_printer(
-            true,
-            'max_runs=',
-            max_runs,
-            '\nEditorIFrame was null or content was null',
-            EditorIFrame
-          )
-          setTimeout(
-            () =>
-              CKEditor_render_equation_normal(
-                ChildIFrameNode,
-                parentNode,
-                max_runs - 1
-              ),
-            500
-          )
-          // setTimeout(
-          //   () => CKEditor_render_equation(RootIFrame, RootIFrame, max_runs - 1),
-          //   500
-          // )
-        }
-      }
-    }
-    // setTimeout(
-    //   () =>
-    //     CKEditor_render_equation_normal(
-    //       ChildIFrameNode,
-    //       parentNode,
-    //       max_runs - 1
-    //     ),
-    //   500
-    // )
-  }
-
-  const CKEditor_bind_rerender = (
-    RootIFrame: HTMLIFrameElement,
-    parentNode: Node,
-    max_runs: number
-  ) => {
-    debug_printer(true, ' running CKEditor_bind_rerender')
-
-    const RootIFrameDocument = RootIFrame.contentDocument as HTMLDocument
-    debug_printer(
-      true,
-      '## btn is ',
-      RootIFrameDocument.querySelector(
-        '.cms-ckeditor-dialog .cke_dialog_ui_button_ok'
-      )
-    )
-    let CKEditorDialogIFrame: HTMLIFrameElement | null = RootIFrameDocument.querySelector(
-      '.cms-ckeditor-dialog iframe.cke_dialog_ui_html'
-    ) as HTMLIFrameElement
-    if (iframe_is_loaded(CKEditorDialogIFrame)) {
-      const CKEditorDialogIFrameDocument = CKEditorDialogIFrame.contentDocument as HTMLDocument
-      const EquationEditDialogBody: HTMLBodyElement | null = CKEditorDialogIFrameDocument.querySelector(
-        'body.model-equationpluginmodel'
-      )
-      // check if the dialog is an for editing djangocms-equations
-      if (EquationEditDialogBody !== null) {
-        const SaveEquationBtn: HTMLAnchorElement | null = RootIFrameDocument.querySelector(
-          '.cms-ckeditor-dialog .cke_dialog_ui_button_ok'
-        )
-        if (SaveEquationBtn !== null) {
-          if (!SaveEquationBtn.classList.contains('listens-for-refresh')) {
-            SaveEquationBtn.classList.add('listens-for-refresh')
-            SaveEquationBtn.addEventListener('click', event => {
-              debug_printer(true, 'Rerendering Equations in CKEditor')
-              setTimeout(
-                () => CKEditor_bind_rerender(RootIFrame, parentNode, 5),
-                500
-              )
-            })
-          }
-        }
-      }
-    } else {
-      if (max_runs >= 0) {
-        debug_printer(
-          true,
-          'max_runs=',
-          max_runs,
-          '\nCKEditorDialogIFrame was null or content was null',
-          CKEditorDialogIFrame
-        )
-        setTimeout(
-          () => CKEditor_bind_rerender(RootIFrame, parentNode, max_runs - 1),
-          500
-        )
-      }
-    }
-  }
-
-  const CKEditor_render_equation = (
-    RootIFrameNode: Node,
-    parentNode: Node,
-    max_runs = 5,
-    date = new Date()
-  ) => {
-    debug_printer(true, ' running CKEditor_render_equation')
-    debug_printer(true, 'RootIFrameNode', RootIFrameNode)
-    const RootIFrame = RootIFrameNode as HTMLIFrameElement
-
-    if (
-      RootIFrame !== null &&
-      RootIFrame.contentDocument !== null &&
-      RootIFrame.contentDocument.body !== null
-    ) {
-      RootIFrame.onload = () => {
-        const RootIFrameBody: Node = RootIFrame.contentDocument.body as Node
-        console.log('loaded RootIFrame', RootIFrame.contentDocument.body)
-        console.log('## spans', RootIFrame.contentDocument.querySelectorAll(".katex"))
-        console.log('## iframe', RootIFrame.contentDocument.querySelectorAll("iframe"))
+        debug_printer(debug, '#### ChildIFrame exists NOT')
         add_mutation_observer({
           targetBodyElement: RootIFrameBody,
           nodeCallbacks: [
             {
               nodeName: 'IFRAME',
-              callbackFuncs: [CKEditor_render_equation_normal],
-            },
-            {
-              nodeName: 'DIV',
-              callbackFuncs: [(foo, bar)=>{console.log("#### div created\n",foo, bar)}],
+              callbackFuncs: [
+                CKEditor_render_equation_normal,
+                foo => {
+                  console.log('#### IFRAME created\n', foo)
+                },
+              ],
             },
           ],
           debugName: 'RootIFrameBody observer',
         })
-        // CKEditor_render_equation_normal(RootIFrame.contentDocument.querySelector("iframe"), RootIFrame)
       }
-      let RootIFrame2 = document.querySelector('iframe') as HTMLElement
-      debug_printer(true, 'RootIFrameBody', RootIFrameBody)
-      setTimeout(() => {
-        debug_printer(
-          true,
-          'RootIFrameBody2 delayed',
-          document.querySelector('iframe')
-        )
-      }, 200)
     }
-    // if (iframe_is_loaded(RootIFrame)) {
-    //   CKEditor_render_equation_normal(RootIFrame, document.body, max_runs)
-    //   // CKEditor_render_equation_normal(RootIFrame, max_runs)
-    //   // CKEditor_bind_rerender(RootIFrame, RootIFrame, max_runs)
-    //   const dummyCallback = (newNode: Node, parentNode: Node) => {
-    //     // console.log("## running dummyCallback", newNode)
-    //     const classList: DOMTokenList = (newNode as HTMLDivElement).classList
-    //     if (
-    //       classList.contains('cke_dialog_body') ||
-    //       classList.contains('cms-ckeditor-dialog')
-    //     ) {
-    //       CKEditor_bind_rerender(RootIFrame, RootIFrame, max_runs)
-    //       console.log('###new DIV cke_dialog_body', newNode)
-    //       console.log('##classList', (newNode as HTMLDivElement).classList)
-    //     }
-    //   }
-    //   add_mutation_observer({
-    //     targetBodyElement: (RootIFrame.contentDocument as HTMLDocument).body,
-    //     nodeCallbacks: [
-    //       {
-    //         nodeName: 'DIV',
-    //         callbackFuncs: [dummyCallback],
-    //       },
-    //     ],
-    //   })
-    // } else {
-    //   if (max_runs >= 0) {
-    //     debug_printer(
-    //       true,
-    //       'max_runs=',
-    //       max_runs,
-    //       date,
-    //       '\niframe1 was null or content was null',
-    //       RootIFrame
-    //     )
-    //     setTimeout(() => {
-    //       CKEditor_render_equation(
-    //         RootIFrame,
-    //         document.body,
-    //         max_runs - 1,
-    //         date
-    //       )
-    //     }, 500)
-    //   }
-    // }
   }
   // original from:
   // https://stackoverflow.com/a/49023264/3990615
@@ -271,10 +121,7 @@ document.addEventListener('DOMContentLoaded', function(event) {
   // }
 
   interface NodeCallback {
-    callbackFuncs: ((
-      targetNode: Node,
-      parentNode: Node | HTMLElement
-    ) => void)[]
+    callbackFuncs: ((targetNode: Node) => void)[]
     nodeName: string
   }
 
@@ -295,7 +142,6 @@ document.addEventListener('DOMContentLoaded', function(event) {
 
   const generateMutationCallback = ({
     nodeCallbacks,
-    parentNode,
     debugName = 'observerDebugName',
     debug = true,
   }: argsGenerateMutationCallback): MutationCallback => {
@@ -316,7 +162,7 @@ document.addEventListener('DOMContentLoaded', function(event) {
                   AddedNode
                 )
 
-                callbackFunc(AddedNode, parentNode)
+                callbackFunc(AddedNode)
               }
             }
           }
@@ -359,11 +205,13 @@ document.addEventListener('DOMContentLoaded', function(event) {
     debugName: 'document.body observer',
   })
   var dclick = new MouseEvent('dblclick', {
-    'view': window,
-    'bubbles': true,
-    'cancelable': true
-  });
-(document.querySelector("p span.katex") as HTMLSpanElement).dispatchEvent(dclick);
+    view: window,
+    bubbles: true,
+    cancelable: true,
+  })
+  ;(document.querySelector('p span.katex') as HTMLSpanElement).dispatchEvent(
+    dclick
+  )
 
   // let body_mutation_observer = new MutationObserver(
   //   body_mutation_observer_callback
