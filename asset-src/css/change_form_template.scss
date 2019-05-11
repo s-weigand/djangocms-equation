@@ -4,16 +4,67 @@
 @import './cms_style_overwrite.scss';
 @import '../../node_modules/katex/dist/katex.css';
 
-#equationpluginmodel_form {
-  div.field-is_inline,
-  div.field-font_size_value,
-  div.field-font_size_unit {
-    width: 30%;
-    float: left;
-    margin-right: 2em;
-  }
+$break-small: 768px;
+
+body.popup.app-djangocms_equation.model-equationpluginmodel #content-main {
+  float: none;
 }
 
-body.popup.app-djangocms_equation.model-equationpluginmodel #content-main{
-  float: none;
+#equationpluginmodel_form > div {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-column-gap: 1rem;
+  grid-template-rows: auto;
+  grid-template-areas:
+    'tex_code_in tex_code_out'
+    'advanced advanced';
+
+  @media screen and (max-width: $break-small) {
+    grid-template-areas:
+      'tex_code_in tex_code_in'
+      'tex_code_out tex_code_out'
+      'advanced advanced';
+  }
+
+  fieldset.tex_code_in {
+    grid-area: tex_code_in;
+    background-color: green;
+    min-width: 15rem;
+    label {
+      margin-top: 0;
+    }
+  }
+  > fieldset.advanced {
+    grid-area: advanced;
+    div.form-row.field-is_inline.field-font_size_value.field-font_size_unit {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      grid-column-gap: 1rem;
+      grid-template-rows: auto;
+      grid-template-areas: 'is_inline font_size_value font_size_unit';
+
+      @media screen and (max-width: $break-small) {
+        grid-template-areas:
+          'is_inline is_inline is_inline'
+          'font_size_value font_size_value font_size_value'
+          'font_size_unit font_size_unit font_size_unit';
+      }
+      div.field-box.field-is_inline {
+        grid-area: is_inline;
+        margin-right: 0px !important;
+      }
+      div.field-box.field-font_size_value {
+        grid-area: font_size_value;
+        margin-right: 0px !important;
+      }
+      div.field-box.field-font_size_unit {
+        grid-area: font_size_unit;
+        margin-right: 0px !important;
+      }
+    }
+  }
+}
+#katex_live_render_out {
+  grid-area: tex_code_out;
+  margin-top: 31px;
 }

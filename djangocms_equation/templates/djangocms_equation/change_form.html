@@ -6,8 +6,8 @@
 
 <script src="{% static_with_version "cms/js/dist/bundle.admin.base.min.js" %}"></script>
 
-<link rel="stylesheet" href="{% static 'djangocms_equation\css\change_form_template.css' %}">
-<script src="{% static 'djangocms_equation\js\change_form_template.js' %}" ></script>
+<link rel="stylesheet" href="{% static 'djangocms_equation/css/change_form_template.css' %}">
+<script src="{% static 'djangocms_equation/js/change_form_template.js' %}" ></script>
 
 <style>
 /*
@@ -25,6 +25,9 @@ html{
 // CMS.$ will be passed for $
 $(document).ready(function () {
     console.log("change_form.html is loading")
+    let katex_live_render_out = document.querySelector("#katex_live_render_out")
+    let new_parent = document.querySelector("#equationpluginmodel_form > div").appendChild(katex_live_render_out)
+
 	CMS.API.Helpers.csrf('{{ csrf_token }}');
 });
 })(CMS.$);

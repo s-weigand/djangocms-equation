@@ -36,7 +36,7 @@
   "bugs": {
     "url": "https://github.com/s-weigand/djangocms-equation/issues"
   },
-  "homepage": "https://github.com/s-weigand/djangocms-equation#readme",
+  "homepage": "https://github.com/s-weigand/djangocms-equation",
   "dependencies": {
     "katex": "^0.10.1"
   },

@@ -23,6 +23,17 @@ class EquationPlugin(CMSPluginBase):
     disable_child_plugins = True
     admin_preview = True
 
+    fieldsets = [
+        (None, {"fields": ("tex_code",), "classes": ("tex_code_in",)}),
+        (
+            _("Advanced settings"),
+            {
+                "classes": ("collapse","advanced",),
+                "fields": (("is_inline", "font_size_value", "font_size_unit"),),
+            },
+        ),
+    ]
+
     def render(self, context, instance, placeholder):
         """
         Method that renders the Plugin with self.render_template and

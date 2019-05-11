@@ -10,7 +10,7 @@ from .models import EquationPluginModel, ALLOWED_FONT_SIZE_UNITS
 
 class EquationForm(forms.ModelForm):
     tex_code = forms.CharField(
-        help_text=_("Insert you LaTeX code here."),
+        help_text=_("Insert your LaTeX code here."),
         widget=forms.Textarea(attrs={"rows": "2"}),
     )
     is_inline = forms.BooleanField(
@@ -25,6 +25,7 @@ class EquationForm(forms.ModelForm):
         widget=forms.NumberInput(
             attrs={"step": "0.1", "id": "djangocms_equation_font_size_value"}
         ),
+        initial=1,
         min_value=0.01,
         required=True,
     )

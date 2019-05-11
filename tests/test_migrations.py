@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+# taken from
+# https://github.com/divio/djangocms-attributes-field/blob/master/tests/test_migrations.py
 # original from
 # http://tech.octopus.energy/news/2016/01/21/testing-for-missing-migrations-in-django.html
 
