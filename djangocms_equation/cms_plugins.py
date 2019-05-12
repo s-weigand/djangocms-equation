@@ -28,7 +28,7 @@ class EquationPlugin(CMSPluginBase):
         (
             _("Advanced settings"),
             {
-                "classes": ("collapse","advanced",),
+                "classes": ("collapse", "advanced"),
                 "fields": (("is_inline", "font_size_value", "font_size_unit"),),
             },
         ),

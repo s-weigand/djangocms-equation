@@ -4,6 +4,9 @@ dist: xenial
 language: python
 cache: pip
 
+services:
+  - docker
+
 language: python
 python:
   - 3.7
@@ -23,22 +26,31 @@ matrix:
   include:
     - python: 3.6
       env: TOXENV=flake8
+      before_install:
+        - echo "skip before_install"
       after_success:
-        - echo "done"
+        - echo "skip after_success"
 
     - python: 3.6
       env: TOXENV=docs-create
+      before_install:
+        - echo "skip before_install"
       after_success:
-        - echo "done"
+        - echo "skip after_success"
 
     - python: 3.6
       env: TOXENV=docs-links
+      before_install:
+        - echo "skip before_install"
       after_success:
-        - echo "done"
+        - echo "skip after_success"
 
   allow_failures:
     #      this tests are allowed to fail since they rely external resources
     - env: TOXENV=docs-links
+
+before_install:
+  - docker-compose up -d
 
 # Command to install dependencies, e.g. pip install -r requirements.txt --use-mirrors
 install:
