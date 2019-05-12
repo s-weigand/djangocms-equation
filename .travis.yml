@@ -2,7 +2,9 @@
 sudo: required
 dist: xenial
 language: python
-cache: pip
+cache:
+  - pip
+  - npm
 
 services:
   - docker
@@ -15,7 +17,7 @@ python:
 
 env:
   global:
-    - DOCKER_IP="127.0.0.1"
+    - DOCKER_IP_TRAVIS="127.0.0.1"
 
   matrix:
     - DJANGO="1.11" CMS="3.4"
@@ -63,6 +65,8 @@ matrix:
     - env: TOXENV=docs-links
 
 before_install:
+  - npm i
+  - npm run publish
   - docker-compose up -d
   - docker-compose ps
 

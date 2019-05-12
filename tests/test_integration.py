@@ -27,14 +27,14 @@ def get_docker_container_ip():
 
     """
     docker_host = os.getenv("DOCKER_HOST", "")
-    docker_ip = os.getenv("DOCKER_IP")
+    docker_ip_travis = os.getenv("DOCKER_IP_TRAVIS")
     ip_match = re.match(
         r".*?\/\/(?P<ip>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})", docker_host
     )
     if ip_match:
         return ip_match.group("ip")
-    elif docker_ip:
-        return docker_ip
+    elif docker_ip_travis:
+        return docker_ip_travis
     else:
         raise DockerNotFoundException(
             "The environment variable 'DOCKER_HOST' was not found!"
@@ -95,12 +95,7 @@ class TestIntegrationChrome(BaseTestCase, StaticLiveServerTestCase):
     def test_page_loaded(self):
         self.browser.get(self.live_server_url)
         self.browser.save_screenshot(screen_shot_path("foo.png"))
-        # self.assertEquals(self.live_server_url, "")
         body = self.browser.find_element_by_css_selector("body")
-        # self.browser.response()
-        # print(self.browser.page_source)
-        with open(screen_shot_path("foo.html"), "a") as source:
-            source.write(self.browser.page_source)
         self.assertNotEquals(body.text, "")
 
 
