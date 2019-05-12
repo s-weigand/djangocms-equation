@@ -57,6 +57,7 @@ matrix:
 
 before_install:
   - docker-compose up -d
+  - docker-machine ip
   - printenv
 
 # Command to install dependencies, e.g. pip install -r requirements.txt --use-mirrors
