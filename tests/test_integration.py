@@ -27,11 +27,14 @@ def get_docker_container_ip():
 
     """
     docker_host = os.getenv("DOCKER_HOST", "")
+    docker_ip = os.getenv("DOCKER_IP")
     ip_match = re.match(
         r".*?\/\/(?P<ip>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})", docker_host
     )
     if ip_match:
         return ip_match.group("ip")
+    elif docker_ip:
+        return docker_ip
     else:
         raise DockerNotFoundException(
             "The environment variable 'DOCKER_HOST' was not found!"
