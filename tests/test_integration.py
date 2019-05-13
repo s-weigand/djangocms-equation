@@ -4,11 +4,13 @@ from __future__ import absolute_import, print_function, unicode_literals
 import os
 import re
 import socket
+from time import sleep
 
 from django.test import override_settings
 from djangocms_helper.base_test import BaseTestCase
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from selenium.webdriver.remote.webdriver import WebDriver
+from selenium.webdriver import Chrome
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 
 
@@ -28,6 +30,8 @@ def screen_shot_path(filename):
 
 def get_docker_container_ip():
     """
+    Using 'DOCKER_HOST' is a workaround for Windows with 'Docker Toolbox'
+    (I don't want hyper-V if I can't use my trusty old VirtualBox).
 
     """
     docker_host = os.getenv("DOCKER_HOST", "")
@@ -86,11 +90,12 @@ class TestIntegrationChrome(BaseTestCase, StaticLiveServerTestCase):
     def setUpClass(cls):
         super(TestIntegrationChrome, cls).setUpClass()
         cls.browser = WebDriver(cls.browser_remote_address, cls.desire_capabilities)
+        # cls.browser = Chrome(executable_path="D:\inno_Admin_Dropbox\Dropbox\innoAdmin\software_downloader\chromedriver_win32\chromedriver.exe")
         cls.browser.implicitly_wait(10)
 
     @classmethod
     def tearDownClass(cls):
-        cls.browser.quit()
+        # cls.browser.quit()
         super(TestIntegrationChrome, cls).tearDownClass()
 
     def setUp(self):
@@ -98,9 +103,29 @@ class TestIntegrationChrome(BaseTestCase, StaticLiveServerTestCase):
 
     def test_page_loaded(self):
         self.browser.get(self.live_server_url)
-        self.browser.save_screenshot(screen_shot_path("foo.png"))
         body = self.browser.find_element_by_css_selector("body")
-        self.assertNotEquals(body.text, "")
+
+        login_form = body.find_element_by_css_selector("#login-form")
+        username = login_form.find_element_by_css_selector("#id_username")
+        # username.send_keys(self._staff_user_username)
+        username.send_keys(self._admin_user_username)
+        password = login_form.find_element_by_css_selector("#id_password")
+        # password.send_keys(self._staff_user_password)
+        password.send_keys(self._admin_user_password)
+        login_form.submit()
+
+        next_btn = self.browser.find_element_by_link_text("Next")
+        next_btn.click()
+
+
+        # for input in body.find_elements_by_css_selector("iframe"):
+        #     print(input.get_attribute('outerHTML'))
+        #     print(input)
+
+        self.browser.save_screenshot(screen_shot_path("foo.png"))
+        self.browser.save_screenshot(screen_shot_path("foo2.png"))
+        # sleep(600)
+        self.assertNotEquals(body.text, "1")
 
 
 # class TestIntegrationFirefox(TestIntegrationChrome):
