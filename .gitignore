@@ -108,4 +108,6 @@ ENV/
 node_modules
 package-lock.json
 
+test_screenshots
+
 djangocms_equation/static/**/**

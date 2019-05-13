@@ -17,9 +17,13 @@ class DockerNotFoundException(Exception):
 
 
 def screen_shot_path(filename):
-    return os.path.abspath(
-        os.path.join(os.path.dirname(__file__), "screenshots", filename)
+    tox_env_name = os.getenv("TOX_ENV_NAME", "")
+    dir_path = os.path.abspath(
+        os.path.join(os.path.dirname(__file__), "..", "test_screenshots", tox_env_name)
     )
+    if not os.path.isdir(dir_path):
+        os.makedirs(dir_path)
+    return os.path.join(dir_path, filename)
 
 
 def get_docker_container_ip():
