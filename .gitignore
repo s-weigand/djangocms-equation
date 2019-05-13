@@ -107,3 +107,5 @@ ENV/
 # js modules
 node_modules
 package-lock.json
+
+djangocms_equation/static/**/**
