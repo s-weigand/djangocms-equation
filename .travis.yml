@@ -5,6 +5,7 @@ language: python
 cache:
   - pip
   - npm
+  - docker
 
 services:
   - docker
