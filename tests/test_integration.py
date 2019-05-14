@@ -69,7 +69,11 @@ def get_own_ip():
     """
     returns own ip
     """
-    return socket.gethostbyname(socket.gethostname())
+    # return socket.gethostbyname(socket.gethostname())
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.connect(('8.8.8.8', 1))  # connect() for UDP doesn't send packets
+    local_ip_address = s.getsockname()[0]
+    return local_ip_address
 
 
 # uncomment the next line if the server throws errors
