@@ -14,18 +14,16 @@ from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver.support import ui
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 
+from .generate_test_screenshot_md import get_screenshot_test_base_folder
+
 
 class DockerNotFoundException(Exception):
     pass
 
 
 def screen_shot_path(filename, sub_dir=""):
-    tox_env_name = os.getenv("TOX_ENV_NAME", "")
-    dir_path = os.path.abspath(
-        os.path.join(
-            os.path.dirname(__file__), "..", "test_screenshots", tox_env_name, sub_dir
-        )
-    )
+    base_folder = get_screenshot_test_base_folder()
+    dir_path = os.path.join(base_folder, sub_dir)
     if not os.path.isdir(dir_path):
         os.makedirs(dir_path)
     return os.path.join(dir_path, filename)
@@ -68,10 +66,15 @@ def get_browser_remote_address(docker_port):
 def get_own_ip():
     """
     returns own ip
+    original from:
+    https://stackoverflow.com/a/25850698/3990615
     """
-    # return socket.gethostbyname(socket.gethostname())
+    # alternativ use travis env vars
+    # SSH_CONNECTION=10.10.16.23 35284 10.20.0.218 22
+    # matching regex:
+    # ".*?\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\s+\d+\s(?P<ip>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})"
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    s.connect(('8.8.8.8', 1))  # connect() for UDP doesn't send packets
+    s.connect(("8.8.8.8", 1))  # connect() for UDP doesn't send packets
     local_ip_address = s.getsockname()[0]
     return local_ip_address
 
@@ -119,9 +122,8 @@ class TestIntegrationChrome(BaseTestCase, StaticLiveServerTestCase):
     def create_test_page(cls):
         cls.browser.get(cls.live_server_url)
         cls.browser.save_screenshot(
-            screen_shot_path("#0_initial_page", "create_test_page")
+            screen_shot_path("#0_initial_page.png", "create_test_page")
         )
-        print(cls.wait_get_element_css("body").text)
         login_form = cls.wait_get_element_css("#login-form")
         cls.browser.save_screenshot(
             screen_shot_path("#1_login-form_empty.png", "create_test_page")
