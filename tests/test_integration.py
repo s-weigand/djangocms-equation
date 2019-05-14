@@ -19,10 +19,12 @@ class DockerNotFoundException(Exception):
     pass
 
 
-def screen_shot_path(filename):
+def screen_shot_path(filename, sub_dir=""):
     tox_env_name = os.getenv("TOX_ENV_NAME", "")
     dir_path = os.path.abspath(
-        os.path.join(os.path.dirname(__file__), "..", "test_screenshots", tox_env_name)
+        os.path.join(
+            os.path.dirname(__file__), "..", "test_screenshots", tox_env_name, sub_dir
+        )
     )
     if not os.path.isdir(dir_path):
         os.makedirs(dir_path)
@@ -70,7 +72,9 @@ def get_own_ip():
     return socket.gethostbyname(socket.gethostname())
 
 
-@override_settings(ALLOWED_HOSTS=["*"], DEBUG=True)
+# uncomment the next line if the server throws errors
+@override_settings(DEBUG=True)
+@override_settings(ALLOWED_HOSTS=["*"])
 class TestIntegrationChrome(BaseTestCase, StaticLiveServerTestCase):
     """
     Baseclass for Integration tests with Selenium running in a docker.
@@ -103,32 +107,51 @@ class TestIntegrationChrome(BaseTestCase, StaticLiveServerTestCase):
         super(TestIntegrationChrome, self).setUp()
 
     @classmethod
+    def wait_get_element_css(cls, css_selector):
+        cls.wait.until(lambda driver: driver.find_element_by_css_selector(css_selector))
+        return cls.browser.find_element_by_css_selector(css_selector)
+
+    @classmethod
     def create_test_page(cls):
         cls.browser.get(cls.live_server_url)
-        body = cls.browser.find_element_by_css_selector("body")
+        login_form = cls.wait_get_element_css("#login-form")
+        cls.browser.save_screenshot(
+            screen_shot_path("#1_login-form_empty.png", "create_test_page")
+        )
 
-        login_form = body.find_element_by_css_selector("#login-form")
-        username = login_form.find_element_by_css_selector("#id_username")
+        username = cls.wait_get_element_css("#id_username")
         username.send_keys(cls._admin_user_username)
-        password = login_form.find_element_by_css_selector("#id_password")
+        password = cls.wait_get_element_css("#id_password")
         password.send_keys(cls._admin_user_password)
+        cls.browser.save_screenshot(
+            screen_shot_path("#2_login-form_filled_out.png", "create_test_page")
+        )
         login_form.submit()
 
         next_btn = cls.browser.find_element_by_link_text("Next")
         next_btn.click()
-        cls.browser.switch_to.frame(cls.browser.find_element_by_css_selector("iframe"))
-        cls.wait.until(lambda driver: driver.find_element_by_css_selector("input"))
+        cls.browser.switch_to.frame(cls.wait_get_element_css("iframe"))
+
+        cls.wait_get_element_css("input")
 
         # for input in self.browser.find_elements_by_css_selector("form"):
         #     print(input.get_attribute("outerHTML"))
         #     print(input)
-        create_page_form = cls.browser.find_element_by_css_selector("form")
+        cls.browser.save_screenshot(
+            screen_shot_path("#3_create-page-iframe_empty.png", "create_test_page")
+        )
+        create_page_form = cls.wait_get_element_css("form")
         title_input = create_page_form.find_element_by_css_selector("#id_1-title")
         title_input.send_keys("test_page")
+        cls.browser.save_screenshot(
+            screen_shot_path("#4_create-page-iframe_filled_out.png", "create_test_page")
+        )
         create_page_form.submit()
         cls.browser.switch_to.default_content()
 
-        cls.browser.save_screenshot(screen_shot_path("page_created.png"))
+        cls.browser.save_screenshot(
+            screen_shot_path("#5_created_page.png", "create_test_page")
+        )
 
     def test_test_page_created(self):
         self.browser.get(self.live_server_url)
