@@ -114,6 +114,7 @@ class TestIntegrationChrome(BaseTestCase, StaticLiveServerTestCase):
     @classmethod
     def create_test_page(cls):
         cls.browser.get(cls.live_server_url)
+        print(cls.browser.page_source)
         login_form = cls.wait_get_element_css("#login-form")
         cls.browser.save_screenshot(
             screen_shot_path("#1_login-form_empty.png", "create_test_page")
