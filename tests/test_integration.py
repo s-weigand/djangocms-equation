@@ -4,14 +4,14 @@ from __future__ import absolute_import, print_function, unicode_literals
 import os
 import re
 import socket
-from time import sleep
 
 from django.test import override_settings
-from djangocms_helper.base_test import BaseTestCase
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
+
+from djangocms_helper.base_test import BaseTestCase
+
 from selenium.webdriver.remote.webdriver import WebDriver
-from selenium.webdriver import Chrome
-import selenium.webdriver.support.ui as ui
+from selenium.webdriver.support import ui
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 
 
@@ -91,8 +91,6 @@ class TestIntegrationChrome(BaseTestCase, StaticLiveServerTestCase):
     def setUpClass(cls):
         super(TestIntegrationChrome, cls).setUpClass()
         cls.browser = WebDriver(cls.browser_remote_address, cls.desire_capabilities)
-        # cls.browser = Chrome(executable_path="D:\inno_Admin_Dropbox\Dropbox\innoAdmin\software_downloader\chromedriver_win32\chromedriver.exe")
-        # cls.browser = Chrome(executable_path=r"D:\Dropbox\Dropbox\uni\innoAdmin\software_downloader\chromedriver_win32\chromedriver.exe")
         cls.wait = ui.WebDriverWait(cls.browser, 10)
         cls.create_test_page()
 
