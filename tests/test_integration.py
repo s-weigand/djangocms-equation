@@ -11,6 +11,7 @@ from djangocms_helper.base_test import BaseTestCase
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver import Chrome
+import selenium.webdriver.support.ui as ui
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 
 
@@ -69,7 +70,7 @@ def get_own_ip():
     return socket.gethostbyname(socket.gethostname())
 
 
-@override_settings(ALLOWED_HOSTS=["*"])
+@override_settings(ALLOWED_HOSTS=["*"], DEBUG=True)
 class TestIntegrationChrome(BaseTestCase, StaticLiveServerTestCase):
     """
     Baseclass for Integration tests with Selenium running in a docker.
@@ -91,41 +92,51 @@ class TestIntegrationChrome(BaseTestCase, StaticLiveServerTestCase):
         super(TestIntegrationChrome, cls).setUpClass()
         cls.browser = WebDriver(cls.browser_remote_address, cls.desire_capabilities)
         # cls.browser = Chrome(executable_path="D:\inno_Admin_Dropbox\Dropbox\innoAdmin\software_downloader\chromedriver_win32\chromedriver.exe")
-        cls.browser.implicitly_wait(10)
+        # cls.browser = Chrome(executable_path=r"D:\Dropbox\Dropbox\uni\innoAdmin\software_downloader\chromedriver_win32\chromedriver.exe")
+        cls.wait = ui.WebDriverWait(cls.browser, 10)
+        cls.create_test_page()
 
     @classmethod
     def tearDownClass(cls):
-        # cls.browser.quit()
+        cls.browser.quit()
         super(TestIntegrationChrome, cls).tearDownClass()
 
     def setUp(self):
         super(TestIntegrationChrome, self).setUp()
 
-    def test_page_loaded(self):
-        self.browser.get(self.live_server_url)
-        body = self.browser.find_element_by_css_selector("body")
+    @classmethod
+    def create_test_page(cls):
+        cls.browser.get(cls.live_server_url)
+        body = cls.browser.find_element_by_css_selector("body")
 
         login_form = body.find_element_by_css_selector("#login-form")
         username = login_form.find_element_by_css_selector("#id_username")
-        # username.send_keys(self._staff_user_username)
-        username.send_keys(self._admin_user_username)
+        username.send_keys(cls._admin_user_username)
         password = login_form.find_element_by_css_selector("#id_password")
-        # password.send_keys(self._staff_user_password)
-        password.send_keys(self._admin_user_password)
+        password.send_keys(cls._admin_user_password)
         login_form.submit()
 
-        next_btn = self.browser.find_element_by_link_text("Next")
+        next_btn = cls.browser.find_element_by_link_text("Next")
         next_btn.click()
+        cls.browser.switch_to.frame(cls.browser.find_element_by_css_selector("iframe"))
+        cls.wait.until(lambda driver: driver.find_element_by_css_selector("input"))
 
-
-        # for input in body.find_elements_by_css_selector("iframe"):
-        #     print(input.get_attribute('outerHTML'))
+        # for input in self.browser.find_elements_by_css_selector("form"):
+        #     print(input.get_attribute("outerHTML"))
         #     print(input)
+        create_page_form = cls.browser.find_element_by_css_selector("form")
+        title_input = create_page_form.find_element_by_css_selector("#id_1-title")
+        title_input.send_keys("test_page")
+        create_page_form.submit()
+        cls.browser.switch_to.default_content()
 
-        self.browser.save_screenshot(screen_shot_path("foo.png"))
-        self.browser.save_screenshot(screen_shot_path("foo2.png"))
-        # sleep(600)
-        self.assertNotEquals(body.text, "1")
+        cls.browser.save_screenshot(screen_shot_path("page_created.png"))
+
+    def test_test_page_created(self):
+        self.browser.get(self.live_server_url)
+        body = self.browser.find_element_by_css_selector("body")
+        self.browser.save_screenshot(screen_shot_path("page_created2.png"))
+        self.assertIn("test_page", body.text)
 
 
 # class TestIntegrationFirefox(TestIntegrationChrome):

@@ -1,7 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 HELPER_SETTINGS = {
-    "INSTALLED_APPS": ["djangocms_equation"],
+    "INSTALLED_APPS": [
+        "djangocms_text_ckeditor",
+        "djangocms_equation",
+    ],
     "CMS_LANGUAGES": {1: [{"code": "en", "name": "English"}]},
     "LANGUAGE_CODE": "en",
     "ALLOWED_HOSTS": ["*"],
@@ -10,6 +13,7 @@ HELPER_SETTINGS = {
 
 def run():
     from djangocms_helper import runner
+
     runner.cms("djangocms_equation")
 
 
