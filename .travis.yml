@@ -67,6 +67,7 @@ matrix:
 
 before_install:
   - ip addr show
+  - printenv
   - npm i
   - npm run publish
   - docker-compose up -d
