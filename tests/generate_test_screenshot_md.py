@@ -27,7 +27,7 @@ def generate_test_screenshot_md():
 
                 else:
                     screenshot_path = "./{}".format(filename)
-                if not dirname in screen_shot_dict:
+                if dirname not in screen_shot_dict:
                     screen_shot_dict[dirname] = [
                         {
                             "caption": screenshot_caption,
