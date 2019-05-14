@@ -87,7 +87,7 @@ class TestIntegrationChrome(BaseTestCase, StaticLiveServerTestCase):
 
     """
 
-    # host = get_own_ip()  # '192.168.178.20'
+    host = get_own_ip()  # '192.168.178.20'
     browser_remote_address = get_browser_remote_address(4444)
     desire_capabilities = DesiredCapabilities.CHROME
 
@@ -117,7 +117,7 @@ class TestIntegrationChrome(BaseTestCase, StaticLiveServerTestCase):
         cls.browser.save_screenshot(
             screen_shot_path("#0_initial_page", "create_test_page")
         )
-        print(cls.browser.page_source)
+        print(cls.wait_get_element_css("body").text)
         login_form = cls.wait_get_element_css("#login-form")
         cls.browser.save_screenshot(
             screen_shot_path("#1_login-form_empty.png", "create_test_page")

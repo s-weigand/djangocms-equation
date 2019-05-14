@@ -66,6 +66,7 @@ matrix:
     - env: TOXENV=docs-links
 
 before_install:
+  - ip addr show
   - npm i
   - npm run publish
   - docker-compose up -d
