@@ -2,7 +2,6 @@
 from __future__ import absolute_import, print_function, unicode_literals
 
 import os
-import re
 import socket
 
 from django.test import override_settings
@@ -10,9 +9,11 @@ from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 
 from djangocms_helper.base_test import BaseTestCase
 
-from selenium.webdriver.remote.webdriver import WebDriver
+from selenium.webdriver import Chrome
+from selenium.webdriver.remote.webdriver import WebDriver as RemoteWebdriver
 from selenium.webdriver.support import ui
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
+from urllib3.exceptions import NewConnectionError, MaxRetryError
 
 from .generate_test_screenshot_md import get_screenshot_test_base_folder
 
@@ -29,38 +30,27 @@ def screen_shot_path(filename, sub_dir=""):
     return os.path.join(dir_path, filename)
 
 
-def get_docker_container_ip():
-    """
-    Using 'DOCKER_HOST' is a workaround for Windows with 'Docker Toolbox'
-    (I don't want hyper-V if I can't use my trusty old VirtualBox).
-
-    """
-    docker_host = os.getenv("DOCKER_HOST", "")
-    docker_ip_travis = os.getenv("DOCKER_IP_TRAVIS")
-    ip_match = re.match(
-        r".*?\/\/(?P<ip>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})", docker_host
-    )
-    if ip_match:
-        return ip_match.group("ip")
-    elif docker_ip_travis:
-        return docker_ip_travis
+def get_browser_instance(browser_port, desire_capabilities, interactive=False):
+    if interactive:
+        pass
     else:
-        raise DockerNotFoundException(
-            "The environment variable 'DOCKER_HOST' was not found!"
-            "On Windows running the tests as admin might help."
+        docker_container_ip = os.getenv("DOCKER_CONTAINER_IP", "127.0.0.1")
+        remote_browser_url = "http://{ip}:{port}/wd/hub".format(
+            ip=docker_container_ip, port=browser_port
         )
-
-
-def get_browser_remote_address(docker_port):
-    """[summary]
-
-    Parameters
-    ----------
-    docker_port : int
-        [description]
-    """
-    docker_container_ip = get_docker_container_ip()
-    return "http://{ip}:{port}/wd/hub".format(ip=docker_container_ip, port=docker_port)
+        try:
+            return RemoteWebdriver(remote_browser_url, desire_capabilities)
+        except (NewConnectionError, MaxRetryError):
+            raise DockerNotFoundException(
+                "Couldn't connect to remote host for browser.\n "
+                "If you use a docker container with an ip different from '127.0.0.1' "
+                "you need to expose the ip address via the Environment variable "
+                "'DOCKER_CONTAINER_IP'. "
+                "Also make sure that the docker images are running (`docker-compose ps`)."
+                "If not change to the root directory of 'djangocms-equation' and run "
+                "`docker-compose up -d`."
+                "See the docs of 'djangocms-equation' for more help."
+            )
 
 
 def get_own_ip():
@@ -95,13 +85,13 @@ class TestIntegrationChrome(BaseTestCase, StaticLiveServerTestCase):
     """
 
     host = get_own_ip()  # '192.168.178.20'
-    browser_remote_address = get_browser_remote_address(4444)
+    browser_port = 4444
     desire_capabilities = DesiredCapabilities.CHROME
 
     @classmethod
     def setUpClass(cls):
         super(TestIntegrationChrome, cls).setUpClass()
-        cls.browser = WebDriver(cls.browser_remote_address, cls.desire_capabilities)
+        cls.browser = get_browser_instance(cls.browser_port, cls.desire_capabilities)
         cls.wait = ui.WebDriverWait(cls.browser, 10)
         cls.create_test_page()
 
