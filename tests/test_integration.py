@@ -10,6 +10,7 @@ from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from djangocms_helper.base_test import BaseTestCase
 
 from selenium.webdriver import Chrome
+from selenium.common.exceptions import WebDriverException
 from selenium.webdriver.remote.webdriver import WebDriver as RemoteWebdriver
 from selenium.webdriver.support import ui
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
@@ -32,7 +33,14 @@ def screen_shot_path(filename, sub_dir=""):
 
 def get_browser_instance(browser_port, desire_capabilities, interactive=False):
     if interactive:
-        pass
+        try:
+            return Chrome(desired_capabilities=DesiredCapabilities.CHROME)
+        except WebDriverException:
+            raise WebDriverException(
+                "'chromedriver' executable needs to be in PATH. "
+                "Please see https://sites.google.com/a/chromium.org/chromedriver/home "
+                "or run `pip install chromedriver_installer`."
+            )
     else:
         docker_container_ip = os.getenv("DOCKER_CONTAINER_IP", "127.0.0.1")
         remote_browser_url = "http://{ip}:{port}/wd/hub".format(
@@ -51,6 +59,14 @@ def get_browser_instance(browser_port, desire_capabilities, interactive=False):
                 "`docker-compose up -d`."
                 "See the docs of 'djangocms-equation' for more help."
             )
+
+
+class ScreenCreator:
+    def __init__(self, browser):
+        self.browser = browser
+
+    def take(self, filename, sub_dir=""):
+        self.browser.save_screenshot(screen_shot_path(filename, sub_dir))
 
 
 def get_own_ip():
@@ -92,6 +108,7 @@ class TestIntegrationChrome(BaseTestCase, StaticLiveServerTestCase):
     def setUpClass(cls):
         super(TestIntegrationChrome, cls).setUpClass()
         cls.browser = get_browser_instance(cls.browser_port, cls.desire_capabilities)
+        cls.screenshot = ScreenCreator(cls.browser)
         cls.wait = ui.WebDriverWait(cls.browser, 10)
         cls.create_test_page()
 
@@ -111,21 +128,17 @@ class TestIntegrationChrome(BaseTestCase, StaticLiveServerTestCase):
     @classmethod
     def create_test_page(cls):
         cls.browser.get(cls.live_server_url)
-        cls.browser.save_screenshot(
-            screen_shot_path("#0_initial_page.png", "create_test_page")
-        )
+        cls.screenshot.take("#0_initial_page.png", "create_test_page")
         login_form = cls.wait_get_element_css("#login-form")
-        cls.browser.save_screenshot(
-            screen_shot_path("#1_login-form_empty.png", "create_test_page")
-        )
+
+        cls.screenshot.take("#1_login-form_empty.png", "create_test_page")
 
         username = cls.wait_get_element_css("#id_username")
         username.send_keys(cls._admin_user_username)
         password = cls.wait_get_element_css("#id_password")
         password.send_keys(cls._admin_user_password)
-        cls.browser.save_screenshot(
-            screen_shot_path("#2_login-form_filled_out.png", "create_test_page")
-        )
+
+        cls.screenshot.take("#2_login-form_filled_out.png", "create_test_page")
         login_form.submit()
 
         next_btn = cls.browser.find_element_by_link_text("Next")
@@ -134,24 +147,14 @@ class TestIntegrationChrome(BaseTestCase, StaticLiveServerTestCase):
 
         cls.wait_get_element_css("input")
 
-        # for input in self.browser.find_elements_by_css_selector("form"):
-        #     print(input.get_attribute("outerHTML"))
-        #     print(input)
-        cls.browser.save_screenshot(
-            screen_shot_path("#3_create-page-iframe_empty.png", "create_test_page")
-        )
+        cls.screenshot.take("#3_create-page-iframe_empty.png", "create_test_page")
         create_page_form = cls.wait_get_element_css("form")
         title_input = create_page_form.find_element_by_css_selector("#id_1-title")
         title_input.send_keys("test_page")
-        cls.browser.save_screenshot(
-            screen_shot_path("#4_create-page-iframe_filled_out.png", "create_test_page")
-        )
+        cls.screenshot.take("#4_create-page-iframe_filled_out.png", "create_test_page")
         create_page_form.submit()
         cls.browser.switch_to.default_content()
-
-        cls.browser.save_screenshot(
-            screen_shot_path("#5_created_page.png", "create_test_page")
-        )
+        cls.screenshot.take("#5_created_page.png", "create_test_page")
 
     def test_test_page_created(self):
         self.browser.get(self.live_server_url)

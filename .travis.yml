@@ -17,8 +17,9 @@ python:
   - 3.5
 
 env:
-  global:
-    - DOCKER_IP_TRAVIS="127.0.0.1"
+  # global:
+  #   - PERCY_TOKEN
+  #     secure:
 
   matrix:
     - DJANGO="1.11" CMS="3.4"
