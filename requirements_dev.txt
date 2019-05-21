@@ -8,6 +8,7 @@ sphinx-rtd-theme>=0.4.3
 Sphinx>=1.8.1
 
 # tests
+percy>=2.0.2
 djangocms-helper>=1.2
 selenium>=3.141.0
 coverage>=4.5.1

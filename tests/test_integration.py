@@ -16,6 +16,8 @@ from selenium.webdriver.support import ui
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from urllib3.exceptions import NewConnectionError, MaxRetryError
 
+import percy
+
 from .generate_test_screenshot_md import get_screenshot_test_base_folder
 
 
@@ -64,9 +66,40 @@ def get_browser_instance(browser_port, desire_capabilities, interactive=False):
 class ScreenCreator:
     def __init__(self, browser):
         self.browser = browser
+        self.run_percy = self.is_on_travis()
+
+    def is_on_travis(self):
+        # originaly from: https://github.com/getsentry/sentry
+        # if we're not running in a PR, we kill the PERCY_TOKEN because its a push
+        # to a branch, and we dont want percy comparing things
+        # we do need to ensure its run on master so that changes get updated
+        if (
+            os.environ.get("TRAVIS_PULL_REQUEST", "false") == "false"
+            and os.environ.get("TRAVIS_BRANCH", "master") != "master"
+        ):
+            os.environ.setdefault("PERCY_ENABLE", "0")
+        if "TRAVIS" in os.environ:
+            self.init_percy()
+            return True
+        else:
+            return False
 
     def take(self, filename, sub_dir=""):
-        self.browser.save_screenshot(screen_shot_path(filename, sub_dir))
+        if self.run_percy:
+            self.percy_runner.snapshot(name="{} - {}".format(sub_dir, filename))
+        else:
+            self.browser.save_screenshot(screen_shot_path(filename, sub_dir))
+
+    def init_percy(self):
+        # Build a ResourceLoader that knows how to collect assets for this application.
+        root_static_dir = os.path.join(os.path.dirname(__file__), "static")
+        loader = percy.ResourceLoader(root_dir=root_static_dir, webdriver=self.browser)
+        self.percy_runner = percy.Runner(loader=loader)
+        self.percy_runner.initialize_build()
+
+    def stop(self):
+        if self.run_percy:
+            self.percy_runner.finalize_build()
 
 
 def get_own_ip():
@@ -114,6 +147,7 @@ class TestIntegrationChrome(BaseTestCase, StaticLiveServerTestCase):
 
     @classmethod
     def tearDownClass(cls):
+        cls.screenshot.stop()
         cls.browser.quit()
         super(TestIntegrationChrome, cls).tearDownClass()
 
