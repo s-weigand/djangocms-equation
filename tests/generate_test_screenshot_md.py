@@ -4,10 +4,12 @@ from __future__ import absolute_import, print_function, unicode_literals
 import os
 import sys
 
-if sys.version_info[0] == 3:
+
+try:
     from urllib.parse import quote
-else:
-    from urllib import quote
+except:
+    from urllib import quote  # pylint: disable=import-error
+
 
 def get_screenshot_test_base_folder():
 
@@ -34,7 +36,9 @@ def generate_test_screenshot_report():
                     else:
                         screenshot_path = "./{}".format(quote(filename))
                 else:
-                    screenshot_path = os.path.abspath(os.path.join(root, quote(filename)))
+                    screenshot_path = os.path.abspath(
+                        os.path.join(root, quote(filename))
+                    )
                     screenshot_path = r"file:///{}".format(screenshot_path)
 
                 # screenshot_path = quote(screenshot_path)
