@@ -5,6 +5,7 @@ import os
 import socket
 
 from django.test import override_settings
+from django.conf import settings
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 
 from djangocms_helper.base_test import BaseTestCase
@@ -17,6 +18,7 @@ from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from urllib3.exceptions import NewConnectionError, MaxRetryError
 
 import percy
+from six.moves.urllib.parse import quote
 
 from .generate_test_screenshot_md import get_screenshot_test_base_folder
 
@@ -67,33 +69,42 @@ class ScreenCreator:
     def __init__(self, browser):
         self.browser = browser
         self.run_percy = self.is_on_travis()
+        self.counter = 0
 
     def is_on_travis(self):
-        # originaly from: https://github.com/getsentry/sentry
-        # if we're not running in a PR, we kill the PERCY_TOKEN because its a push
-        # to a branch, and we dont want percy comparing things
-        # we do need to ensure its run on master so that changes get updated
         if (
-            os.environ.get("TRAVIS_PULL_REQUEST", "false") == "false"
-            and os.environ.get("TRAVIS_BRANCH", "master") != "master"
+            "TRAVIS" in os.environ
+            and "USE_PERCY" in os.environ
+            and os.environ.get("TRAVIS_PULL_REQUEST", "false") != "false"
         ):
-            os.environ.setdefault("PERCY_ENABLE", "0")
-        if "TRAVIS" in os.environ:
             self.init_percy()
             return True
         else:
             return False
 
+    def reset_counter(self):
+        self.counter = 0
+
     def take(self, filename, sub_dir=""):
+        self.counter += 1
         if self.run_percy:
-            self.percy_runner.snapshot(name="{} - {}".format(sub_dir, filename))
+            tox_env = os.getenv("TOX_ENV_NAME", "")
+            self.percy_runner.snapshot(
+                name="{} - {} - #{}_{}".format(tox_env, sub_dir, self.counter, filename)
+            )
         else:
+            filename = "#{}_{}".format(self.counter, filename)
             self.browser.save_screenshot(screen_shot_path(filename, sub_dir))
 
     def init_percy(self):
         # Build a ResourceLoader that knows how to collect assets for this application.
-        root_static_dir = os.path.join(os.path.dirname(__file__), "static")
-        loader = percy.ResourceLoader(root_dir=root_static_dir, webdriver=self.browser)
+        # root_static_dir = os.path.join(os.path.dirname(__file__), "static")
+        root_static_dir = settings.STATIC_ROOT
+        loader = percy.ResourceLoader(
+            root_dir=root_static_dir,
+            base_url=quote(settings.STATIC_URL),
+            webdriver=self.browser,
+        )
         self.percy_runner = percy.Runner(loader=loader)
         self.percy_runner.initialize_build()
 
@@ -119,7 +130,7 @@ def get_own_ip():
 
 
 # uncomment the next line if the server throws errors
-@override_settings(DEBUG=True)
+# @override_settings(DEBUG=True)
 @override_settings(ALLOWED_HOSTS=["*"])
 class TestIntegrationChrome(BaseTestCase, StaticLiveServerTestCase):
     """
@@ -152,6 +163,7 @@ class TestIntegrationChrome(BaseTestCase, StaticLiveServerTestCase):
         super(TestIntegrationChrome, cls).tearDownClass()
 
     def setUp(self):
+        self.screenshot.reset_counter()
         super(TestIntegrationChrome, self).setUp()
 
     @classmethod
@@ -162,17 +174,17 @@ class TestIntegrationChrome(BaseTestCase, StaticLiveServerTestCase):
     @classmethod
     def create_test_page(cls):
         cls.browser.get(cls.live_server_url)
-        cls.screenshot.take("#0_initial_page.png", "create_test_page")
+        cls.screenshot.take("initial_page.png", "create_test_page")
         login_form = cls.wait_get_element_css("#login-form")
 
-        cls.screenshot.take("#1_login-form_empty.png", "create_test_page")
+        cls.screenshot.take("login-form_empty.png", "create_test_page")
 
         username = cls.wait_get_element_css("#id_username")
         username.send_keys(cls._admin_user_username)
         password = cls.wait_get_element_css("#id_password")
         password.send_keys(cls._admin_user_password)
 
-        cls.screenshot.take("#2_login-form_filled_out.png", "create_test_page")
+        cls.screenshot.take("login-form_filled_out.png", "create_test_page")
         login_form.submit()
 
         next_btn = cls.browser.find_element_by_link_text("Next")
@@ -181,19 +193,19 @@ class TestIntegrationChrome(BaseTestCase, StaticLiveServerTestCase):
 
         cls.wait_get_element_css("input")
 
-        cls.screenshot.take("#3_create-page-iframe_empty.png", "create_test_page")
+        cls.screenshot.take("create-page-iframe_empty.png", "create_test_page")
         create_page_form = cls.wait_get_element_css("form")
         title_input = create_page_form.find_element_by_css_selector("#id_1-title")
         title_input.send_keys("test_page1")
-        cls.screenshot.take("#4_create-page-iframe_filled_out.png", "create_test_page")
+        cls.screenshot.take("create-page-iframe_filled_out.png", "create_test_page")
         create_page_form.submit()
         cls.browser.switch_to.default_content()
-        cls.screenshot.take("#5_created_page.png", "create_test_page")
+        cls.screenshot.take("created_page.png", "create_test_page")
 
     def test_test_page_created(self):
         self.browser.get(self.live_server_url)
         body = self.browser.find_element_by_css_selector("body")
-        self.browser.save_screenshot(screen_shot_path("page_created2.png"))
+        self.screenshot.take("created_page2.png", "test_test_page_created")
         self.assertIn("test_page1", body.text)
 
 
