@@ -184,7 +184,7 @@ class TestIntegrationChrome(BaseTestCase, StaticLiveServerTestCase):
         cls.screenshot.take("#3_create-page-iframe_empty.png", "create_test_page")
         create_page_form = cls.wait_get_element_css("form")
         title_input = create_page_form.find_element_by_css_selector("#id_1-title")
-        title_input.send_keys("test_page")
+        title_input.send_keys("test_page1")
         cls.screenshot.take("#4_create-page-iframe_filled_out.png", "create_test_page")
         create_page_form.submit()
         cls.browser.switch_to.default_content()
@@ -194,7 +194,7 @@ class TestIntegrationChrome(BaseTestCase, StaticLiveServerTestCase):
         self.browser.get(self.live_server_url)
         body = self.browser.find_element_by_css_selector("body")
         self.browser.save_screenshot(screen_shot_path("page_created2.png"))
-        self.assertIn("test_page", body.text)
+        self.assertIn("test_page1", body.text)
 
 
 # class TestIntegrationFirefox(TestIntegrationChrome):
