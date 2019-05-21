@@ -2,13 +2,12 @@
 from __future__ import absolute_import, print_function, unicode_literals
 
 import os
-import sys
 
 
 try:
     from urllib.parse import quote
-except:
-    from urllib import quote  # pylint: disable=import-error
+except ImportError:
+    from urllib import quote
 
 
 def get_screenshot_test_base_folder():
