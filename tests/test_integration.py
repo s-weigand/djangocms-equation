@@ -98,11 +98,9 @@ class ScreenCreator:
 
     def init_percy(self):
         # Build a ResourceLoader that knows how to collect assets for this application.
-        # root_static_dir = os.path.join(os.path.dirname(__file__), "static")
-        root_static_dir = settings.STATIC_ROOT
         loader = percy.ResourceLoader(
-            root_dir=root_static_dir,
-            base_url=quote(settings.STATIC_URL),
+            root_dir=settings.STATIC_ROOT,
+            # base_url=quote(settings.STATIC_URL),
             webdriver=self.browser,
         )
         self.percy_runner = percy.Runner(loader=loader)
@@ -130,7 +128,7 @@ def get_own_ip():
 
 
 # uncomment the next line if the server throws errors
-# @override_settings(DEBUG=True)
+@override_settings(DEBUG=True)
 @override_settings(ALLOWED_HOSTS=["*"])
 class TestIntegrationChrome(BaseTestCase, StaticLiveServerTestCase):
     """
