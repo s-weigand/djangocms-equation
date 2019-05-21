@@ -100,7 +100,7 @@ class ScreenCreator:
         # Build a ResourceLoader that knows how to collect assets for this application.
         loader = percy.ResourceLoader(
             root_dir=settings.STATIC_ROOT,
-            # base_url=quote(settings.STATIC_URL),
+            base_url=quote(settings.STATIC_URL),
             webdriver=self.browser,
         )
         self.percy_runner = percy.Runner(loader=loader)
