@@ -2,8 +2,12 @@
 from __future__ import absolute_import, print_function, unicode_literals
 
 import os
-from urllib.parse import quote
+import sys
 
+if sys.version_info[0] == 3:
+    from urllib.parse import quote
+else:
+    from urllib import quote
 
 def get_screenshot_test_base_folder():
 
