@@ -83,8 +83,8 @@ install:
 script: tox
 
 after_success:
-    - coveralls
-    - coverage erase
+  - coveralls
+  - coverage erase
 
 # Assuming you have installed the travis-ci CLI tool, after you
 # create the Github repo and add it to Travis, run the
