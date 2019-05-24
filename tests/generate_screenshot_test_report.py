@@ -23,7 +23,7 @@ def generate_test_screenshot_report(percy_local_develop=False):
     screen_shot_dict = {}
     base_path = get_screenshot_test_base_folder()
     for root, _, filenames in os.walk(base_path):
-        for filename in filenames:
+        for filename in sorted(filenames):
             if filename.endswith(".png"):
                 sub_root, test_name = os.path.split(root)
                 _, browser_name = os.path.split(sub_root)
