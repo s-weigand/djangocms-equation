@@ -176,6 +176,7 @@ class TestIntegrationChrome(BaseTestCase, StaticLiveServerTestCase):
         cls.screenshot = ScreenCreator(cls.browser, cls.browser_name)
         cls.wait = ui.WebDriverWait(cls.browser, 10)
         cls.browser.delete_all_cookies()
+        cls.create_test_page()
 
     @classmethod
     def tearDownClass(cls):
@@ -184,7 +185,6 @@ class TestIntegrationChrome(BaseTestCase, StaticLiveServerTestCase):
         super(TestIntegrationChrome, cls).tearDownClass()
 
     def setUp(self):
-        self.get_pages()
         self.logout_user()
         self.screenshot.reset_counter()
         super(TestIntegrationChrome, self).setUp()
@@ -198,6 +198,43 @@ class TestIntegrationChrome(BaseTestCase, StaticLiveServerTestCase):
     def wait_get_element_link_text(cls, link_text):
         cls.wait.until(lambda driver: driver.find_element_by_link_text(link_text))
         return cls.browser.find_element_by_link_text(link_text)
+
+    @classmethod
+    def create_test_page(cls):
+        """
+        Logs in and creates the first page
+        """
+        cls.browser.get(cls.live_server_url)
+        body = cls.browser.find_element_by_css_selector("body")
+        cls.screenshot.take("initial_page.png", "create_test_page")
+
+        if "test_page" not in body.text:
+
+            login_form = cls.wait_get_element_css("#login-form")
+
+            username = cls.wait_get_element_css("#id_username")
+            username.send_keys(cls._admin_user_username)
+            password = cls.wait_get_element_css("#id_password")
+            password.send_keys(cls._admin_user_password)
+
+            cls.screenshot.take("login-form_filled_out.png", "create_test_page")
+            login_form.submit()
+            cls.screenshot.take("user_loged_in.png", "create_test_page")
+
+            next_btn = cls.wait_get_element_link_text("Next")
+            next_btn.click()
+            cls.browser.switch_to.frame(cls.wait_get_element_css("iframe"))
+
+            cls.wait_get_element_css("input")
+
+            cls.screenshot.take("create-page-iframe_empty.png", "create_test_page")
+            create_page_form = cls.wait_get_element_css("form")
+            title_input = create_page_form.find_element_by_css_selector("#id_1-title")
+            title_input.send_keys("test_page")
+            cls.screenshot.take("create-page-iframe_filled_out.png", "create_test_page")
+            create_page_form.submit()
+            cls.browser.switch_to.default_content()
+            cls.screenshot.take("created_page.png", "create_test_page")
 
     def login_user(self):
         self.browser.get(self.live_server_url + "/?edit")
@@ -227,7 +264,7 @@ class TestIntegrationChrome(BaseTestCase, StaticLiveServerTestCase):
         self.login_user()
         self.browser.get(self.live_server_url)
         self.screenshot.take("start_page_user_loged_in.png", "test_login_user")
-        cms_navigation = self.browser.find_element_by_css_selector(
+        cms_navigation = self.wait_get_element_css(
             ".cms-toolbar-item-navigation span"
         )
         self.assertEquals(
