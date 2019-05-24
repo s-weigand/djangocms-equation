@@ -209,16 +209,7 @@ class TestIntegrationChrome(BaseTestCase, StaticLiveServerTestCase):
         cls.screenshot.take("initial_page.png", "create_test_page")
 
         if "test_page" not in body.text:
-
-            login_form = cls.wait_get_element_css("#login-form")
-
-            username = cls.wait_get_element_css("#id_username")
-            username.send_keys(cls._admin_user_username)
-            password = cls.wait_get_element_css("#id_password")
-            password.send_keys(cls._admin_user_password)
-
-            cls.screenshot.take("login-form_filled_out.png", "create_test_page")
-            login_form.submit()
+            cls.login_user()
             cls.screenshot.take("user_loged_in.png", "create_test_page")
 
             next_btn = cls.wait_get_element_link_text("Next")
@@ -236,17 +227,19 @@ class TestIntegrationChrome(BaseTestCase, StaticLiveServerTestCase):
             cls.browser.switch_to.default_content()
             cls.screenshot.take("created_page.png", "create_test_page")
 
-    def login_user(self):
-        self.browser.get(self.live_server_url + "/?edit")
+    @classmethod
+    def login_user(cls):
+        cls.browser.get(cls.live_server_url + "/?edit")
         try:
-            login_form = self.wait_get_element_css("form.cms-form-login, #login-form")
-            username = self.wait_get_element_css("#id_username")
-            username.send_keys(self._admin_user_username)
-            password = self.wait_get_element_css("#id_password")
-            password.send_keys(self._admin_user_password)
+            login_form = cls.wait_get_element_css("form.cms-form-login, #login-form")
+            username = cls.wait_get_element_css("#id_username")
+            username.send_keys(cls._admin_user_username)
+            password = cls.wait_get_element_css("#id_password")
+            password.send_keys(cls._admin_user_password)
             login_form.submit()
         except TimeoutException:
             print("Didn't find `form.cms-form-login` or `#login-form`.")
+            cls.screenshot.take("login_fail.png", "login_fail")
 
     def logout_user(self):
         # visiting the logout link is a fallback since FireFox
