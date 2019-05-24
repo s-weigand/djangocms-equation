@@ -2,6 +2,7 @@
 from __future__ import absolute_import, print_function, unicode_literals
 
 import os
+from collections import OrderedDict
 
 try:
     from urllib.parse import quote
@@ -20,7 +21,7 @@ def get_screenshot_test_base_folder():
 
 def generate_test_screenshot_report(percy_local_develop=False):
     test_env_name = os.getenv("TOX_ENV_NAME", "stand alone")
-    screen_shot_dict = {}
+    screen_shot_dict = OrderedDict()
     base_path = get_screenshot_test_base_folder()
     for root, _, filenames in os.walk(base_path):
         for filename in sorted(filenames):

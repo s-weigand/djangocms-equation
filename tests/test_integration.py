@@ -14,6 +14,7 @@ from selenium.webdriver import Chrome
 from selenium.common.exceptions import WebDriverException
 from selenium.webdriver.remote.webdriver import WebDriver as RemoteWebdriver
 from selenium.webdriver.support import ui
+from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from urllib3.exceptions import NewConnectionError, MaxRetryError
 
@@ -155,6 +156,18 @@ class TestIntegrationChrome(BaseTestCase, StaticLiveServerTestCase):
     browser_port = 4444
     desire_capabilities = DesiredCapabilities.CHROME
     browser_name = "Chrome"
+    _pages_data = (
+        {
+            "en": {
+                "title": "testpage",
+                "template": "page.html",
+                "publish": True,
+                "menu_title": "test_page",
+                "in_navigation": True,
+            }
+        },
+    )
+    languages = ["en"]
 
     @classmethod
     def setUpClass(cls):
@@ -162,7 +175,7 @@ class TestIntegrationChrome(BaseTestCase, StaticLiveServerTestCase):
         cls.browser = get_browser_instance(cls.browser_port, cls.desire_capabilities)
         cls.screenshot = ScreenCreator(cls.browser, cls.browser_name)
         cls.wait = ui.WebDriverWait(cls.browser, 10)
-        cls.create_test_page()
+        cls.browser.delete_all_cookies()
 
     @classmethod
     def tearDownClass(cls):
@@ -171,6 +184,8 @@ class TestIntegrationChrome(BaseTestCase, StaticLiveServerTestCase):
         super(TestIntegrationChrome, cls).tearDownClass()
 
     def setUp(self):
+        self.get_pages()
+        self.logout_user()
         self.screenshot.reset_counter()
         super(TestIntegrationChrome, self).setUp()
 
@@ -182,48 +197,53 @@ class TestIntegrationChrome(BaseTestCase, StaticLiveServerTestCase):
     @classmethod
     def wait_get_element_link_text(cls, link_text):
         cls.wait.until(lambda driver: driver.find_element_by_link_text(link_text))
-        return cls.browser.find_element_by_link_text("Next")
+        return cls.browser.find_element_by_link_text(link_text)
 
-    @classmethod
-    def create_test_page(cls):
-        """
-        Logs in and creates the first page
-        """
-        cls.browser.get(cls.live_server_url)
-        cls.screenshot.take("initial_page.png", "create_test_page")
-        login_form = cls.wait_get_element_css("#login-form")
+    def login_user(self):
+        self.browser.get(self.live_server_url + "/?edit")
+        try:
+            login_form = self.wait_get_element_css("form.cms-form-login")
+            username = self.wait_get_element_css("#id_username")
+            username.send_keys(self._admin_user_username)
+            password = self.wait_get_element_css("#id_password")
+            password.send_keys(self._admin_user_password)
+            login_form.submit()
+        except TimeoutException:
+            print("Didn't find `form.cms-form-login`.")
 
-        cls.screenshot.take("login-form_empty.png", "create_test_page")
+    def logout_user(self):
+        self.browser.delete_all_cookies()
+        self.browser.refresh()
 
-        username = cls.wait_get_element_css("#id_username")
-        username.send_keys(cls._admin_user_username)
-        password = cls.wait_get_element_css("#id_password")
-        password.send_keys(cls._admin_user_password)
-
-        cls.screenshot.take("login-form_filled_out.png", "create_test_page")
-        login_form.submit()
-        cls.screenshot.take("user_loged_in.png", "create_test_page")
-
-        next_btn = cls.wait_get_element_link_text("Next")
-        next_btn.click()
-        cls.browser.switch_to.frame(cls.wait_get_element_css("iframe"))
-
-        cls.wait_get_element_css("input")
-
-        cls.screenshot.take("create-page-iframe_empty.png", "create_test_page")
-        create_page_form = cls.wait_get_element_css("form")
-        title_input = create_page_form.find_element_by_css_selector("#id_1-title")
-        title_input.send_keys("test_page")
-        cls.screenshot.take("create-page-iframe_filled_out.png", "create_test_page")
-        create_page_form.submit()
-        cls.browser.switch_to.default_content()
-        cls.screenshot.take("created_page.png", "create_test_page")
-
-    def test_test_page_created(self):
+    def test_page_exists(self):
         self.browser.get(self.live_server_url)
         body = self.browser.find_element_by_css_selector("body")
-        self.screenshot.take("created_page2.png", "test_test_page_created")
+        self.screenshot.take("created_page.png", "test_page_exists")
         self.assertIn("test_page", body.text)
+
+    def test_login_user(self):
+        self.login_user()
+        self.browser.get(self.live_server_url)
+        self.screenshot.take("start_page_user_loged_in.png", "test_login_user")
+        cms_navigation = self.browser.find_element_by_css_selector(
+            ".cms-toolbar-item-navigation span"
+        )
+        self.assertEquals(
+            cms_navigation.text,
+            "example.com",
+            cms_navigation.get_attribute("innerHTML"),
+        )
+
+    def test_logout_user(self):
+        self.login_user()
+        self.logout_user()
+        self.browser.get(self.live_server_url)
+        self.screenshot.take("start_page_user_loged_out.png", "test_logout_user")
+        self.assertRaises(
+            NoSuchElementException,
+            self.browser.find_element_by_css_selector,
+            "#cms-top",
+        )
 
 
 class TestIntegrationFirefox(TestIntegrationChrome):
