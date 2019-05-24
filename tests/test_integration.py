@@ -212,8 +212,10 @@ class TestIntegrationChrome(BaseTestCase, StaticLiveServerTestCase):
             print("Didn't find `form.cms-form-login`.")
 
     def logout_user(self):
+        # visiting the logout link is a fallback since FireFox
+        # sometimes doesn't logout properly by just deleting the coockies
+        self.browser.get(self.live_server_url + "/admin/logout/")
         self.browser.delete_all_cookies()
-        self.browser.refresh()
 
     def test_page_exists(self):
         self.browser.get(self.live_server_url)
