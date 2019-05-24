@@ -239,14 +239,14 @@ class TestIntegrationChrome(BaseTestCase, StaticLiveServerTestCase):
     def login_user(self):
         self.browser.get(self.live_server_url + "/?edit")
         try:
-            login_form = self.wait_get_element_css("form.cms-form-login")
+            login_form = self.wait_get_element_css("form.cms-form-login, #login-form")
             username = self.wait_get_element_css("#id_username")
             username.send_keys(self._admin_user_username)
             password = self.wait_get_element_css("#id_password")
             password.send_keys(self._admin_user_password)
             login_form.submit()
         except TimeoutException:
-            print("Didn't find `form.cms-form-login`.")
+            print("Didn't find `form.cms-form-login` or `#login-form`.")
 
     def logout_user(self):
         # visiting the logout link is a fallback since FireFox
@@ -262,11 +262,9 @@ class TestIntegrationChrome(BaseTestCase, StaticLiveServerTestCase):
 
     def test_login_user(self):
         self.login_user()
-        self.browser.get(self.live_server_url)
+        self.browser.get(self.live_server_url + "/?edit")
         self.screenshot.take("start_page_user_loged_in.png", "test_login_user")
-        cms_navigation = self.wait_get_element_css(
-            ".cms-toolbar-item-navigation span"
-        )
+        cms_navigation = self.wait_get_element_css(".cms-toolbar-item-navigation span")
         self.assertEquals(
             cms_navigation.text,
             "example.com",
