@@ -8,7 +8,7 @@ from django.test import override_settings
 from django.conf import settings
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 
-from djangocms_helper.base_test import BaseTestCase
+from djangocms_helper.base_test import BaseTransactionTestCase
 
 from selenium.webdriver import Chrome
 from selenium.common.exceptions import WebDriverException
@@ -91,18 +91,28 @@ class ScreenCreator:
     def reset_counter(self):
         self.counter = 0
 
-    def take(self, filename, sub_dir=""):
-        self.counter += 1
-        if self.run_percy:
-            tox_env = os.getenv("TOX_ENV_NAME", "")
-            self.percy_runner.snapshot(
-                name="{} - {} - #{}_{}".format(tox_env, sub_dir, self.counter, filename)
-            )
-        else:
-            filename = "#{}_{}".format(self.counter, filename)
-            self.browser.save_screenshot(
-                screen_shot_path(filename, self.browser_name, sub_dir)
-            )
+    def take(self, filename, sub_dir="", take_screen_shot=True):
+        if take_screen_shot:
+            self.counter += 1
+            if self.run_percy:
+                tox_env = os.getenv("TOX_ENV_NAME", "")
+                self.percy_runner.snapshot(
+                    name="{} - {} - #{}_{}".format(
+                        tox_env, sub_dir, self.counter, filename
+                    )
+                )
+            else:
+                filename = "#{}_{}".format(self.counter, filename)
+                # sets the color of links to black, this is to prevent visual diffs with percy
+                script_code = (
+                    "document.styleSheets[document.styleSheets.length-1].insertRule("
+                    '"a{color: black}"'
+                    ", document.styleSheets[document.styleSheets.length-1].cssRules.length)"
+                )
+                self.browser.execute_script(script_code)
+                self.browser.save_screenshot(
+                    screen_shot_path(filename, self.browser_name, sub_dir)
+                )
 
     def init_percy(self):
         # Build a ResourceLoader that knows how to collect assets for this application.
@@ -140,7 +150,7 @@ def get_own_ip():
 # uncomment the next line if the server throws errors
 @override_settings(DEBUG=True)
 @override_settings(ALLOWED_HOSTS=["*"])
-class TestIntegrationChrome(BaseTestCase, StaticLiveServerTestCase):
+class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
     """
     Baseclass for Integration tests with Selenium running in a docker.
     The settings default to chrome (see. docker-compose.yml),
@@ -171,12 +181,10 @@ class TestIntegrationChrome(BaseTestCase, StaticLiveServerTestCase):
 
     @classmethod
     def setUpClass(cls):
-        super(TestIntegrationChrome, cls).setUpClass()
         cls.browser = get_browser_instance(cls.browser_port, cls.desire_capabilities)
         cls.screenshot = ScreenCreator(cls.browser, cls.browser_name)
         cls.wait = ui.WebDriverWait(cls.browser, 10)
         cls.browser.delete_all_cookies()
-        cls.create_test_page()
 
     @classmethod
     def tearDownClass(cls):
@@ -185,6 +193,10 @@ class TestIntegrationChrome(BaseTestCase, StaticLiveServerTestCase):
         super(TestIntegrationChrome, cls).tearDownClass()
 
     def setUp(self):
+        # This is needed so the users will be recreated each time,
+        # since TransactionTestCase drops its db per test
+        super(TestIntegrationChrome, self).setUpClass()
+        self.get_pages()
         self.logout_user()
         self.screenshot.reset_counter()
         super(TestIntegrationChrome, self).setUp()
@@ -199,53 +211,90 @@ class TestIntegrationChrome(BaseTestCase, StaticLiveServerTestCase):
         cls.wait.until(lambda driver: driver.find_element_by_link_text(link_text))
         return cls.browser.find_element_by_link_text(link_text)
 
-    @classmethod
-    def create_test_page(cls):
-        """
-        Logs in and creates the first page
-        """
-        cls.browser.get(cls.live_server_url)
-        body = cls.browser.find_element_by_css_selector("body")
-        cls.screenshot.take("initial_page.png", "create_test_page")
-
-        if "test_page" not in body.text:
-            cls.login_user()
-            cls.screenshot.take("user_loged_in.png", "create_test_page")
-
-            next_btn = cls.wait_get_element_link_text("Next")
-            next_btn.click()
-            cls.browser.switch_to.frame(cls.wait_get_element_css("iframe"))
-
-            cls.wait_get_element_css("input")
-
-            cls.screenshot.take("create-page-iframe_empty.png", "create_test_page")
-            create_page_form = cls.wait_get_element_css("form")
-            title_input = create_page_form.find_element_by_css_selector("#id_1-title")
-            title_input.send_keys("test_page")
-            cls.screenshot.take("create-page-iframe_filled_out.png", "create_test_page")
-            create_page_form.submit()
-            cls.browser.switch_to.default_content()
-            cls.screenshot.take("created_page.png", "create_test_page")
-
-    @classmethod
-    def login_user(cls):
-        cls.browser.get(cls.live_server_url + "/?edit")
+    def login_user(self, take_screen_shot=False):
+        self.browser.get(self.live_server_url + "/?edit")
         try:
-            login_form = cls.wait_get_element_css("form.cms-form-login, #login-form")
-            username = cls.wait_get_element_css("#id_username")
-            username.send_keys(cls._admin_user_username)
-            password = cls.wait_get_element_css("#id_password")
-            password.send_keys(cls._admin_user_password)
+            username = self.wait_get_element_css("#id_username")
+            username.send_keys(self._admin_user_username)
+            password = self.wait_get_element_css("#id_password")
+            password.send_keys(self._admin_user_password)
+            self.screenshot.take(
+                "added_credentials.png",
+                "test_login_user",
+                take_screen_shot=take_screen_shot,
+            )
+            login_form = self.wait_get_element_css("form.cms-form-login")
             login_form.submit()
-        except TimeoutException:
-            print("Didn't find `form.cms-form-login` or `#login-form`.")
-            cls.screenshot.take("login_fail.png", "login_fail")
+            self.screenshot.take(
+                "form_submitted.png",
+                "test_login_user",
+                take_screen_shot=take_screen_shot,
+            )
+        except TimeoutException as e:
+            print("Didn't find `form.cms-form-login`.")
+            self.screenshot.take("login_fail.png", "login_fail")
+            raise TimeoutException(e.msg)
 
     def logout_user(self):
         # visiting the logout link is a fallback since FireFox
         # sometimes doesn't logout properly by just deleting the coockies
         self.browser.get(self.live_server_url + "/admin/logout/")
         self.browser.delete_all_cookies()
+
+    def create_standalone_equation(
+        self,
+        self_test=False,
+        tex_code=r"\int^{a}_{b} f(x) \mathrm{d}x",
+        font_size_value=1,
+        font_size_unit="rem",
+        is_inline=False,
+    ):
+        self.login_user()
+        sidebar_toggle_btn = self.wait_get_element_css(
+            ".cms-toolbar-item-cms-mode-switcher a"
+        )
+        sidebar_toggle_btn.click()
+        add_plugin_btn = self.wait_get_element_css(
+            ".cms-submenu-btn.cms-submenu-add.cms-btn"
+        )
+        self.screenshot.take(
+            "sidebar_open.png",
+            "test_create_standalone_equation",
+            take_screen_shot=self_test,
+        )
+        add_plugin_btn.click()
+        equatuion_btn = self.wait_get_element_css(
+            '.cms-submenu-item a[href="EquationPlugin"]'
+        )
+        self.screenshot.take(
+            "plugin_add_modal.png",
+            "test_create_standalone_equation",
+            take_screen_shot=self_test,
+        )
+        equatuion_btn.click()
+        equation_edit_iframe = self.wait_get_element_css("iframe")
+        self.screenshot.take(
+            "equation_edit_iframe.png",
+            "test_create_standalone_equation",
+            take_screen_shot=self_test,
+        )
+        self.browser.switch_to.frame(equation_edit_iframe)
+        latex_input = self.wait_get_element_css("#id_tex_code")
+        latex_input.send_keys(tex_code)
+        self.screenshot.take(
+            "equation_entered.png",
+            "test_create_standalone_equation",
+            take_screen_shot=self_test,
+        )
+        self.browser.switch_to.default_content()
+        save_btn = self.wait_get_element_css(".cms-btn.cms-btn-action.default")
+        save_btn.click()
+        self.wait_get_element_css("span.katex")
+        self.screenshot.take(
+            "equation_rendered.png",
+            "test_create_standalone_equation",
+            take_screen_shot=self_test,
+        )
 
     def test_page_exists(self):
         self.browser.get(self.live_server_url)
@@ -254,7 +303,7 @@ class TestIntegrationChrome(BaseTestCase, StaticLiveServerTestCase):
         self.assertIn("test_page", body.text)
 
     def test_login_user(self):
-        self.login_user()
+        self.login_user(take_screen_shot=True)
         self.browser.get(self.live_server_url + "/?edit")
         self.screenshot.take("start_page_user_loged_in.png", "test_login_user")
         cms_navigation = self.wait_get_element_css(".cms-toolbar-item-navigation span")
@@ -274,6 +323,9 @@ class TestIntegrationChrome(BaseTestCase, StaticLiveServerTestCase):
             self.browser.find_element_by_css_selector,
             "#cms-top",
         )
+
+    def test_create_standalone_equation(self):
+        self.create_standalone_equation(True)
 
 
 class TestIntegrationFirefox(TestIntegrationChrome):
