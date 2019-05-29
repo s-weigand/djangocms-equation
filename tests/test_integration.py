@@ -42,7 +42,10 @@ def screen_shot_path(filename, browser_name, sub_dir=""):
 def get_browser_instance(browser_port, desire_capabilities, interactive=False):
     if interactive:
         try:
-            return Chrome(desired_capabilities=DesiredCapabilities.CHROME)
+            return Chrome(
+                executable_path=os.getenv("chromedriver"),
+                desired_capabilities=DesiredCapabilities.CHROME,
+            )
         except WebDriverException:
             raise WebDriverException(
                 "'chromedriver' executable needs to be in PATH. "
@@ -181,7 +184,9 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.browser = get_browser_instance(cls.browser_port, cls.desire_capabilities)
+        cls.browser = get_browser_instance(
+            cls.browser_port, cls.desire_capabilities, interactive=False
+        )
         cls.screenshot = ScreenCreator(cls.browser, cls.browser_name)
         cls.wait = ui.WebDriverWait(cls.browser, 10)
         cls.browser.delete_all_cookies()
@@ -249,7 +254,9 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
         font_size_unit="rem",
         is_inline=False,
     ):
+        # from time import sleep
         self.login_user()
+        # sleep(50)
         sidebar_toggle_btn = self.wait_get_element_css(
             ".cms-toolbar-item-cms-mode-switcher a"
         )
@@ -280,6 +287,7 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
         )
         self.browser.switch_to.frame(equation_edit_iframe)
         latex_input = self.wait_get_element_css("#id_tex_code")
+        latex_input.click()
         latex_input.send_keys(tex_code)
         self.screenshot.take(
             "equation_entered.png",
@@ -292,6 +300,14 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
         self.wait_get_element_css("span.katex")
         self.screenshot.take(
             "equation_rendered.png",
+            "test_create_standalone_equation",
+            take_screen_shot=self_test,
+        )
+
+        # self.browser.get(self.live_server_url)
+        # sleep(1000)
+        self.screenshot.take(
+            "equation_rendered_after_sleep.png",
             "test_create_standalone_equation",
             take_screen_shot=self_test,
         )
