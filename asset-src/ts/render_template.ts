@@ -4,10 +4,21 @@ import {
   render_full_page,
 } from './djangocms_equation'
 
-init_render_main_page(false)
+// init_render_main_page(false)
+console.log("foooooooooooooooooooooo")
+
+if (document.readyState === 'complete') {
+  console.log("compleate")
+  init_render_main_page(false)
+} else {
+  document.addEventListener('DOMContentLoaded', function(event) {
+    console.log("DOMContentLoaded triggered")
+    init_render_main_page(false)
+  })
+}
 
 // just for debugging
-document.addEventListener('DOMContentLoaded', function(event) {
+// document.addEventListener('DOMContentLoaded', function(event) {
   // RootIFrame
   // document.querySelector("iframe")
   // EditorIFrame
@@ -214,15 +225,15 @@ document.addEventListener('DOMContentLoaded', function(event) {
     targetBodyElement: document.body,
     nodeCallbacks: [
       { nodeName: 'IFRAME', callbackFuncs: [CKEditor_render_equation] },
-      // {
-      //   nodeName: 'P',
-      //   callbackFuncs: [
-      //     foo => {
-      //       render_spans(document.body as HTMLBodyElement)
-      //       console.log('#### new span', foo)
-      //     },
-      //   ],
-      // },
+      {
+        nodeName: 'P',
+        callbackFuncs: [
+          foo => {
+            render_spans(document.body as HTMLBodyElement)
+            console.log('#### new span', foo)
+          },
+        ],
+      },
     ],
     debugName: 'document.body observer',
   })
@@ -246,4 +257,4 @@ document.addEventListener('DOMContentLoaded', function(event) {
 
   // edit dialog visable
   // document.querySelector("iframe").contentDocument.querySelector(".cke_dialog_body").offsetParent
-})
+// })
