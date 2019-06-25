@@ -204,14 +204,15 @@ document.addEventListener('DOMContentLoaded', function(event) {
     ],
     debugName: 'document.body observer',
   })
-  var dclick = new MouseEvent('dblclick', {
-    view: window,
-    bubbles: true,
-    cancelable: true,
-  })
-  ;(document.querySelector('p span.katex') as HTMLSpanElement).dispatchEvent(
-    dclick
-  )
+  // var dclick = new MouseEvent('dblclick', {
+  //   view: window,
+  //   bubbles: true,
+  //   cancelable: true,
+  // })
+  // ;
+  // (document.querySelector('p span.katex') as HTMLSpanElement).dispatchEvent(
+  //   dclick
+  // )
 
   // let body_mutation_observer = new MutationObserver(
   //   body_mutation_observer_callback
