@@ -297,7 +297,7 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
         )
         self.browser.switch_to.default_content()
         save_btn = self.wait_get_element_css(".cms-btn.cms-btn-action.default")
-        sleep(2)
+        # sleep(2)
         save_btn.click()
         self.wait_get_element_css("span.katex")
         self.screenshot.take(
@@ -307,7 +307,7 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
         )
 
         # self.browser.get(self.live_server_url)
-        sleep(1000)
+        # sleep(1000)
         self.screenshot.take(
             "equation_rendered_after_sleep.png",
             "test_create_standalone_equation",
