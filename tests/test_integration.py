@@ -185,7 +185,7 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
     @classmethod
     def setUpClass(cls):
         cls.browser = get_browser_instance(
-            cls.browser_port, cls.desire_capabilities, interactive=True
+            cls.browser_port, cls.desire_capabilities, interactive=False
         )
         cls.screenshot = ScreenCreator(cls.browser, cls.browser_name)
         cls.wait = ui.WebDriverWait(cls.browser, 10)
