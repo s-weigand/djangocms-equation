@@ -237,13 +237,13 @@ if (document.readyState === 'complete') {
     ],
     debugName: 'document.body observer',
   })
-  // render_spans(document.body as HTMLBodyElement)
   // var dclick = new MouseEvent('dblclick', {
   //   view: window,
   //   bubbles: true,
   //   cancelable: true,
   // })
-  // ;(document.querySelector('p span.katex') as HTMLSpanElement).dispatchEvent(
+  // ;
+  // (document.querySelector('p span.katex') as HTMLSpanElement).dispatchEvent(
   //   dclick
   // )
 
