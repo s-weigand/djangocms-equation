@@ -254,7 +254,7 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
         font_size_unit="rem",
         is_inline=False,
     ):
-        from time import sleep
+        # from time import sleepsleep
 
         self.login_user()
         # sleep(50)
