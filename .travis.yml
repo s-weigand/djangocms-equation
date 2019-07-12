@@ -83,8 +83,8 @@ install:
 script: tox
 
 after_success:
-  - "if [[ $USE_PERCY == 'true' ]]; then python tests/manage.py test utils.percy_upload; fi"
-  - ls -la test_screenshots
+  - if [ "$TOX_ENV_NAME" == "py37-dj21-cms36" ] ; then python tests/manage.py test utils.percy_upload; fi
+  - ls -la "test_screenshots/$TOX_ENV_NAME"
   - coveralls
   - coverage erase
 
