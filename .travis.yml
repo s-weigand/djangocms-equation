@@ -83,6 +83,8 @@ install:
 script: tox
 
 after_success:
+  - "if [[ $USE_PERCY == 'true' ]]; then python tests/manage.py test utils.percy_upload; fi"
+  - ls -la test_screenshots
   - coveralls
   - coverage erase
 

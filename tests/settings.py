@@ -14,7 +14,7 @@ HELPER_SETTINGS = {
 
 
 def run():
-    from .generate_screenshot_test_report import get_screenshot_test_base_folder
+    from .utils.generate_screenshot_test_report import get_screenshot_test_base_folder
     # clean screenshots from last run
     rmtree(get_screenshot_test_base_folder(), ignore_errors=True)
     # run test and generate new screenshots
