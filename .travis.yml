@@ -83,8 +83,8 @@ install:
 script: tox
 
 after_success:
-  - if [ "$TOX_ENV_NAME" == "py37-dj21-cms36" ] ; then python tests/manage.py test utils.percy_upload; fi
-  - ls -la "test_screenshots/$TOX_ENV_NAME"
+  - if [ "$DJANGO" == "2.1" ] && [ "$CMS" == "3.6" ] && [ "$TRAVIS_PYTHON_VERSION" == "3.7" ]; then python tests/manage.py test utils.percy_upload; fi
+  - ls -la test_screenshots/Chrome
   - coveralls
   - coverage erase
 

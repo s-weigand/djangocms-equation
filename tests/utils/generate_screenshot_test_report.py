@@ -11,8 +11,10 @@ except ImportError:
 
 
 def get_screenshot_test_base_folder():
-
-    tox_env_name = os.getenv("TOX_ENV_NAME", "")
+    if "TRAVIS" in os.environ:
+        tox_env_name = ""
+    else:
+        tox_env_name = os.getenv("TOX_ENV_NAME", "")
     dir_path = os.path.abspath(
         os.path.join(
             os.path.dirname(__file__), "..", "..", "test_screenshots", tox_env_name
