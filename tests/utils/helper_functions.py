@@ -76,7 +76,6 @@ class ScreenCreator:
         if (
             "TRAVIS" in os.environ
             and use_percy
-            and "USE_PERCY" in os.environ
             and os.environ.get("TRAVIS_PULL_REQUEST", "false") != "false"
         ):
             self.init_percy()
