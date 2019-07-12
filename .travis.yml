@@ -83,7 +83,7 @@ install:
 script: tox
 
 after_success:
-  - if [ "$DJANGO" == "2.1" ] && [ "$CMS" == "3.6" ] && [ "$TRAVIS_PYTHON_VERSION" == "3.7" ]; then python tests/manage.py test utils.percy_upload; fi
+  - if [ "$DJANGO" == "2.1" ] && [ "$CMS" == "3.6" ] && [ "$TRAVIS_PYTHON_VERSION" == "3.7" ]; then pip install django percy; python tests/manage.py test utils.percy_upload; fi
   - ls -la test_screenshots/Chrome
   - coveralls
   - coverage erase
