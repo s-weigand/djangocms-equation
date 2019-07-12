@@ -85,6 +85,7 @@ script: tox
 after_success:
   - if [ "$DJANGO" == "2.1" ] && [ "$CMS" == "3.6" ] && [ "$TRAVIS_PYTHON_VERSION" == "3.7" ]; then "$PWD/.tox/py37-dj21-cms36/bin/python" tests/manage.py test utils.percy_upload; fi
   - ls -la test_screenshots/Chrome
+  - ls -la test_screenshots
   - coveralls
   - coverage erase
 
