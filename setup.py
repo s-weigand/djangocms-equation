@@ -11,7 +11,7 @@ with open("README.rst") as readme_file:
 with open("HISTORY.rst") as history_file:
     history = history_file.read()
 
-requirements = ["django-cms>=3.4", "django>=1.11", "djangocms-text-ckeditor>=3.2.1"]
+requirements = ["django-cms>=3.4,<3.7", "django>=1.11,<2.2", "djangocms-text-ckeditor>=3.2.1"]
 
 setup(
     author="Sebastian Weigand",

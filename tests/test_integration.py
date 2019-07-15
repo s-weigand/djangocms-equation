@@ -1,136 +1,22 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, print_function, unicode_literals
 
-import os
-import socket
-
 from django.test import override_settings
-from django.conf import settings
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 
-from djangocms_helper.base_test import BaseTestCase
+from djangocms_helper.base_test import BaseTransactionTestCase
 
-from selenium.webdriver import Chrome
-from selenium.common.exceptions import WebDriverException
-from selenium.webdriver.remote.webdriver import WebDriver as RemoteWebdriver
 from selenium.webdriver.support import ui
+from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
-from urllib3.exceptions import NewConnectionError, MaxRetryError
 
-import percy
-from six.moves.urllib.parse import quote
-
-from .generate_test_screenshot_md import get_screenshot_test_base_folder
-
-
-class DockerNotFoundException(Exception):
-    pass
-
-
-def screen_shot_path(filename, sub_dir=""):
-    base_folder = get_screenshot_test_base_folder()
-    dir_path = os.path.join(base_folder, sub_dir)
-    if not os.path.isdir(dir_path):
-        os.makedirs(dir_path)
-    return os.path.join(dir_path, filename)
-
-
-def get_browser_instance(browser_port, desire_capabilities, interactive=False):
-    if interactive:
-        try:
-            return Chrome(desired_capabilities=DesiredCapabilities.CHROME)
-        except WebDriverException:
-            raise WebDriverException(
-                "'chromedriver' executable needs to be in PATH. "
-                "Please see https://sites.google.com/a/chromium.org/chromedriver/home "
-                "or run `pip install chromedriver_installer`."
-            )
-    else:
-        docker_container_ip = os.getenv("DOCKER_CONTAINER_IP", "127.0.0.1")
-        remote_browser_url = "http://{ip}:{port}/wd/hub".format(
-            ip=docker_container_ip, port=browser_port
-        )
-        try:
-            return RemoteWebdriver(remote_browser_url, desire_capabilities)
-        except (NewConnectionError, MaxRetryError):
-            raise DockerNotFoundException(
-                "Couldn't connect to remote host for browser.\n "
-                "If you use a docker container with an ip different from '127.0.0.1' "
-                "you need to expose the ip address via the Environment variable "
-                "'DOCKER_CONTAINER_IP'. "
-                "Also make sure that the docker images are running (`docker-compose ps`)."
-                "If not change to the root directory of 'djangocms-equation' and run "
-                "`docker-compose up -d`."
-                "See the docs of 'djangocms-equation' for more help."
-            )
-
-
-class ScreenCreator:
-    def __init__(self, browser):
-        self.browser = browser
-        self.run_percy = self.is_on_travis()
-        self.counter = 0
-
-    def is_on_travis(self):
-        if (
-            "TRAVIS" in os.environ
-            and "USE_PERCY" in os.environ
-            and os.environ.get("TRAVIS_PULL_REQUEST", "false") != "false"
-        ):
-            self.init_percy()
-            return True
-        else:
-            return False
-
-    def reset_counter(self):
-        self.counter = 0
-
-    def take(self, filename, sub_dir=""):
-        self.counter += 1
-        if self.run_percy:
-            tox_env = os.getenv("TOX_ENV_NAME", "")
-            self.percy_runner.snapshot(
-                name="{} - {} - #{}_{}".format(tox_env, sub_dir, self.counter, filename)
-            )
-        else:
-            filename = "#{}_{}".format(self.counter, filename)
-            self.browser.save_screenshot(screen_shot_path(filename, sub_dir))
-
-    def init_percy(self):
-        # Build a ResourceLoader that knows how to collect assets for this application.
-        loader = percy.ResourceLoader(
-            root_dir=settings.STATIC_ROOT,
-            base_url=quote(settings.STATIC_URL),
-            webdriver=self.browser,
-        )
-        self.percy_runner = percy.Runner(loader=loader)
-        self.percy_runner.initialize_build()
-
-    def stop(self):
-        if self.run_percy:
-            self.percy_runner.finalize_build()
-
-
-def get_own_ip():
-    """
-    returns own ip
-    original from:
-    https://stackoverflow.com/a/25850698/3990615
-    """
-    # alternativ use travis env vars
-    # SSH_CONNECTION=10.10.16.23 35284 10.20.0.218 22
-    # matching regex:
-    # ".*?\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\s+\d+\s(?P<ip>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})"
-    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    s.connect(("8.8.8.8", 1))  # connect() for UDP doesn't send packets
-    local_ip_address = s.getsockname()[0]
-    return local_ip_address
+from .utils.helper_functions import get_browser_instance, get_own_ip, ScreenCreator
 
 
 # uncomment the next line if the server throws errors
 @override_settings(DEBUG=True)
 @override_settings(ALLOWED_HOSTS=["*"])
-class TestIntegrationChrome(BaseTestCase, StaticLiveServerTestCase):
+class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
     """
     Baseclass for Integration tests with Selenium running in a docker.
     The settings default to chrome (see. docker-compose.yml),
@@ -142,17 +28,31 @@ class TestIntegrationChrome(BaseTestCase, StaticLiveServerTestCase):
 
     """
 
-    host = get_own_ip()  # '192.168.178.20'
+    host = get_own_ip()
     browser_port = 4444
     desire_capabilities = DesiredCapabilities.CHROME
+    browser_name = "Chrome"
+    _pages_data = (
+        {
+            "en": {
+                "title": "testpage",
+                "template": "page.html",
+                "publish": True,
+                "menu_title": "test_page",
+                "in_navigation": True,
+            }
+        },
+    )
+    languages = ["en"]
 
     @classmethod
     def setUpClass(cls):
-        super(TestIntegrationChrome, cls).setUpClass()
-        cls.browser = get_browser_instance(cls.browser_port, cls.desire_capabilities)
-        cls.screenshot = ScreenCreator(cls.browser)
+        cls.browser = get_browser_instance(
+            cls.browser_port, cls.desire_capabilities, interactive=False
+        )
+        cls.screenshot = ScreenCreator(cls.browser, cls.browser_name)
         cls.wait = ui.WebDriverWait(cls.browser, 10)
-        cls.create_test_page()
+        cls.browser.delete_all_cookies()
 
     @classmethod
     def tearDownClass(cls):
@@ -161,6 +61,11 @@ class TestIntegrationChrome(BaseTestCase, StaticLiveServerTestCase):
         super(TestIntegrationChrome, cls).tearDownClass()
 
     def setUp(self):
+        # This is needed so the users will be recreated each time,
+        # since TransactionTestCase drops its db per test
+        super(TestIntegrationChrome, self).setUpClass()
+        self.get_pages()
+        self.logout_user()
         self.screenshot.reset_counter()
         super(TestIntegrationChrome, self).setUp()
 
@@ -170,43 +75,172 @@ class TestIntegrationChrome(BaseTestCase, StaticLiveServerTestCase):
         return cls.browser.find_element_by_css_selector(css_selector)
 
     @classmethod
-    def create_test_page(cls):
-        cls.browser.get(cls.live_server_url)
-        cls.screenshot.take("initial_page.png", "create_test_page")
-        login_form = cls.wait_get_element_css("#login-form")
+    def wait_get_element_link_text(cls, link_text):
+        cls.wait.until(lambda driver: driver.find_element_by_link_text(link_text))
+        return cls.browser.find_element_by_link_text(link_text)
 
-        cls.screenshot.take("login-form_empty.png", "create_test_page")
+    def login_user(self, take_screen_shot=False):
+        self.browser.get(self.live_server_url + "/?edit")
+        try:
+            username = self.wait_get_element_css("#id_username")
+            username.send_keys(self._admin_user_username)
+            password = self.wait_get_element_css("#id_password")
+            password.send_keys(self._admin_user_password)
+            self.screenshot.take(
+                "added_credentials.png",
+                "test_login_user",
+                take_screen_shot=take_screen_shot,
+            )
+            login_form = self.wait_get_element_css("form.cms-form-login")
+            login_form.submit()
+            self.screenshot.take(
+                "form_submitted.png",
+                "test_login_user",
+                take_screen_shot=take_screen_shot,
+            )
+        except TimeoutException as e:
+            print("Didn't find `form.cms-form-login`.")
+            self.screenshot.take("login_fail.png", "login_fail")
+            raise TimeoutException(e.msg)
 
-        username = cls.wait_get_element_css("#id_username")
-        username.send_keys(cls._admin_user_username)
-        password = cls.wait_get_element_css("#id_password")
-        password.send_keys(cls._admin_user_password)
+    def logout_user(self):
+        # visiting the logout link is a fallback since FireFox
+        # sometimes doesn't logout properly by just deleting the coockies
+        self.browser.get(self.live_server_url + "/admin/logout/")
+        self.browser.delete_all_cookies()
 
-        cls.screenshot.take("login-form_filled_out.png", "create_test_page")
-        login_form.submit()
+    def create_standalone_equation(
+        self,
+        self_test=False,
+        tex_code=r"\int^{a}_{b} f(x) \mathrm{d}x",
+        font_size_value=1,
+        font_size_unit="rem",
+        is_inline=False,
+    ):
+        # from time import sleepsleep
 
-        next_btn = cls.browser.find_element_by_link_text("Next")
-        next_btn.click()
-        cls.browser.switch_to.frame(cls.wait_get_element_css("iframe"))
+        self.login_user()
+        # sleep(50)
+        sidebar_toggle_btn = self.wait_get_element_css(
+            ".cms-toolbar-item-cms-mode-switcher a"
+        )
+        sidebar_toggle_btn.click()
+        add_plugin_btn = self.wait_get_element_css(
+            ".cms-submenu-btn.cms-submenu-add.cms-btn"
+        )
+        self.screenshot.take(
+            "sidebar_open.png",
+            "test_create_standalone_equation",
+            take_screen_shot=self_test,
+        )
+        add_plugin_btn.click()
+        equatuion_btn = self.wait_get_element_css(
+            '.cms-submenu-item a[href="EquationPlugin"]'
+        )
+        self.screenshot.take(
+            "plugin_add_modal.png",
+            "test_create_standalone_equation",
+            take_screen_shot=self_test,
+        )
+        equatuion_btn.click()
+        equation_edit_iframe = self.wait_get_element_css("iframe")
+        self.screenshot.take(
+            "equation_edit_iframe.png",
+            "test_create_standalone_equation",
+            take_screen_shot=self_test,
+        )
+        self.browser.switch_to.frame(equation_edit_iframe)
+        latex_input = self.wait_get_element_css("#id_tex_code")
+        latex_input.click()
+        latex_input.send_keys(tex_code)
+        self.screenshot.take(
+            "equation_entered.png",
+            "test_create_standalone_equation",
+            take_screen_shot=self_test,
+        )
+        self.browser.switch_to.default_content()
+        save_btn = self.wait_get_element_css(".cms-btn.cms-btn-action.default")
+        # sleep(2)
+        save_btn.click()
+        self.wait_get_element_css("span.katex")
+        self.screenshot.take(
+            "equation_rendered2.png",
+            "test_create_standalone_equation",
+            take_screen_shot=self_test,
+        )
 
-        cls.wait_get_element_css("input")
+        # self.browser.get(self.live_server_url)
+        # sleep(1000)
+        self.screenshot.take(
+            "equation_rendered_after_sleep.png",
+            "test_create_standalone_equation",
+            take_screen_shot=self_test,
+        )
 
-        cls.screenshot.take("create-page-iframe_empty.png", "create_test_page")
-        create_page_form = cls.wait_get_element_css("form")
-        title_input = create_page_form.find_element_by_css_selector("#id_1-title")
-        title_input.send_keys("test_page")
-        cls.screenshot.take("create-page-iframe_filled_out.png", "create_test_page")
-        create_page_form.submit()
-        cls.browser.switch_to.default_content()
-        cls.screenshot.take("created_page.png", "create_test_page")
-
-    def test_test_page_created(self):
+    def test_page_exists(self):
         self.browser.get(self.live_server_url)
         body = self.browser.find_element_by_css_selector("body")
-        self.screenshot.take("created_page2.png", "test_test_page_created")
+        self.screenshot.take("created_page.png", "test_page_exists")
         self.assertIn("test_page", body.text)
+
+    def test_login_user(self):
+        self.login_user(take_screen_shot=True)
+        self.browser.get(self.live_server_url + "/?edit")
+        self.screenshot.take("start_page_user_loged_in.png", "test_login_user")
+        cms_navigation = self.wait_get_element_css(".cms-toolbar-item-navigation span")
+        self.assertEquals(
+            cms_navigation.text,
+            "example.com",
+            cms_navigation.get_attribute("innerHTML"),
+        )
+
+    def test_logout_user(self):
+        self.login_user()
+        self.logout_user()
+        self.browser.get(self.live_server_url)
+        self.screenshot.take("start_page_user_loged_out.png", "test_logout_user")
+        self.assertRaises(
+            NoSuchElementException,
+            self.browser.find_element_by_css_selector,
+            "#cms-top",
+        )
+
+    def test_create_standalone_equation(self):
+        self.create_standalone_equation(True)
 
 
 # class TestIntegrationFirefox(TestIntegrationChrome):
-#     browser_remote_address = get_browser_remote_address(4445)
+#     browser_port = 4445
 #     desire_capabilities = DesiredCapabilities.FIREFOX
+#     browser_name = "FireFox"
+
+
+# @override_settings(DEBUG=True)
+# @override_settings(ALLOWED_HOSTS=["*"])
+# @override_settings(STATICFILES_DIRS=(get_screenshot_test_base_folder(),))
+# class PercyScreenshotGenerator(StaticLiveServerTestCase):
+#     host = get_own_ip()
+#     browser_port = 4444
+#     desire_capabilities = DesiredCapabilities.CHROME
+
+#     @classmethod
+#     def setUpClass(cls):
+#         super(PercyScreenshotGenerator, cls).setUpClass()
+#         cls.browser = get_browser_instance(cls.browser_port, cls.desire_capabilities)
+#         cls.screenshot = ScreenCreator(cls.browser, use_percy=True)
+#         cls.wait = ui.WebDriverWait(cls.browser, 10)
+
+#     @classmethod
+#     def tearDownClass(cls):
+#         cls.screenshot.stop()
+#         cls.browser.quit()
+#         super(PercyScreenshotGenerator, cls).tearDownClass()
+
+#     def test_generate_percy_screenshot(self):
+#         if self.screenshot.is_on_travis(True):
+#             report_filenames = generate_test_screenshot_report(True)
+#             for report_filename in report_filenames:
+#                 self.browser.get(
+#                     "{}/static/{}".format(self.live_server_url, report_filename)
+#                 )
+#                 self.screenshot.take("{}.png".format(report_filename[:-5]))

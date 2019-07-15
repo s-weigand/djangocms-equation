@@ -4,10 +4,21 @@ import {
   render_full_page,
 } from './djangocms_equation'
 
-init_render_main_page(false)
+// init_render_main_page(false)
+console.log("foooooooooooooooooooooo")
+
+if (document.readyState === 'complete') {
+  console.log("compleate")
+  init_render_main_page(false)
+} else {
+  document.addEventListener('DOMContentLoaded', function(event) {
+    console.log("DOMContentLoaded triggered")
+    init_render_main_page(false)
+  })
+}
 
 // just for debugging
-document.addEventListener('DOMContentLoaded', function(event) {
+// document.addEventListener('DOMContentLoaded', function(event) {
   // RootIFrame
   // document.querySelector("iframe")
   // EditorIFrame
@@ -65,8 +76,21 @@ document.addEventListener('DOMContentLoaded', function(event) {
   }
   const render_spans = (targetBody: HTMLBodyElement) => {
     console.log('## ran render_spans')
-    if (targetBody.querySelectorAll('span.katex').length !== 0) {
+    let katex_spans = targetBody.querySelectorAll('span.katex')
+    if (katex_spans.length !== 0) {
       render_full_page(targetBody)
+      // removes the class cke_widget_inline from the grandparent span
+      // of span.katex which leads to the equiation being displayed
+      // as if it was floating left in the texteditor.
+      // But in normal render it would be centered.
+      let i = katex_spans.length - 1
+      for (; i > -1; i--) {
+        let cke_grand_parent_span = (katex_spans[i]
+          .parentElement as HTMLElement).parentElement as HTMLSpanElement
+        if (cke_grand_parent_span.classList.contains('cke_widget_inline')) {
+          cke_grand_parent_span.classList.remove('cke_widget_inline')
+        }
+      }
     }
   }
 
@@ -201,6 +225,15 @@ document.addEventListener('DOMContentLoaded', function(event) {
     targetBodyElement: document.body,
     nodeCallbacks: [
       { nodeName: 'IFRAME', callbackFuncs: [CKEditor_render_equation] },
+      {
+        nodeName: 'P',
+        callbackFuncs: [
+          foo => {
+            render_spans(document.body as HTMLBodyElement)
+            console.log('#### new span', foo)
+          },
+        ],
+      },
     ],
     debugName: 'document.body observer',
   })
@@ -224,4 +257,4 @@ document.addEventListener('DOMContentLoaded', function(event) {
 
   // edit dialog visable
   // document.querySelector("iframe").contentDocument.querySelector(".cke_dialog_body").offsetParent
-})
+// })

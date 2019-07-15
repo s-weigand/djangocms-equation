@@ -45,45 +45,45 @@ const update_live_element_font_size = (
 
 export const init_render_main_page = (debug = true): void => {
   debug_printer(debug, 'init_render_main_page did run')
-  document.addEventListener('DOMContentLoaded', function(event) {
-    render_full_page()
-    // window needs to be cast to any since the vartiable 'CMS'
-    // gets injected to windows by the javascript code of django-cms
-    const CMS = (window as any).CMS
-    if (CMS !== undefined) {
-      CMS.$(window).on('cms-content-refresh', function() {
-        render_full_page()
-      })
-    }
+  // document.addEventListener('DOMContentLoaded', function(event) {
+  render_full_page()
+  // window needs to be cast to any since the property 'CMS'
+  // gets injected to windows by the javascript code of django-cms
+  const CMS = (window as any).CMS
+  if (CMS !== undefined) {
+    CMS.$(window).on('cms-content-refresh', function() {
+      render_full_page()
+    })
+  }
 
-    debug_printer(debug, 'page loaded')
-    let cms_btn: HTMLAnchorElement | null = document.querySelector(
-      '.cms-toolbar-item-cms-mode-switcher a'
-    )
-    const render_structure_content_on_show = (): void => {
-      let structure_content: HTMLDivElement | null = document.querySelector(
-        '.cms-structure-content'
-      ) as HTMLDivElement
-      if (structure_content !== null) {
-        // check if the element is visible
-        if (structure_content.offsetParent !== null) {
-          debug_printer(debug, 'cms_btn clicked => rendering all')
-          renderMathInElement(structure_content, {
-            throwOnError: false,
-            ...katex_delimiters_setting,
-          })
-        } else {
-          debug_printer(debug, 'need delay')
-          setTimeout(render_structure_content_on_show, 200)
-        }
+  debug_printer(debug, 'page loaded')
+  let cms_btn: HTMLAnchorElement | null = document.querySelector(
+    '.cms-toolbar-item-cms-mode-switcher a'
+  )
+  const render_structure_content_on_show = (): void => {
+    let structure_content: HTMLDivElement | null = document.querySelector(
+      '.cms-structure-content'
+    ) as HTMLDivElement
+    if (structure_content !== null) {
+      // check if the element is visible
+      if (structure_content.offsetParent !== null) {
+        debug_printer(debug, 'cms_btn clicked => rendering all')
+        renderMathInElement(structure_content, {
+          throwOnError: false,
+          ...katex_delimiters_setting,
+        })
+      } else {
+        debug_printer(debug, 'need delay')
+        setTimeout(render_structure_content_on_show, 200)
       }
     }
-    debug_printer(debug, 'cms_btn is:', cms_btn)
-    if (cms_btn !== null) {
-      // somehow onclick doesn't work, onfocus will be the hotfix for now
-      cms_btn.onfocus = render_structure_content_on_show
-    }
-  })
+  }
+  debug_printer(debug, 'cms_btn is:', cms_btn)
+  if (cms_btn !== null) {
+    // somehow onclick doesn't work, onfocus will be the hotfix for now
+    cms_btn.onfocus = render_structure_content_on_show
+  }
+  // })
 }
 
 export const init_live_editor_render = (debug = true): void => {
@@ -98,8 +98,8 @@ export const init_live_editor_render = (debug = true): void => {
       if (tex_in !== null && tex_out !== null) {
         let tex_code: string = tex_in.value
         let tex_code_lines: number = tex_code.split(/\r\n|\r|\n/).length
-        if(tex_code_lines>=2){
-          tex_in.setAttribute("rows", `${tex_code_lines}`)
+        if (tex_code_lines >= 2) {
+          tex_in.setAttribute('rows', `${tex_code_lines}`)
         }
         debug_printer(debug, 'tex_code to render: ', tex_code)
         render(tex_code, tex_out, {
