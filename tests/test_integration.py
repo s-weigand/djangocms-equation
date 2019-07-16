@@ -131,7 +131,7 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
 
     def open_structure_board(self):
         structure_board = self.wait_get_element_css(
-            ".cms-structure.cms-structure-condensed"
+            ".cms-structure"
         )
         if not structure_board.is_displayed():
             sidebar_toggle_btn = self.wait_get_element_css(
@@ -147,7 +147,6 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
         font_size_unit="rem",
         is_inline=False,
     ):
-        from time import sleep
 
         self.login_user()
         self.open_structure_board()
@@ -190,17 +189,10 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
         save_btn.click()
 
         self.wait_for_element_to_disapear(".cms-modal")
+
         self.wait_get_element_css("span.katex")
         self.screenshot.take(
-            "equation_rendered2.png",
-            "test_create_standalone_equation",
-            take_screen_shot=self_test,
-        )
-
-        # if self_test:
-        #     sleep(20)
-        self.screenshot.take(
-            "equation_rendered_after_sleep.png",
+            "equation_rendered.png",
             "test_create_standalone_equation",
             take_screen_shot=self_test,
         )
