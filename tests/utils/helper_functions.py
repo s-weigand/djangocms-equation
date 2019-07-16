@@ -1,4 +1,3 @@
-
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, print_function, unicode_literals
 
@@ -13,6 +12,8 @@ from selenium.common.exceptions import WebDriverException
 from selenium.webdriver.remote.webdriver import WebDriver as RemoteWebdriver
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from urllib3.exceptions import NewConnectionError, MaxRetryError
+
+from webdriver_manager.chrome import ChromeDriverManager
 
 import percy
 from six.moves.urllib.parse import quote
@@ -33,18 +34,11 @@ def screen_shot_path(filename, browser_name, sub_dir=""):
 
 
 def get_browser_instance(browser_port, desire_capabilities, interactive=False):
-    if interactive:
-        try:
-            return Chrome(
-                executable_path=os.getenv("chromedriver"),
-                desired_capabilities=DesiredCapabilities.CHROME,
-            )
-        except WebDriverException:
-            raise WebDriverException(
-                "'chromedriver' executable needs to be in PATH. "
-                "Please see https://sites.google.com/a/chromium.org/chromedriver/home "
-                "or run `pip install chromedriver_installer`."
-            )
+    if interactive and not "TRAVIS" in os.environ:
+        return Chrome(
+            ChromeDriverManager().install(),
+            desired_capabilities=DesiredCapabilities.CHROME,
+        )
     else:
         docker_container_ip = os.getenv("DOCKER_CONTAINER_IP", "127.0.0.1")
         remote_browser_url = "http://{ip}:{port}/wd/hub".format(
