@@ -8,7 +8,6 @@ from django.conf import settings
 
 
 from selenium.webdriver import Chrome
-from selenium.common.exceptions import WebDriverException
 from selenium.webdriver.remote.webdriver import WebDriver as RemoteWebdriver
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from urllib3.exceptions import NewConnectionError, MaxRetryError
@@ -34,7 +33,7 @@ def screen_shot_path(filename, browser_name, sub_dir=""):
 
 
 def get_browser_instance(browser_port, desire_capabilities, interactive=False):
-    if interactive and not "TRAVIS" in os.environ:
+    if interactive and "TRAVIS" not in os.environ:
         return Chrome(
             ChromeDriverManager().install(),
             desired_capabilities=DesiredCapabilities.CHROME,
