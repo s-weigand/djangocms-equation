@@ -130,14 +130,37 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
         self.browser.delete_all_cookies()
 
     def open_structure_board(self):
-        structure_board = self.wait_get_element_css(
-            ".cms-structure"
-        )
+        structure_board = self.wait_get_element_css(".cms-structure")
         if not structure_board.is_displayed():
             sidebar_toggle_btn = self.wait_get_element_css(
                 ".cms-toolbar-item-cms-mode-switcher a"
             )
             sidebar_toggle_btn.click()
+
+    def enter_equation(
+        self,
+        self_test=False,
+        tex_code=r"\int^{a}_{b} f(x) \mathrm{d}x",
+        font_size_value=1,
+        font_size_unit="rem",
+        is_inline=False,
+    ):
+        equation_edit_iframe = self.wait_get_element_css("iframe")
+        self.screenshot.take(
+            "equation_edit_iframe.png",
+            "test_create_standalone_equation",
+            take_screen_shot=self_test,
+        )
+        self.browser.switch_to.frame(equation_edit_iframe)
+        latex_input = self.wait_get_element_css("#id_tex_code")
+        latex_input.click()
+        latex_input.send_keys(tex_code)
+        self.screenshot.take(
+            "equation_entered.png",
+            "test_create_standalone_equation",
+            take_screen_shot=self_test,
+        )
+        self.browser.switch_to.default_content()
 
     def create_standalone_equation(
         self,
@@ -168,22 +191,14 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
             take_screen_shot=self_test,
         )
         equatuion_btn.click()
-        equation_edit_iframe = self.wait_get_element_css("iframe")
-        self.screenshot.take(
-            "equation_edit_iframe.png",
-            "test_create_standalone_equation",
-            take_screen_shot=self_test,
+
+        self.enter_equation(
+            self_test=self_test,
+            tex_code=tex_code,
+            font_size_value=font_size_value,
+            font_size_unit=font_size_unit,
+            is_inline=is_inline,
         )
-        self.browser.switch_to.frame(equation_edit_iframe)
-        latex_input = self.wait_get_element_css("#id_tex_code")
-        latex_input.click()
-        latex_input.send_keys(tex_code)
-        self.screenshot.take(
-            "equation_entered.png",
-            "test_create_standalone_equation",
-            take_screen_shot=self_test,
-        )
-        self.browser.switch_to.default_content()
         save_btn = self.wait_get_element_css(".cms-btn.cms-btn-action.default")
 
         save_btn.click()
