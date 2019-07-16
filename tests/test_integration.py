@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, print_function, unicode_literals
 
+from cms import __version__ as cms_version
+
 from django.test import override_settings
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 
@@ -48,7 +50,7 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
     @classmethod
     def setUpClass(cls):
         cls.browser = get_browser_instance(
-            cls.browser_port, cls.desire_capabilities, interactive=False
+            cls.browser_port, cls.desire_capabilities, interactive=True
         )
         cls.screenshot = ScreenCreator(cls.browser, cls.browser_name)
         cls.wait = ui.WebDriverWait(cls.browser, 10)
@@ -75,39 +77,67 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
         return cls.browser.find_element_by_css_selector(css_selector)
 
     @classmethod
+    def wait_get_elements_css(cls, css_selector):
+        cls.wait.until(
+            lambda driver: driver.find_elements_by_css_selector(css_selector)
+        )
+        return cls.browser.find_elements_by_css_selector(css_selector)
+
+    @classmethod
     def wait_get_element_link_text(cls, link_text):
         cls.wait.until(lambda driver: driver.find_element_by_link_text(link_text))
         return cls.browser.find_element_by_link_text(link_text)
 
-    def login_user(self, take_screen_shot=False):
-        self.browser.get(self.live_server_url + "/?edit")
+    def is_logged_in(self):
         try:
-            username = self.wait_get_element_css("#id_username")
-            username.send_keys(self._admin_user_username)
-            password = self.wait_get_element_css("#id_password")
-            password.send_keys(self._admin_user_password)
-            self.screenshot.take(
-                "added_credentials.png",
-                "test_login_user",
-                take_screen_shot=take_screen_shot,
+            self.browser.find_element_by_css_selector(
+                ".cms-toolbar-item-navigation span"
             )
-            login_form = self.wait_get_element_css("form.cms-form-login")
-            login_form.submit()
-            self.screenshot.take(
-                "form_submitted.png",
-                "test_login_user",
-                take_screen_shot=take_screen_shot,
-            )
-        except TimeoutException as e:
-            print("Didn't find `form.cms-form-login`.")
-            self.screenshot.take("login_fail.png", "login_fail")
-            raise TimeoutException(e.msg)
+            return True
+        except NoSuchElementException:
+            return False
+
+    def login_user(self, take_screen_shot=False):
+        if not self.is_logged_in():
+            self.browser.get(self.live_server_url + "/?edit")
+        if not self.is_logged_in():
+            try:
+                username = self.wait_get_element_css("#id_username")
+                username.send_keys(self._admin_user_username)
+                password = self.wait_get_element_css("#id_password")
+                password.send_keys(self._admin_user_password)
+                self.screenshot.take(
+                    "added_credentials.png",
+                    "test_login_user",
+                    take_screen_shot=take_screen_shot,
+                )
+                login_form = self.wait_get_element_css("form.cms-form-login")
+                login_form.submit()
+                self.screenshot.take(
+                    "form_submitted.png",
+                    "test_login_user",
+                    take_screen_shot=take_screen_shot,
+                )
+            except TimeoutException as e:
+                print("Didn't find `form.cms-form-login`.")
+                self.screenshot.take("login_fail.png", "login_fail")
+                raise TimeoutException(e.msg)
 
     def logout_user(self):
         # visiting the logout link is a fallback since FireFox
         # sometimes doesn't logout properly by just deleting the coockies
         self.browser.get(self.live_server_url + "/admin/logout/")
         self.browser.delete_all_cookies()
+
+    def open_structure_board(self):
+        structure_board = self.wait_get_element_css(
+            ".cms-structure.cms-structure-condensed"
+        )
+        if not structure_board.is_displayed():
+            sidebar_toggle_btn = self.wait_get_element_css(
+                ".cms-toolbar-item-cms-mode-switcher a"
+            )
+            sidebar_toggle_btn.click()
 
     def create_standalone_equation(
         self,
@@ -117,14 +147,10 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
         font_size_unit="rem",
         is_inline=False,
     ):
-        # from time import sleepsleep
+        from time import sleep
 
         self.login_user()
-        # sleep(50)
-        sidebar_toggle_btn = self.wait_get_element_css(
-            ".cms-toolbar-item-cms-mode-switcher a"
-        )
-        sidebar_toggle_btn.click()
+        self.open_structure_board()
         add_plugin_btn = self.wait_get_element_css(
             ".cms-submenu-btn.cms-submenu-add.cms-btn"
         )
@@ -160,8 +186,10 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
         )
         self.browser.switch_to.default_content()
         save_btn = self.wait_get_element_css(".cms-btn.cms-btn-action.default")
-        # sleep(2)
+
         save_btn.click()
+
+        self.wait_for_element_to_disapear(".cms-modal")
         self.wait_get_element_css("span.katex")
         self.screenshot.take(
             "equation_rendered2.png",
@@ -169,13 +197,42 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
             take_screen_shot=self_test,
         )
 
-        # self.browser.get(self.live_server_url)
-        # sleep(1000)
+        # if self_test:
+        #     sleep(20)
         self.screenshot.take(
             "equation_rendered_after_sleep.png",
             "test_create_standalone_equation",
             take_screen_shot=self_test,
         )
+
+    def wait_for_element_to_disapear(self, css_selector):
+        self.wait.until_not(
+            lambda driver: driver.find_element_by_css_selector(
+                css_selector
+            ).is_displayed()
+        )
+
+    def delete_plugin(self, delete_all=True):
+        self.open_structure_board()
+        delete_links = self.wait_get_elements_css("a[data-rel=delete]")
+        if not delete_all:
+            delete_links = [delete_links[0]]
+        for _ in delete_links:
+            # since the delete links aren't visible the click is triggered
+            # with javascript
+            self.browser.execute_script(
+                'document.querySelector("a[data-rel=delete]").click()'
+            )
+            delete_confirm = self.wait_get_element_css(".deletelink")
+            delete_confirm.click()
+        self.wait_for_element_to_disapear(".cms-messages")
+
+    def js_injection_hack(self):
+        cms_version_tuple = tuple(map(int, cms_version.split(".")))
+        if cms_version_tuple < (3, 7):
+            self.create_standalone_equation()
+            self.browser.refresh()
+            self.delete_plugin(delete_all=True)
 
     def test_page_exists(self):
         self.browser.get(self.live_server_url)
@@ -206,6 +263,7 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
         )
 
     def test_create_standalone_equation(self):
+        self.js_injection_hack()
         self.create_standalone_equation(True)
 
 
