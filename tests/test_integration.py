@@ -2,6 +2,7 @@
 from __future__ import absolute_import, print_function, unicode_literals
 
 import os
+from time import sleep
 
 from cms import __version__ as cms_version
 
@@ -16,7 +17,7 @@ from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 
 from .utils.helper_functions import get_browser_instance, get_own_ip, ScreenCreator
 
-INTERACTIVE = True
+INTERACTIVE = False
 
 
 # uncomment the next line if the server throws errors
@@ -56,6 +57,7 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
         cls.browser = get_browser_instance(
             cls.browser_port, cls.desire_capabilities, interactive=INTERACTIVE
         )
+        cls.browser.set_window_size(1366, 768)
         cls.screenshot = ScreenCreator(cls.browser, cls.browser_name)
         cls.wait = ui.WebDriverWait(cls.browser, 10)
         cls.browser.delete_all_cookies()
@@ -94,8 +96,6 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
 
     def sleep(self):
         if INTERACTIVE and "TRAVIS" not in os.environ:
-            from time import sleep
-
             sleep(60)
 
     def is_logged_in(self):
@@ -162,6 +162,8 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
         )
         self.browser.switch_to.frame(equation_edit_iframe)
         latex_input = self.wait_get_element_css("#id_tex_code")
+        # the click is needed for firefox to create
+        latex_input.click()
         latex_input.send_keys(tex_code)
         if font_size_value != 1 or font_size_unit != "rem" or is_inline is True:
             advanced_setting_toggle = self.wait_get_element_css(".collapse-toggle")
@@ -211,6 +213,11 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
         )
         self.screenshot.take("sidebar_open.png", test_name, take_screen_shot=self_test)
         add_plugin_btn.click()
+        # ##### Firefox Hack, to prevent scroll errors
+        quick_search = self.wait_get_element_css(".cms-quicksearch input")
+        quick_search.click()
+        quick_search.send_keys("eq")
+        # ######
         equatuion_btn = self.wait_get_element_css(
             '.cms-submenu-item a[href="EquationPlugin"]'
         )
