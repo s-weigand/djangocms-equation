@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, print_function, unicode_literals
 
+import os
+
 from cms import __version__ as cms_version
 
 from django.test import override_settings
@@ -13,6 +15,8 @@ from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 
 from .utils.helper_functions import get_browser_instance, get_own_ip, ScreenCreator
+
+INTERACTIVE = True
 
 
 # uncomment the next line if the server throws errors
@@ -50,7 +54,7 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
     @classmethod
     def setUpClass(cls):
         cls.browser = get_browser_instance(
-            cls.browser_port, cls.desire_capabilities, interactive=True
+            cls.browser_port, cls.desire_capabilities, interactive=INTERACTIVE
         )
         cls.screenshot = ScreenCreator(cls.browser, cls.browser_name)
         cls.wait = ui.WebDriverWait(cls.browser, 10)
@@ -87,6 +91,12 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
     def wait_get_element_link_text(cls, link_text):
         cls.wait.until(lambda driver: driver.find_element_by_link_text(link_text))
         return cls.browser.find_element_by_link_text(link_text)
+
+    def sleep(self):
+        if INTERACTIVE and "TRAVIS" not in os.environ:
+            from time import sleep
+
+            sleep(60)
 
     def is_logged_in(self):
         try:
@@ -144,22 +154,44 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
         font_size_value=1,
         font_size_unit="rem",
         is_inline=False,
+        test_name="test_create_standalone_equation",
     ):
         equation_edit_iframe = self.wait_get_element_css("iframe")
         self.screenshot.take(
-            "equation_edit_iframe.png",
-            "test_create_standalone_equation",
-            take_screen_shot=self_test,
+            "equation_edit_iframe.png", test_name, take_screen_shot=self_test
         )
         self.browser.switch_to.frame(equation_edit_iframe)
         latex_input = self.wait_get_element_css("#id_tex_code")
-        latex_input.click()
         latex_input.send_keys(tex_code)
-        self.screenshot.take(
-            "equation_entered.png",
-            "test_create_standalone_equation",
-            take_screen_shot=self_test,
-        )
+        if font_size_value != 1 or font_size_unit != "rem" or is_inline is True:
+            advanced_setting_toggle = self.wait_get_element_css(".collapse-toggle")
+            advanced_setting_toggle.click()
+
+            if font_size_value != 1:
+                font_size_value_input = self.wait_get_element_css(
+                    "#djangocms_equation_font_size_value"
+                )
+                font_size_value_input.clear()
+                font_size_value_input.send_keys(str(font_size_value))
+
+            if font_size_unit != "rem":
+                font_size_unit_input = self.wait_get_element_css(
+                    "#djangocms_equation_font_size_unit"
+                )
+                font_size_unit_input.click()
+                unit_option = self.wait_get_element_css(
+                    "#djangocms_equation_font_size_unit option[value={}]".format(
+                        font_size_unit
+                    )
+                )
+                unit_option.click()
+
+            if is_inline is True:
+                is_inline_input = self.wait_get_element_css("#id_is_inline")
+                is_inline_input.click()
+            self.sleep()
+        self.screenshot.take("equation_entered.png", test_name, take_screen_shot=True)
+
         self.browser.switch_to.default_content()
 
     def create_standalone_equation(
@@ -169,6 +201,7 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
         font_size_value=1,
         font_size_unit="rem",
         is_inline=False,
+        test_name="test_create_standalone_equation",
     ):
 
         self.login_user()
@@ -176,19 +209,13 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
         add_plugin_btn = self.wait_get_element_css(
             ".cms-submenu-btn.cms-submenu-add.cms-btn"
         )
-        self.screenshot.take(
-            "sidebar_open.png",
-            "test_create_standalone_equation",
-            take_screen_shot=self_test,
-        )
+        self.screenshot.take("sidebar_open.png", test_name, take_screen_shot=self_test)
         add_plugin_btn.click()
         equatuion_btn = self.wait_get_element_css(
             '.cms-submenu-item a[href="EquationPlugin"]'
         )
         self.screenshot.take(
-            "plugin_add_modal.png",
-            "test_create_standalone_equation",
-            take_screen_shot=self_test,
+            "plugin_add_modal.png", test_name, take_screen_shot=self_test
         )
         equatuion_btn.click()
 
@@ -198,6 +225,7 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
             font_size_value=font_size_value,
             font_size_unit=font_size_unit,
             is_inline=is_inline,
+            test_name=test_name,
         )
         save_btn = self.wait_get_element_css(".cms-btn.cms-btn-action.default")
 
@@ -206,11 +234,7 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
         self.wait_for_element_to_disapear(".cms-modal")
 
         self.wait_get_element_css("span.katex")
-        self.screenshot.take(
-            "equation_rendered.png",
-            "test_create_standalone_equation",
-            take_screen_shot=self_test,
-        )
+        self.screenshot.take("equation_rendered.png", test_name, take_screen_shot=True)
 
     def wait_for_element_to_disapear(self, css_selector):
         self.wait.until_not(
@@ -273,39 +297,28 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
         self.js_injection_hack()
         self.create_standalone_equation(True)
 
+    def test_create_standalone_equation_2rem(self):
+        self.js_injection_hack()
+        self.create_standalone_equation(
+            font_size_value=2, test_name="test_create_standalone_equation_2rem"
+        )
 
-# class TestIntegrationFirefox(TestIntegrationChrome):
-#     browser_port = 4445
-#     desire_capabilities = DesiredCapabilities.FIREFOX
-#     browser_name = "FireFox"
+    def test_create_standalone_equation_1_in(self):
+        self.js_injection_hack()
+        self.create_standalone_equation(
+            font_size_unit="in", test_name="test_create_standalone_equation_1_in"
+        )
+
+    def test_create_standalone_equation_inline_True(self):
+        self.js_injection_hack()
+        self.create_standalone_equation(
+            is_inline=True, test_name="test_create_standalone_equation_inline_True"
+        )
 
 
-# @override_settings(DEBUG=True)
-# @override_settings(ALLOWED_HOSTS=["*"])
-# @override_settings(STATICFILES_DIRS=(get_screenshot_test_base_folder(),))
-# class PercyScreenshotGenerator(StaticLiveServerTestCase):
-#     host = get_own_ip()
-#     browser_port = 4444
-#     desire_capabilities = DesiredCapabilities.CHROME
+if not INTERACTIVE or "TRAVIS" in os.environ:
 
-#     @classmethod
-#     def setUpClass(cls):
-#         super(PercyScreenshotGenerator, cls).setUpClass()
-#         cls.browser = get_browser_instance(cls.browser_port, cls.desire_capabilities)
-#         cls.screenshot = ScreenCreator(cls.browser, use_percy=True)
-#         cls.wait = ui.WebDriverWait(cls.browser, 10)
-
-#     @classmethod
-#     def tearDownClass(cls):
-#         cls.screenshot.stop()
-#         cls.browser.quit()
-#         super(PercyScreenshotGenerator, cls).tearDownClass()
-
-#     def test_generate_percy_screenshot(self):
-#         if self.screenshot.is_on_travis(True):
-#             report_filenames = generate_test_screenshot_report(True)
-#             for report_filename in report_filenames:
-#                 self.browser.get(
-#                     "{}/static/{}".format(self.live_server_url, report_filename)
-#                 )
-#                 self.screenshot.take("{}.png".format(report_filename[:-5]))
+    class TestIntegrationFirefox(TestIntegrationChrome):
+        browser_port = 4445
+        desire_capabilities = DesiredCapabilities.FIREFOX
+        browser_name = "FireFox"
