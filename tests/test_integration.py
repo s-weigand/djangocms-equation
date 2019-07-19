@@ -221,6 +221,11 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
         # ##### Firefox Hack, to prevent scroll errors
         quick_search = self.wait_get_element_css(".cms-quicksearch input")
         # quick_search.click()
+        # since the element sometimes isn't visible the selection is
+        # done via with javascript
+        self.browser.execute_script(
+            'document.querySelector(".cms-quicksearch input").select()'
+        )
         quick_search.send_keys("eq")
         # ######
         equatuion_btn = self.wait_get_element_css(
