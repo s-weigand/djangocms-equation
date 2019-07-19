@@ -10,6 +10,7 @@ from django.conf import settings
 from selenium.webdriver import Chrome
 from selenium.webdriver.remote.webdriver import WebDriver as RemoteWebdriver
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
+from selenium.common.exceptions import JavascriptException
 from urllib3.exceptions import NewConnectionError, MaxRetryError
 
 from webdriver_manager.chrome import ChromeDriverManager
@@ -98,6 +99,7 @@ class ScreenCreator:
                         "#nprogress{display:none;}",  # hides the progressbar
                     ]
                 )
+                self.hide_elements([".cms-messages"])
                 self.browser.save_screenshot(
                     screen_shot_path(filename, self.browser_name, sub_dir)
                 )
@@ -112,6 +114,17 @@ class ScreenCreator:
                 )
             )
             self.browser.execute_script(script_code)
+
+    def hide_elements(self, css_selectors):
+        for css_selector in css_selectors:
+            # in case the element doesn't exist
+            try:
+                script_code = 'document.querySelector("{}").style.display="none"'.format(
+                    css_selector
+                )
+                self.browser.execute_script(script_code)
+            except JavascriptException:
+                pass
 
     def init_percy(self):
         # Build a ResourceLoader that knows how to collect assets for this application.

@@ -58,7 +58,7 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
             cls.browser_port, cls.desire_capabilities, interactive=INTERACTIVE
         )
         # cls.browser.set_window_size(1366, 768)
-        cls.browser.set_window_size(1100, 768)
+        cls.browser.set_window_size(1100, 900)
         cls.screenshot = ScreenCreator(cls.browser, cls.browser_name)
         cls.wait = ui.WebDriverWait(cls.browser, 20)
         cls.browser.delete_all_cookies()
@@ -95,9 +95,9 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
         cls.wait.until(lambda driver: driver.find_element_by_link_text(link_text))
         return cls.browser.find_element_by_link_text(link_text)
 
-    def sleep(self):
+    def sleep(self, time=60):
         if INTERACTIVE and "TRAVIS" not in os.environ:
-            sleep(60)
+            sleep(time)
 
     def is_logged_in(self):
         try:
@@ -284,6 +284,7 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
             self.browser.refresh()
             self.delete_plugin(delete_all=True)
             self.wait_for_element_to_disapear(".cms-messages")
+            self.screenshot.hide_elements([".cms-modal-iframe"])
 
     def test_page_exists(self):
         self.browser.get(self.live_server_url)
