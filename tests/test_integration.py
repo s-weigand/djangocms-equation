@@ -21,7 +21,7 @@ INTERACTIVE = False
 
 
 # uncomment the next line if the server throws errors
-@override_settings(DEBUG=True)
+@override_settings(DEBUG=False)
 @override_settings(ALLOWED_HOSTS=["*"])
 class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
     """
@@ -57,7 +57,8 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
         cls.browser = get_browser_instance(
             cls.browser_port, cls.desire_capabilities, interactive=INTERACTIVE
         )
-        cls.browser.set_window_size(1366, 768)
+        # cls.browser.set_window_size(1366, 768)
+        cls.browser.set_window_size(1100, 768)
         cls.screenshot = ScreenCreator(cls.browser, cls.browser_name)
         cls.wait = ui.WebDriverWait(cls.browser, 20)
         cls.browser.delete_all_cookies()
@@ -155,6 +156,7 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
         font_size_unit="rem",
         is_inline=False,
         test_name="test_create_standalone_equation",
+        not_js_injection_hack=True,
     ):
         equation_edit_iframe = self.wait_get_element_css("iframe")
         self.screenshot.take(
@@ -192,7 +194,9 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
                 is_inline_input = self.wait_get_element_css("#id_is_inline")
                 is_inline_input.click()
             self.sleep()
-        self.screenshot.take("equation_entered.png", test_name, take_screen_shot=True)
+        self.screenshot.take(
+            "equation_entered.png", test_name, take_screen_shot=not_js_injection_hack
+        )
 
         self.browser.switch_to.default_content()
 
@@ -204,6 +208,7 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
         font_size_unit="rem",
         is_inline=False,
         test_name="test_create_standalone_equation",
+        not_js_injection_hack=True,
     ):
 
         self.login_user()
@@ -215,7 +220,7 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
         add_plugin_btn.click()
         # ##### Firefox Hack, to prevent scroll errors
         quick_search = self.wait_get_element_css(".cms-quicksearch input")
-        quick_search.click()
+        # quick_search.click()
         quick_search.send_keys("eq")
         # ######
         equatuion_btn = self.wait_get_element_css(
@@ -233,6 +238,7 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
             font_size_unit=font_size_unit,
             is_inline=is_inline,
             test_name=test_name,
+            not_js_injection_hack=not_js_injection_hack,
         )
         save_btn = self.wait_get_element_css(".cms-btn.cms-btn-action.default")
 
@@ -241,7 +247,9 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
         self.wait_for_element_to_disapear(".cms-modal")
 
         self.wait_get_element_css("span.katex")
-        self.screenshot.take("equation_rendered.png", test_name, take_screen_shot=True)
+        self.screenshot.take(
+            "equation_rendered.png", test_name, take_screen_shot=not_js_injection_hack
+        )
 
     def wait_for_element_to_disapear(self, css_selector):
         self.wait.until_not(
@@ -263,14 +271,14 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
             )
             delete_confirm = self.wait_get_element_css(".deletelink")
             delete_confirm.click()
-        self.wait_for_element_to_disapear(".cms-messages")
 
     def js_injection_hack(self):
         cms_version_tuple = tuple(map(int, cms_version.split(".")))
         if cms_version_tuple < (3, 7):
-            self.create_standalone_equation()
+            self.create_standalone_equation(not_js_injection_hack=False)
             self.browser.refresh()
             self.delete_plugin(delete_all=True)
+            self.wait_for_element_to_disapear(".cms-messages")
 
     def test_page_exists(self):
         self.browser.get(self.live_server_url)
