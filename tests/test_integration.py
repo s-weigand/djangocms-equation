@@ -55,7 +55,10 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
     @classmethod
     def setUpClass(cls):
         cls.browser = get_browser_instance(
-            cls.browser_port, cls.desire_capabilities, interactive=INTERACTIVE
+            cls.browser_port,
+            cls.desire_capabilities,
+            interactive=INTERACTIVE,
+            browser_name=cls.browser_name,
         )
         # cls.browser.set_window_size(1366, 768)
         cls.browser.set_window_size(1100, 900)
@@ -193,7 +196,7 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
             if is_inline is True:
                 is_inline_input = self.wait_get_element_css("#id_is_inline")
                 is_inline_input.click()
-            self.sleep()
+            self.sleep(2)
         self.screenshot.take(
             "equation_entered.png", test_name, take_screen_shot=not_js_injection_hack
         )
@@ -219,8 +222,9 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
         self.screenshot.take("sidebar_open.png", test_name, take_screen_shot=self_test)
         add_plugin_btn.click()
         # ##### Firefox Hack, to prevent scroll errors
+        self.wait_for_element_to_be_visable(".cms-modal")
         quick_search = self.wait_get_element_css(".cms-quicksearch input")
-        # quick_search.click()
+        quick_search.click()
         # since the element sometimes isn't visible the selection is
         # done via with javascript
         self.browser.execute_script(
@@ -258,6 +262,13 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
 
     def wait_for_element_to_disapear(self, css_selector):
         self.wait.until_not(
+            lambda driver: driver.find_element_by_css_selector(
+                css_selector
+            ).is_displayed()
+        )
+
+    def wait_for_element_to_be_visable(self, css_selector):
+        self.wait.until(
             lambda driver: driver.find_element_by_css_selector(
                 css_selector
             ).is_displayed()
@@ -337,9 +348,7 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
         )
 
 
-if not INTERACTIVE or "TRAVIS" in os.environ:
-
-    class TestIntegrationFirefox(TestIntegrationChrome):
-        browser_port = 4445
-        desire_capabilities = DesiredCapabilities.FIREFOX
-        browser_name = "FireFox"
+class TestIntegrationFirefox(TestIntegrationChrome):
+    browser_port = 4445
+    desire_capabilities = DesiredCapabilities.FIREFOX
+    browser_name = "FireFox"

@@ -7,13 +7,14 @@ import socket
 from django.conf import settings
 
 
-from selenium.webdriver import Chrome
+from selenium.webdriver import Chrome, Firefox
 from selenium.webdriver.remote.webdriver import WebDriver as RemoteWebdriver
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from selenium.common.exceptions import JavascriptException
 from urllib3.exceptions import NewConnectionError, MaxRetryError
 
 from webdriver_manager.chrome import ChromeDriverManager
+from webdriver_manager.firefox import GeckoDriverManager
 
 import percy
 from six.moves.urllib.parse import quote
@@ -25,6 +26,10 @@ class DockerNotFoundException(Exception):
     pass
 
 
+class InvalidBrowserNameException(Exception):
+    pass
+
+
 def screen_shot_path(filename, browser_name, sub_dir=""):
     base_folder = get_screenshot_test_base_folder()
     dir_path = os.path.join(base_folder, browser_name, sub_dir)
@@ -33,8 +38,17 @@ def screen_shot_path(filename, browser_name, sub_dir=""):
     return os.path.join(dir_path, filename)
 
 
-def get_browser_instance(browser_port, desire_capabilities, interactive=False):
-    if interactive and "TRAVIS" not in os.environ:
+def get_browser_instance(
+    browser_port, desire_capabilities, interactive=False, browser_name="Chrome"
+):
+    if browser_name not in ["Chrome", "FireFox"]:
+        raise InvalidBrowserNameException("Only the browser_names 'Chrome' and 'FireFox' are supported")
+    if interactive and browser_name == "FireFox" and "TRAVIS" not in os.environ:
+        return Firefox(
+            executable_path=GeckoDriverManager().install(),
+            desired_capabilities=DesiredCapabilities.FIREFOX,
+        )
+    elif interactive and "TRAVIS" not in os.environ:
         return Chrome(
             ChromeDriverManager().install(),
             desired_capabilities=DesiredCapabilities.CHROME,
