@@ -91,16 +91,27 @@ class ScreenCreator:
                 )
             else:
                 filename = "#{}_{}".format(self.counter, filename)
-                # sets the color of links to black, this is to prevent visual diffs with percy
-                script_code = (
-                    "document.styleSheets[document.styleSheets.length-1].insertRule("
-                    '"a{color: black}"'
-                    ", document.styleSheets[document.styleSheets.length-1].cssRules.length)"
+                # this is to prevent visual diffs with percy
+                self.insert_css_Rules(
+                    [
+                        "a{color: black;}",  # sets the color of links to black
+                        "#nprogress{display:none;}",  # hides the progressbar
+                    ]
                 )
-                self.browser.execute_script(script_code)
                 self.browser.save_screenshot(
                     screen_shot_path(filename, self.browser_name, sub_dir)
                 )
+
+    def insert_css_Rules(self, css_rules):
+        for css_rule in css_rules:
+            script_code = (
+                "document.styleSheets[document.styleSheets.length-1].insertRule("
+                '"{}"'
+                ", document.styleSheets[document.styleSheets.length-1].cssRules.length)".format(
+                    css_rule
+                )
+            )
+            self.browser.execute_script(script_code)
 
     def init_percy(self):
         # Build a ResourceLoader that knows how to collect assets for this application.
