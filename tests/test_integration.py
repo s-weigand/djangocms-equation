@@ -59,7 +59,7 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
         )
         cls.browser.set_window_size(1366, 768)
         cls.screenshot = ScreenCreator(cls.browser, cls.browser_name)
-        cls.wait = ui.WebDriverWait(cls.browser, 10)
+        cls.wait = ui.WebDriverWait(cls.browser, 20)
         cls.browser.delete_all_cookies()
 
     @classmethod
