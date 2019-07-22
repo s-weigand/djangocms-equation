@@ -383,21 +383,19 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
     def test_create_standalone_equation_2rem(self):
         self.js_injection_hack()
         self.create_standalone_equation(
-            True, font_size_value=2, test_name="test_create_standalone_equation_2rem"
+            font_size_value=2, test_name="test_create_standalone_equation_2rem"
         )
 
     def test_create_standalone_equation_1_in(self):
         self.js_injection_hack()
         self.create_standalone_equation(
-            True, font_size_unit="in", test_name="test_create_standalone_equation_1_in"
+            font_size_unit="in", test_name="test_create_standalone_equation_1_in"
         )
 
     def test_create_standalone_equation_inline_True(self):
         self.js_injection_hack()
         self.create_standalone_equation(
-            True,
-            is_inline=True,
-            test_name="test_create_standalone_equation_inline_True",
+            is_inline=True, test_name="test_create_standalone_equation_inline_True"
         )
 
 
