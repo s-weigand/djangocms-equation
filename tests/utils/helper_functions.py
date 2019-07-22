@@ -42,7 +42,9 @@ def get_browser_instance(
     browser_port, desire_capabilities, interactive=False, browser_name="Chrome"
 ):
     if browser_name not in ["Chrome", "FireFox"]:
-        raise InvalidBrowserNameException("Only the browser_names 'Chrome' and 'FireFox' are supported")
+        raise InvalidBrowserNameException(
+            "Only the browser_names 'Chrome' and 'FireFox' are supported"
+        )
     if interactive and browser_name == "FireFox" and "TRAVIS" not in os.environ:
         return Firefox(
             executable_path=GeckoDriverManager().install(),

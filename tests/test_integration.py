@@ -12,7 +12,11 @@ from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from djangocms_helper.base_test import BaseTransactionTestCase
 
 from selenium.webdriver.support import ui
-from selenium.common.exceptions import NoSuchElementException, TimeoutException
+from selenium.common.exceptions import (
+    NoSuchElementException,
+    TimeoutException,
+    ElementNotInteractableException,
+)
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 
 from .utils.helper_functions import get_browser_instance, get_own_ip, ScreenCreator
@@ -143,13 +147,26 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
         self.browser.get(self.live_server_url + "/admin/logout/")
         self.browser.delete_all_cookies()
 
-    def open_structure_board(self):
+    def open_structure_board(
+        self, self_test=False, test_name="test_create_standalone_equation", counter=0
+    ):
         structure_board = self.wait_get_element_css(".cms-structure")
         if not structure_board.is_displayed():
-            sidebar_toggle_btn = self.wait_get_element_css(
-                ".cms-toolbar-item-cms-mode-switcher a"
-            )
-            sidebar_toggle_btn.click()
+            if counter <= 2:
+                try:
+                    sidebar_toggle_btn = self.wait_get_element_css(
+                        ".cms-toolbar-item-cms-mode-switcher a"
+                    )
+                    sidebar_toggle_btn.click()
+                except ElementNotInteractableException:
+                    self.screenshot.take(
+                        "sidebar_open_fail_{}.png".format(counter),
+                        test_name,
+                        take_screen_shot=self_test,
+                    )
+                    self.open_structure_board(
+                        self_test=self_test, test_name=test_name, counter=counter + 1
+                    )
 
     def enter_equation(
         self,
@@ -203,6 +220,46 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
 
         self.browser.switch_to.default_content()
 
+    def open_stand_alone_add_modal(
+        self, self_test=False, test_name="test_create_standalone_equation", counter=0
+    ):
+        if counter <= 2:
+            add_plugin_btn = self.wait_get_element_css(
+                ".cms-submenu-btn.cms-submenu-add.cms-btn"
+            )
+            add_plugin_btn.click()
+            # #### Firefox Hack, since it fails sometimes to open the modal
+            try:
+                self.wait_for_element_to_be_visable(".cms-modal")
+            except TimeoutException:
+                print("Didn't find `.cms-modal` for the {} time.".format(counter))
+                self.screenshot.take(
+                    "open_stand_alone_add_modal_fail_{}.png".format(counter), test_name
+                )
+                self.open_stand_alone_add_modal(
+                    self_test=self_test, test_name=test_name, counter=counter + 1
+                )
+            else:
+                # prevent scroll errors
+                quick_search = self.wait_get_element_css(".cms-quicksearch input")
+                quick_search.click()
+                # since the element sometimes isn't visible the selection is
+                # done via with javascript
+                self.browser.execute_script(
+                    'document.querySelector(".cms-quicksearch input").select()'
+                )
+                quick_search.send_keys("eq")
+                equatuion_btn = self.wait_get_element_css(
+                    '.cms-submenu-item a[href="EquationPlugin"]'
+                )
+                self.screenshot.take(
+                    "plugin_add_modal.png", test_name, take_screen_shot=self_test
+                )
+                equatuion_btn.click()
+        else:
+            print("Didn't find `.cms-modal`.")
+            self.screenshot.take("open_stand_alone_add_modal_final_fail.png", test_name)
+
     def create_standalone_equation(
         self,
         self_test=False,
@@ -215,30 +272,12 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
     ):
 
         self.login_user()
-        self.open_structure_board()
-        add_plugin_btn = self.wait_get_element_css(
-            ".cms-submenu-btn.cms-submenu-add.cms-btn"
-        )
-        self.screenshot.take("sidebar_open.png", test_name, take_screen_shot=self_test)
-        add_plugin_btn.click()
-        # ##### Firefox Hack, to prevent scroll errors
-        self.wait_for_element_to_be_visable(".cms-modal")
-        quick_search = self.wait_get_element_css(".cms-quicksearch input")
-        quick_search.click()
-        # since the element sometimes isn't visible the selection is
-        # done via with javascript
-        self.browser.execute_script(
-            'document.querySelector(".cms-quicksearch input").select()'
-        )
-        quick_search.send_keys("eq")
-        # ######
-        equatuion_btn = self.wait_get_element_css(
-            '.cms-submenu-item a[href="EquationPlugin"]'
-        )
+        self.open_structure_board(self_test=self_test, test_name=test_name)
         self.screenshot.take(
-            "plugin_add_modal.png", test_name, take_screen_shot=self_test
+            "sidebar_open.png", test_name, take_screen_shot=self_test
         )
-        equatuion_btn.click()
+
+        self.open_stand_alone_add_modal(self_test=self_test, test_name=test_name)
 
         self.enter_equation(
             self_test=self_test,
@@ -332,19 +371,21 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
     def test_create_standalone_equation_2rem(self):
         self.js_injection_hack()
         self.create_standalone_equation(
-            font_size_value=2, test_name="test_create_standalone_equation_2rem"
+            True, font_size_value=2, test_name="test_create_standalone_equation_2rem"
         )
 
     def test_create_standalone_equation_1_in(self):
         self.js_injection_hack()
         self.create_standalone_equation(
-            font_size_unit="in", test_name="test_create_standalone_equation_1_in"
+            True, font_size_unit="in", test_name="test_create_standalone_equation_1_in"
         )
 
     def test_create_standalone_equation_inline_True(self):
         self.js_injection_hack()
         self.create_standalone_equation(
-            is_inline=True, test_name="test_create_standalone_equation_inline_True"
+            True,
+            is_inline=True,
+            test_name="test_create_standalone_equation_inline_True",
         )
 
 
