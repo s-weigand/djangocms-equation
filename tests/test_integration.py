@@ -225,17 +225,25 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
         self, self_test=False, test_name="test_create_standalone_equation", counter=0
     ):
         if counter <= 2:
-            add_plugin_btn = self.wait_get_element_css(
-                ".cms-submenu-btn.cms-submenu-add.cms-btn"
-            )
-            add_plugin_btn.click()
-            # #### Firefox Hack, since it fails sometimes to open the modal
             try:
+                add_plugin_btn = self.wait_get_element_css(
+                    ".cms-submenu-btn.cms-submenu-add.cms-btn"
+                )
+                add_plugin_btn.click()
+                # #### Firefox Hack, since it fails sometimes to open the modal
                 self.wait_for_element_to_be_visable(".cms-modal")
+            except StaleElementReferenceException:
+                print("Didn't find `.cms-submenu-btn.cms-submenu-add.cms-btn` for the {} time.".format(counter))
+                self.screenshot.take(
+                    "open_stand_alone_add_modal_fail_{}_click.png".format(counter), test_name
+                )
+                self.open_stand_alone_add_modal(
+                    self_test=self_test, test_name=test_name, counter=counter + 1
+                )
             except TimeoutException:
                 print("Didn't find `.cms-modal` for the {} time.".format(counter))
                 self.screenshot.take(
-                    "open_stand_alone_add_modal_fail_{}.png".format(counter), test_name
+                    "open_stand_alone_add_modal_fail_{}_modal_open.png".format(counter), test_name
                 )
                 self.open_stand_alone_add_modal(
                     self_test=self_test, test_name=test_name, counter=counter + 1
