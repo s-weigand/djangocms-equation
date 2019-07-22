@@ -16,6 +16,7 @@ from selenium.common.exceptions import (
     NoSuchElementException,
     TimeoutException,
     ElementNotInteractableException,
+    StaleElementReferenceException,
 )
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 
@@ -273,9 +274,7 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
 
         self.login_user()
         self.open_structure_board(self_test=self_test, test_name=test_name)
-        self.screenshot.take(
-            "sidebar_open.png", test_name, take_screen_shot=self_test
-        )
+        self.screenshot.take("sidebar_open.png", test_name, take_screen_shot=self_test)
 
         self.open_stand_alone_add_modal(self_test=self_test, test_name=test_name)
 
@@ -300,11 +299,14 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
         )
 
     def wait_for_element_to_disapear(self, css_selector):
-        self.wait.until_not(
-            lambda driver: driver.find_element_by_css_selector(
-                css_selector
-            ).is_displayed()
-        )
+        try:
+            self.wait.until_not(
+                lambda driver: driver.find_element_by_css_selector(
+                    css_selector
+                ).is_displayed()
+            )
+        except StaleElementReferenceException:
+            pass
 
     def wait_for_element_to_be_visable(self, css_selector):
         self.wait.until(
