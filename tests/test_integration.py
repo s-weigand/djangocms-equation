@@ -233,9 +233,10 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
                 # #### Firefox Hack, since it fails sometimes to open the modal
                 self.wait_for_element_to_be_visable(".cms-modal")
             except StaleElementReferenceException:
-                print("Didn't find `.cms-submenu-btn.cms-submenu-add.cms-btn` for the {} time.".format(counter))
+                print("Didn't find `add_plugin_btn` for the {} time.".format(counter))
                 self.screenshot.take(
-                    "open_stand_alone_add_modal_fail_{}_click.png".format(counter), test_name
+                    "open_stand_alone_add_modal_fail_{}_click.png".format(counter),
+                    test_name,
                 )
                 self.open_stand_alone_add_modal(
                     self_test=self_test, test_name=test_name, counter=counter + 1
@@ -243,7 +244,8 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
             except TimeoutException:
                 print("Didn't find `.cms-modal` for the {} time.".format(counter))
                 self.screenshot.take(
-                    "open_stand_alone_add_modal_fail_{}_modal_open.png".format(counter), test_name
+                    "open_stand_alone_add_modal_fail_{}_modal_open.png".format(counter),
+                    test_name,
                 )
                 self.open_stand_alone_add_modal(
                     self_test=self_test, test_name=test_name, counter=counter + 1
