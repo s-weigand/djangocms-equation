@@ -41,6 +41,7 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
     """
 
     host = get_own_ip()
+    cms_version_tuple = tuple(map(int, cms_version.split(".")))
     browser_port = 4444
     desire_capabilities = DesiredCapabilities.CHROME
     browser_name = "Chrome"
@@ -66,7 +67,7 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
             browser_name=cls.browser_name,
         )
         # cls.browser.set_window_size(1366, 768)
-        cls.browser.set_window_size(1100, 900)
+        cls.browser.set_window_size(1400, 1200)
         cls.screenshot = ScreenCreator(cls.browser, cls.browser_name)
         cls.wait = ui.WebDriverWait(cls.browser, 20)
         cls.browser.delete_all_cookies()
@@ -103,8 +104,25 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
         cls.wait.until(lambda driver: driver.find_element_by_link_text(link_text))
         return cls.browser.find_element_by_link_text(link_text)
 
-    def sleep(self, time=60):
-        if INTERACTIVE and "TRAVIS" not in os.environ:
+    def wait_for_element_to_disapear(self, css_selector):
+        try:
+            self.wait.until_not(
+                lambda driver: driver.find_element_by_css_selector(
+                    css_selector
+                ).is_displayed()
+            )
+        except StaleElementReferenceException:
+            pass
+
+    def wait_for_element_to_be_visable(self, css_selector):
+        self.wait.until(
+            lambda driver: driver.find_element_by_css_selector(
+                css_selector
+            ).is_displayed()
+        )
+
+    def sleep(self, time=60, allways_sleep=False):
+        if (INTERACTIVE and "TRAVIS" not in os.environ) or allways_sleep:
             sleep(time)
 
     def is_logged_in(self):
@@ -179,11 +197,11 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
         test_name="test_create_standalone_equation",
         not_js_injection_hack=True,
     ):
-        equation_edit_iframe = self.wait_get_element_css("iframe")
-        self.screenshot.take(
-            "equation_edit_iframe.png", test_name, take_screen_shot=self_test
-        )
-        self.browser.switch_to.frame(equation_edit_iframe)
+        # equation_edit_iframe = self.wait_get_element_css("iframe")
+        # self.screenshot.take(
+        #     "equation_edit_iframe.png", test_name, take_screen_shot=self_test
+        # )
+        # self.browser.switch_to.frame(equation_edit_iframe)
         latex_input = self.wait_get_element_css("#id_tex_code")
         # the click is needed for firefox to create
         latex_input.click()
@@ -219,10 +237,12 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
             "equation_entered.png", test_name, take_screen_shot=not_js_injection_hack
         )
 
-        self.browser.switch_to.default_content()
-
     def open_stand_alone_add_modal(
-        self, self_test=False, test_name="test_create_standalone_equation", counter=0
+        self,
+        self_test=False,
+        test_name="test_create_standalone_equation",
+        plugin_to_add="equation",
+        counter=0,
     ):
         if counter <= 2:
             try:
@@ -259,17 +279,31 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
                 self.browser.execute_script(
                     'document.querySelector(".cms-quicksearch input").select()'
                 )
-                quick_search.send_keys("eq")
-                equatuion_btn = self.wait_get_element_css(
-                    '.cms-submenu-item a[href="EquationPlugin"]'
-                )
+                if plugin_to_add == "equation":
+                    quick_search.send_keys("eq")
+                    plugin_btn = self.wait_get_element_css(
+                        '.cms-submenu-item a[href="EquationPlugin"]'
+                    )
+                elif plugin_to_add == "text":
+                    quick_search.send_keys("text")
+                    plugin_btn = self.wait_get_element_css(
+                        '.cms-submenu-item a[href="TextPlugin"]'
+                    )
+
                 self.screenshot.take(
                     "plugin_add_modal.png", test_name, take_screen_shot=self_test
                 )
-                equatuion_btn.click()
+                plugin_btn.click()
         else:
             print("Didn't find `.cms-modal`.")
             self.screenshot.take("open_stand_alone_add_modal_final_fail.png", test_name)
+
+    def hide_structure_mode_cms_34(self):
+        if self.cms_version_tuple < (3, 5):
+            content_link = self.wait_get_element_css(
+                '.cms-toolbar-item-cms-mode-switcher a[href="?edit"]'
+            )
+            content_link.click()
 
     def create_standalone_equation(
         self,
@@ -286,7 +320,14 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
         self.open_structure_board(self_test=self_test, test_name=test_name)
         self.screenshot.take("sidebar_open.png", test_name, take_screen_shot=self_test)
 
-        self.open_stand_alone_add_modal(self_test=self_test, test_name=test_name)
+        self.open_stand_alone_add_modal(
+            self_test=self_test, test_name=test_name, plugin_to_add="equation"
+        )
+        equation_edit_iframe = self.wait_get_element_css("iframe")
+        self.screenshot.take(
+            "equation_edit_iframe.png", test_name, take_screen_shot=self_test
+        )
+        self.browser.switch_to.frame(equation_edit_iframe)
 
         self.enter_equation(
             self_test=self_test,
@@ -297,33 +338,91 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
             test_name=test_name,
             not_js_injection_hack=not_js_injection_hack,
         )
+        self.browser.switch_to.default_content()
         save_btn = self.wait_get_element_css(".cms-btn.cms-btn-action.default")
-
         save_btn.click()
 
         self.wait_for_element_to_disapear(".cms-modal")
+
+        self.hide_structure_mode_cms_34()
 
         self.wait_get_element_css("span.katex")
         self.screenshot.take(
             "equation_rendered.png", test_name, take_screen_shot=not_js_injection_hack
         )
 
-    def wait_for_element_to_disapear(self, css_selector):
-        try:
-            self.wait.until_not(
-                lambda driver: driver.find_element_by_css_selector(
-                    css_selector
-                ).is_displayed()
-            )
-        except StaleElementReferenceException:
-            pass
+    def create_text_equation(
+        self,
+        self_test=False,
+        tex_code=r"\int^{a}_{b} f(x) \mathrm{d}x",
+        font_size_value=1,
+        font_size_unit="rem",
+        is_inline=False,
+        test_name="test_create_text_equation",
+    ):
+        def switch_to_text_edit_frame():
+            self.browser.switch_to.default_content()
+            text_edit_iframe = self.wait_get_element_css("iframe")
+            self.browser.switch_to.frame(text_edit_iframe)
 
-    def wait_for_element_to_be_visable(self, css_selector):
-        self.wait.until(
-            lambda driver: driver.find_element_by_css_selector(
-                css_selector
-            ).is_displayed()
+        self.login_user()
+        self.open_structure_board(self_test=self_test, test_name=test_name)
+
+        self.open_stand_alone_add_modal(
+            self_test=self_test, test_name=test_name, plugin_to_add="text"
         )
+        switch_to_text_edit_frame()
+        plugin_select = self.wait_get_element_css(".cke_button__cmsplugins")
+        self.screenshot.take(
+            "text_edit_iframe.png", test_name, take_screen_shot=self_test
+        )
+        plugin_select.click()
+        text_edit_pannel_iframe = self.wait_get_element_css("iframe.cke_panel_frame")
+        self.browser.switch_to.frame(text_edit_pannel_iframe)
+        equation_option = self.wait_get_element_css(
+            '.cke_panel_listItem a[rel="EquationPlugin"]'
+        )
+        equation_option.click()
+        switch_to_text_edit_frame()
+        equation_edit_iframe = self.wait_get_element_css("iframe.cke_dialog_ui_html")
+        self.browser.switch_to.frame(equation_edit_iframe)
+
+        self.enter_equation(
+            self_test=self_test,
+            tex_code=tex_code,
+            font_size_value=font_size_value,
+            font_size_unit=font_size_unit,
+            is_inline=is_inline,
+            test_name=test_name,
+            not_js_injection_hack=True,
+        )
+
+        switch_to_text_edit_frame()
+
+        OK_btn = self.wait_get_element_css(".cke_dialog_ui_button_ok")
+        OK_btn.click()
+
+        # making sure that equation properly propagated, to the text editor
+        cke_wysiwyg_frame = self.wait_get_element_css("iframe.cke_wysiwyg_frame")
+        self.browser.switch_to.frame(cke_wysiwyg_frame)
+        self.wait_for_element_to_be_visable("span.katex")
+
+        switch_to_text_edit_frame()
+        self.screenshot.take(
+            "equation_in_text_editor.png", test_name, take_screen_shot=self_test
+        )
+
+        self.browser.switch_to.default_content()
+        save_btn = self.wait_get_element_css(".cms-btn.cms-btn-action.default")
+        save_btn.click()
+
+        self.browser.switch_to.default_content()
+        self.wait_for_element_to_disapear(".cms-modal")
+
+        self.hide_structure_mode_cms_34()
+
+        self.wait_get_element_css("span.katex-html")
+        self.screenshot.take("equation_rendered.png", test_name, take_screen_shot=True)
 
     def delete_plugin(self, delete_all=True):
         self.open_structure_board()
@@ -340,8 +439,7 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
             delete_confirm.click()
 
     def js_injection_hack(self):
-        cms_version_tuple = tuple(map(int, cms_version.split(".")))
-        if cms_version_tuple < (3, 7):
+        if self.cms_version_tuple < (3, 7):
             self.create_standalone_equation(not_js_injection_hack=False)
             self.browser.refresh()
             self.delete_plugin(delete_all=True)
@@ -397,6 +495,10 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
         self.create_standalone_equation(
             is_inline=True, test_name="test_create_standalone_equation_inline_True"
         )
+
+    def test_create_text_equation(self):
+        self.js_injection_hack()
+        self.create_text_equation(self_test=True)
 
 
 class TestIntegrationFirefox(TestIntegrationChrome):

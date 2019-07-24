@@ -110,26 +110,27 @@ class ScreenCreator:
                 filename = "#{}_{}".format(self.counter, filename)
                 # this is to prevent visual diffs with percy
                 self.insert_css_Rules(
-                    [
-                        "a{color: black;}",  # sets the color of links to black
-                        "#nprogress{display:none;}",  # hides the progressbar
-                    ]
+                    ["a{color: black;}"]  # sets the color of links to black
                 )
-                self.hide_elements([".cms-messages"])
+                self.hide_elements(
+                    [".cms-messages", "#nprogress"]  # popup messages  # progress bar
+                )
                 self.browser.save_screenshot(
                     screen_shot_path(filename, self.browser_name, sub_dir)
                 )
 
     def insert_css_Rules(self, css_rules):
         for css_rule in css_rules:
-            script_code = (
-                "document.styleSheets[document.styleSheets.length-1].insertRule("
-                '"{}"'
-                ", document.styleSheets[document.styleSheets.length-1].cssRules.length)".format(
-                    css_rule
+            try:
+                script_code = (
+                    "document.styleSheets[document.styleSheets.length-1].insertRule("
+                    '"{}"'
+                    ", document.styleSheets[document.styleSheets.length-1].cssRules.length)"
+                    "".format(css_rule)
                 )
-            )
-            self.browser.execute_script(script_code)
+                self.browser.execute_script(script_code)
+            except JavascriptException:
+                pass
 
     def hide_elements(self, css_selectors):
         for css_selector in css_selectors:
