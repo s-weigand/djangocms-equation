@@ -67,7 +67,7 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
             browser_name=cls.browser_name,
         )
         # cls.browser.set_window_size(1366, 768)
-        cls.browser.set_window_size(1400, 1200)
+        cls.browser.set_window_size(1200, 1200)
         cls.screenshot = ScreenCreator(cls.browser, cls.browser_name)
         cls.wait = ui.WebDriverWait(cls.browser, 20)
         cls.browser.delete_all_cookies()
@@ -365,27 +365,38 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
             text_edit_iframe = self.wait_get_element_css("iframe")
             self.browser.switch_to.frame(text_edit_iframe)
 
+        def add_equation_text_plugin(counter=0):
+            if counter < 2:
+                try:
+                    switch_to_text_edit_frame()
+                    plugin_select = self.wait_get_element_css(".cke_button__cmsplugins")
+                    self.screenshot.take(
+                        "text_edit_iframe.png", test_name, take_screen_shot=self_test
+                    )
+                    plugin_select.click()
+                    text_edit_pannel_iframe = self.wait_get_element_css(
+                        "iframe.cke_panel_frame"
+                    )
+                    self.browser.switch_to.frame(text_edit_pannel_iframe)
+                    equation_option = self.wait_get_element_css(
+                        '.cke_panel_listItem a[rel="EquationPlugin"]'
+                    )
+                    equation_option.click()
+                    switch_to_text_edit_frame()
+                    equation_edit_iframe = self.wait_get_element_css(
+                        "iframe.cke_dialog_ui_html"
+                    )
+                    self.browser.switch_to.frame(equation_edit_iframe)
+                except TimeoutException:
+                    add_equation_text_plugin(counter=counter + 1)
+
         self.login_user()
         self.open_structure_board(self_test=self_test, test_name=test_name)
 
         self.open_stand_alone_add_modal(
             self_test=self_test, test_name=test_name, plugin_to_add="text"
         )
-        switch_to_text_edit_frame()
-        plugin_select = self.wait_get_element_css(".cke_button__cmsplugins")
-        self.screenshot.take(
-            "text_edit_iframe.png", test_name, take_screen_shot=self_test
-        )
-        plugin_select.click()
-        text_edit_pannel_iframe = self.wait_get_element_css("iframe.cke_panel_frame")
-        self.browser.switch_to.frame(text_edit_pannel_iframe)
-        equation_option = self.wait_get_element_css(
-            '.cke_panel_listItem a[rel="EquationPlugin"]'
-        )
-        equation_option.click()
-        switch_to_text_edit_frame()
-        equation_edit_iframe = self.wait_get_element_css("iframe.cke_dialog_ui_html")
-        self.browser.switch_to.frame(equation_edit_iframe)
+        add_equation_text_plugin()
 
         self.enter_equation(
             self_test=self_test,
