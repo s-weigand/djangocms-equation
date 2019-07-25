@@ -7,6 +7,9 @@ cache:
   - npm
   - docker
 
+node_js:
+  - 12
+
 services:
   - docker
 
