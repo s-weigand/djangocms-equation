@@ -390,6 +390,36 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
                 except TimeoutException:
                     add_equation_text_plugin(counter=counter + 1)
 
+        def save_equation_text_plugin(counter=0):
+            if counter < 2:
+                try:
+                    switch_to_text_edit_frame()
+
+                    OK_btn = self.wait_get_element_css(".cke_dialog_ui_button_ok")
+                    OK_btn.click()
+
+                    # making sure that equation properly propagated, to the text editor
+                    cke_wysiwyg_frame = self.wait_get_element_css(
+                        "iframe.cke_wysiwyg_frame"
+                    )
+                    self.browser.switch_to.frame(cke_wysiwyg_frame)
+                    self.wait_for_element_to_be_visable("span.katex")
+
+                    switch_to_text_edit_frame()
+                    self.screenshot.take(
+                        "equation_in_text_editor.png",
+                        test_name,
+                        take_screen_shot=self_test,
+                    )
+
+                    self.browser.switch_to.default_content()
+                    save_btn = self.wait_get_element_css(
+                        ".cms-btn.cms-btn-action.default"
+                    )
+                    save_btn.click()
+                except TimeoutException:
+                    save_equation_text_plugin(counter=counter + 1)
+
         self.login_user()
         self.open_structure_board(self_test=self_test, test_name=test_name)
 
@@ -408,24 +438,7 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
             not_js_injection_hack=True,
         )
 
-        switch_to_text_edit_frame()
-
-        OK_btn = self.wait_get_element_css(".cke_dialog_ui_button_ok")
-        OK_btn.click()
-
-        # making sure that equation properly propagated, to the text editor
-        cke_wysiwyg_frame = self.wait_get_element_css("iframe.cke_wysiwyg_frame")
-        self.browser.switch_to.frame(cke_wysiwyg_frame)
-        self.wait_for_element_to_be_visable("span.katex")
-
-        switch_to_text_edit_frame()
-        self.screenshot.take(
-            "equation_in_text_editor.png", test_name, take_screen_shot=self_test
-        )
-
-        self.browser.switch_to.default_content()
-        save_btn = self.wait_get_element_css(".cms-btn.cms-btn-action.default")
-        save_btn.click()
+        save_equation_text_plugin()
 
         self.browser.switch_to.default_content()
         self.wait_for_element_to_disapear(".cms-modal")
