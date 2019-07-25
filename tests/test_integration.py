@@ -17,6 +17,7 @@ from selenium.common.exceptions import (
     TimeoutException,
     ElementNotInteractableException,
     StaleElementReferenceException,
+    JavascriptException,
 )
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 
@@ -66,7 +67,6 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
             interactive=INTERACTIVE,
             browser_name=cls.browser_name,
         )
-        # cls.browser.set_window_size(1366, 768)
         cls.browser.set_window_size(1100, 1200)
         cls.screenshot = ScreenCreator(cls.browser, cls.browser_name)
         cls.wait = ui.WebDriverWait(cls.browser, 20)
@@ -197,13 +197,8 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
         test_name="test_create_standalone_equation",
         not_js_injection_hack=True,
     ):
-        # equation_edit_iframe = self.wait_get_element_css("iframe")
-        # self.screenshot.take(
-        #     "equation_edit_iframe.png", test_name, take_screen_shot=self_test
-        # )
-        # self.browser.switch_to.frame(equation_edit_iframe)
         latex_input = self.wait_get_element_css("#id_tex_code")
-        # the click is needed for firefox to create
+        # the click is needed for firefox to select the element
         latex_input.click()
         latex_input.send_keys(tex_code)
         if font_size_value != 1 or font_size_unit != "rem" or is_inline is True:
@@ -365,6 +360,11 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
             text_edit_iframe = self.wait_get_element_css("iframe")
             self.browser.switch_to.frame(text_edit_iframe)
 
+        def switch_to_cke_wysiwyg_frame():
+            switch_to_text_edit_frame()
+            cke_wysiwyg_frame = self.wait_get_element_css("iframe.cke_wysiwyg_frame")
+            self.browser.switch_to.frame(cke_wysiwyg_frame)
+
         def add_equation_text_plugin(counter=0):
             if counter < 2:
                 try:
@@ -390,6 +390,18 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
                 except TimeoutException:
                     add_equation_text_plugin(counter=counter + 1)
 
+        def add_text(text=" Some text for testing:", counter=0):
+            if counter < 2:
+                try:
+                    switch_to_cke_wysiwyg_frame()
+                    self.wait_get_element_css("body p")
+                    script_code = 'document.querySelector("body p").innerText=" {} "'.format(
+                        text
+                    )
+                    self.browser.execute_script(script_code)
+                except (TimeoutException, JavascriptException):
+                    add_text(text=text, counter=counter + 1)
+
         def save_equation_text_plugin(counter=0):
             if counter < 2:
                 try:
@@ -399,10 +411,7 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
                     OK_btn.click()
 
                     # making sure that equation properly propagated, to the text editor
-                    cke_wysiwyg_frame = self.wait_get_element_css(
-                        "iframe.cke_wysiwyg_frame"
-                    )
-                    self.browser.switch_to.frame(cke_wysiwyg_frame)
+                    switch_to_cke_wysiwyg_frame()
                     self.wait_for_element_to_be_visable("span.katex")
 
                     switch_to_text_edit_frame()
@@ -426,6 +435,9 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
         self.open_stand_alone_add_modal(
             self_test=self_test, test_name=test_name, plugin_to_add="text"
         )
+
+        add_text()
+
         add_equation_text_plugin()
 
         self.enter_equation(
@@ -523,6 +535,24 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
     def test_create_text_equation(self):
         self.js_injection_hack()
         self.create_text_equation(self_test=True)
+
+    def test_create_text_equation_2rem(self):
+        self.js_injection_hack()
+        self.create_text_equation(
+            font_size_value=2, test_name="test_create_text_equation_2rem"
+        )
+
+    def test_create_text_equation_1_in(self):
+        self.js_injection_hack()
+        self.create_text_equation(
+            font_size_unit="in", test_name="test_create_text_equation_1_in"
+        )
+
+    def test_create_text_equation_inline_True(self):
+        self.js_injection_hack()
+        self.create_text_equation(
+            is_inline=True, test_name="test_create_text_equation_inline_True"
+        )
 
 
 class TestIntegrationFirefox(TestIntegrationChrome):
