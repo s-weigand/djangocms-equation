@@ -67,6 +67,10 @@ matrix:
     - env: TOXENV=docs-links
 
 before_install:
+  - nvm install 12
+  - node --version
+  - npm --version
+  - nvm --version
   - ip addr show
   - printenv
   - npm i
