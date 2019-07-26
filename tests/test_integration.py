@@ -11,7 +11,7 @@ from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 
 from djangocms_helper.base_test import BaseTransactionTestCase
 
-from selenium.webdriver.support import ui
+
 from selenium.common.exceptions import (
     NoSuchElementException,
     TimeoutException,
@@ -19,9 +19,15 @@ from selenium.common.exceptions import (
     StaleElementReferenceException,
     JavascriptException,
 )
+from selenium.webdriver.support import ui
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 
-from .utils.helper_functions import get_browser_instance, get_own_ip, ScreenCreator
+from .utils.helper_functions import (
+    get_browser_instance,
+    get_own_ip,
+    ScreenCreator,
+    retry_on_browser_exception,
+)
 
 INTERACTIVE = False
 
@@ -106,20 +112,27 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
 
     def wait_for_element_to_disapear(self, css_selector):
         try:
+            self.browser.find_element_by_css_selector(css_selector)
+        except StaleElementReferenceException:
+            pass
+        else:
             self.wait.until_not(
                 lambda driver: driver.find_element_by_css_selector(
                     css_selector
                 ).is_displayed()
             )
-        except StaleElementReferenceException:
-            pass
 
     def wait_for_element_to_be_visable(self, css_selector):
-        self.wait.until(
-            lambda driver: driver.find_element_by_css_selector(
-                css_selector
-            ).is_displayed()
-        )
+        try:
+            self.browser.find_element_by_css_selector(css_selector)
+        except StaleElementReferenceException:
+            pass
+        else:
+            self.wait.until(
+                lambda driver: driver.find_element_by_css_selector(
+                    css_selector
+                ).is_displayed()
+            )
 
     def sleep(self, time=60, allways_sleep=False):
         if (INTERACTIVE and "TRAVIS" not in os.environ) or allways_sleep:
@@ -137,7 +150,6 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
     def login_user(self, take_screen_shot=False):
         if not self.is_logged_in():
             self.browser.get(self.live_server_url + "/?edit")
-        if not self.is_logged_in():
             try:
                 username = self.wait_get_element_css("#id_username")
                 username.send_keys(self._admin_user_username)
@@ -166,27 +178,18 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
         self.browser.get(self.live_server_url + "/admin/logout/")
         self.browser.delete_all_cookies()
 
+    @retry_on_browser_exception(exceptions=(ElementNotInteractableException))
     def open_structure_board(
-        self, self_test=False, test_name="test_create_standalone_equation", counter=0
+        self, self_test=False, test_name="test_create_standalone_equation"
     ):
         structure_board = self.wait_get_element_css(".cms-structure")
         if not structure_board.is_displayed():
-            if counter <= 2:
-                try:
-                    sidebar_toggle_btn = self.wait_get_element_css(
-                        ".cms-toolbar-item-cms-mode-switcher a"
-                    )
-                    sidebar_toggle_btn.click()
-                except ElementNotInteractableException:
-                    self.screenshot.take(
-                        "sidebar_open_fail_{}.png".format(counter),
-                        test_name,
-                        take_screen_shot=self_test,
-                    )
-                    self.open_structure_board(
-                        self_test=self_test, test_name=test_name, counter=counter + 1
-                    )
+            sidebar_toggle_btn = self.wait_get_element_css(
+                ".cms-toolbar-item-cms-mode-switcher a"
+            )
+            sidebar_toggle_btn.click()
 
+    @retry_on_browser_exception(exceptions=(TimeoutException))
     def enter_equation(
         self,
         self_test=False,
@@ -200,10 +203,16 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
         latex_input = self.wait_get_element_css("#id_tex_code")
         # the click is needed for firefox to select the element
         latex_input.click()
-        latex_input.send_keys(tex_code)
+        if latex_input.get_attribute('value') == "":
+            latex_input.send_keys(tex_code)
         if font_size_value != 1 or font_size_unit != "rem" or is_inline is True:
-            advanced_setting_toggle = self.wait_get_element_css(".collapse-toggle")
-            advanced_setting_toggle.click()
+            try:
+                self.browser.find_element_by_css_selector(".collapse.advanced.collapsed")
+            except NoSuchElementException:
+                pass
+            else:
+                advanced_setting_toggle = self.wait_get_element_css(".collapse-toggle")
+                advanced_setting_toggle.click()
 
             if font_size_value != 1:
                 font_size_value_input = self.wait_get_element_css(
@@ -232,66 +241,44 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
             "equation_entered.png", test_name, take_screen_shot=not_js_injection_hack
         )
 
+    @retry_on_browser_exception(
+        exceptions=(StaleElementReferenceException, TimeoutException)
+    )
     def open_stand_alone_add_modal(
         self,
         self_test=False,
         test_name="test_create_standalone_equation",
         plugin_to_add="equation",
-        counter=0,
     ):
-        if counter <= 2:
-            try:
-                add_plugin_btn = self.wait_get_element_css(
-                    ".cms-submenu-btn.cms-submenu-add.cms-btn"
-                )
-                add_plugin_btn.click()
-                # #### Firefox Hack, since it fails sometimes to open the modal
-                self.wait_for_element_to_be_visable(".cms-modal")
-            except StaleElementReferenceException:
-                print("Didn't find `add_plugin_btn` for the {} time.".format(counter))
-                self.screenshot.take(
-                    "open_stand_alone_add_modal_fail_{}_click.png".format(counter),
-                    test_name,
-                )
-                self.open_stand_alone_add_modal(
-                    self_test=self_test, test_name=test_name, counter=counter + 1
-                )
-            except TimeoutException:
-                print("Didn't find `.cms-modal` for the {} time.".format(counter))
-                self.screenshot.take(
-                    "open_stand_alone_add_modal_fail_{}_modal_open.png".format(counter),
-                    test_name,
-                )
-                self.open_stand_alone_add_modal(
-                    self_test=self_test, test_name=test_name, counter=counter + 1
-                )
-            else:
-                # prevent scroll errors
-                quick_search = self.wait_get_element_css(".cms-quicksearch input")
-                quick_search.click()
-                # since the element sometimes isn't visible the selection is
-                # done via with javascript
-                self.browser.execute_script(
-                    'document.querySelector(".cms-quicksearch input").select()'
-                )
-                if plugin_to_add == "equation":
-                    quick_search.send_keys("eq")
-                    plugin_btn = self.wait_get_element_css(
-                        '.cms-submenu-item a[href="EquationPlugin"]'
-                    )
-                elif plugin_to_add == "text":
-                    quick_search.send_keys("text")
-                    plugin_btn = self.wait_get_element_css(
-                        '.cms-submenu-item a[href="TextPlugin"]'
-                    )
+        add_plugin_btn = self.wait_get_element_css(
+            ".cms-submenu-btn.cms-submenu-add.cms-btn"
+        )
+        add_plugin_btn.click()
+        # #### Firefox Hack, since it fails sometimes to open the modal
+        self.wait_for_element_to_be_visable(".cms-modal")
+        # prevent scroll errors
+        quick_search = self.wait_get_element_css(".cms-quicksearch input")
+        quick_search.click()
+        # since the element sometimes isn't visible the selection is
+        # done via with javascript
+        self.browser.execute_script(
+            'document.querySelector(".cms-quicksearch input").select()'
+        )
+        if plugin_to_add == "equation":
+            quick_search.send_keys("eq")
+            plugin_btn = self.wait_get_element_css(
+                '.cms-submenu-item a[href="EquationPlugin"]'
+            )
+        elif plugin_to_add == "text":
+            quick_search.send_keys("text")
+            plugin_btn = self.wait_get_element_css(
+                '.cms-submenu-item a[href="TextPlugin"]'
+            )
 
-                self.screenshot.take(
-                    "plugin_add_modal.png", test_name, take_screen_shot=self_test
-                )
-                plugin_btn.click()
-        else:
-            print("Didn't find `.cms-modal`.")
-            self.screenshot.take("open_stand_alone_add_modal_final_fail.png", test_name)
+        self.screenshot.take(
+            "plugin_add_modal.png", test_name, take_screen_shot=self_test
+        )
+        plugin_btn.click()
 
     def hide_structure_mode_cms_34(self):
         if self.cms_version_tuple < (3, 5):
@@ -365,69 +352,56 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
             cke_wysiwyg_frame = self.wait_get_element_css("iframe.cke_wysiwyg_frame")
             self.browser.switch_to.frame(cke_wysiwyg_frame)
 
-        def add_equation_text_plugin(counter=0):
-            if counter < 2:
-                try:
-                    switch_to_text_edit_frame()
-                    plugin_select = self.wait_get_element_css(".cke_button__cmsplugins")
-                    self.screenshot.take(
-                        "text_edit_iframe.png", test_name, take_screen_shot=self_test
-                    )
-                    plugin_select.click()
-                    text_edit_pannel_iframe = self.wait_get_element_css(
-                        "iframe.cke_panel_frame"
-                    )
-                    self.browser.switch_to.frame(text_edit_pannel_iframe)
-                    equation_option = self.wait_get_element_css(
-                        '.cke_panel_listItem a[rel="EquationPlugin"]'
-                    )
-                    equation_option.click()
-                    switch_to_text_edit_frame()
-                    equation_edit_iframe = self.wait_get_element_css(
-                        "iframe.cke_dialog_ui_html"
-                    )
-                    self.browser.switch_to.frame(equation_edit_iframe)
-                except TimeoutException:
-                    add_equation_text_plugin(counter=counter + 1)
+        @retry_on_browser_exception(exceptions=(TimeoutException))
+        def add_equation_text_plugin():
+            switch_to_text_edit_frame()
+            plugin_select = self.wait_get_element_css(".cke_button__cmsplugins")
+            self.screenshot.take(
+                "text_edit_iframe.png", test_name, take_screen_shot=self_test
+            )
+            plugin_select.click()
+            text_edit_pannel_iframe = self.wait_get_element_css(
+                "iframe.cke_panel_frame"
+            )
+            self.browser.switch_to.frame(text_edit_pannel_iframe)
+            equation_option = self.wait_get_element_css(
+                '.cke_panel_listItem a[rel="EquationPlugin"]'
+            )
+            equation_option.click()
+            switch_to_text_edit_frame()
+            equation_edit_iframe = self.wait_get_element_css(
+                "iframe.cke_dialog_ui_html"
+            )
+            self.browser.switch_to.frame(equation_edit_iframe)
 
+        @retry_on_browser_exception(exceptions=(TimeoutException, JavascriptException))
         def add_text(text=" Some text for testing:", counter=0):
-            if counter < 2:
-                try:
-                    switch_to_cke_wysiwyg_frame()
-                    self.wait_get_element_css("body p")
-                    script_code = 'document.querySelector("body p").innerText=" {} "'.format(
-                        text
-                    )
-                    self.browser.execute_script(script_code)
-                except (TimeoutException, JavascriptException):
-                    add_text(text=text, counter=counter + 1)
+            switch_to_cke_wysiwyg_frame()
+            self.wait_get_element_css("body p")
+            script_code = 'document.querySelector("body p").innerText=" {} "'.format(
+                text
+            )
+            self.browser.execute_script(script_code)
 
-        def save_equation_text_plugin(counter=0):
-            if counter < 2:
-                try:
-                    switch_to_text_edit_frame()
+        @retry_on_browser_exception(exceptions=(TimeoutException))
+        def save_equation_text_plugin():
+            switch_to_text_edit_frame()
 
-                    OK_btn = self.wait_get_element_css(".cke_dialog_ui_button_ok")
-                    OK_btn.click()
+            OK_btn = self.wait_get_element_css(".cke_dialog_ui_button_ok")
+            OK_btn.click()
 
-                    # making sure that equation properly propagated, to the text editor
-                    switch_to_cke_wysiwyg_frame()
-                    self.wait_for_element_to_be_visable("span.katex")
+            # making sure that equation properly propagated, to the text editor
+            switch_to_cke_wysiwyg_frame()
+            self.wait_for_element_to_be_visable("span.katex")
 
-                    switch_to_text_edit_frame()
-                    self.screenshot.take(
-                        "equation_in_text_editor.png",
-                        test_name,
-                        take_screen_shot=self_test,
-                    )
+            switch_to_text_edit_frame()
+            self.screenshot.take(
+                "equation_in_text_editor.png", test_name, take_screen_shot=self_test
+            )
 
-                    self.browser.switch_to.default_content()
-                    save_btn = self.wait_get_element_css(
-                        ".cms-btn.cms-btn-action.default"
-                    )
-                    save_btn.click()
-                except TimeoutException:
-                    save_equation_text_plugin(counter=counter + 1)
+            self.browser.switch_to.default_content()
+            save_btn = self.wait_get_element_css(".cms-btn.cms-btn-action.default")
+            save_btn.click()
 
         self.login_user()
         self.open_structure_board(self_test=self_test, test_name=test_name)

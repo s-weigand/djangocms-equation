@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, print_function, unicode_literals
 
+import functools
 import os
 import socket
 
@@ -10,8 +11,15 @@ from django.conf import settings
 from selenium.webdriver import Chrome, Firefox
 from selenium.webdriver.remote.webdriver import WebDriver as RemoteWebdriver
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
-from selenium.common.exceptions import JavascriptException
 from urllib3.exceptions import NewConnectionError, MaxRetryError
+
+from selenium.common.exceptions import (
+    NoSuchElementException,
+    TimeoutException,
+    ElementNotInteractableException,
+    StaleElementReferenceException,
+    JavascriptException,
+)
 
 from webdriver_manager.chrome import ChromeDriverManager
 from webdriver_manager.firefox import GeckoDriverManager
@@ -73,6 +81,36 @@ def get_browser_instance(
                 "`docker-compose up -d`."
                 "See the docs of 'djangocms-equation' for more help."
             )
+
+
+def retry_on_browser_exception(
+    max_retry=2,
+    exceptions=(
+        NoSuchElementException,
+        TimeoutException,
+        ElementNotInteractableException,
+        StaleElementReferenceException,
+        JavascriptException,
+    ),
+):
+    def outer_wrapper(func):
+        @functools.wraps(func)
+        def func_wrapper(*args, **kwargs):
+            if func_wrapper.counter <= max_retry:
+                try:
+                    return func(*args, **kwargs)
+                except exceptions as e:
+                    print()
+                    print(type(e).__name__, ": ")
+                    print("In function: `{}`".format(func.__name__))
+                    print(e)
+                    func_wrapper.counter += 1
+                    return func_wrapper(*args, **kwargs)
+
+        func_wrapper.counter = 0
+        return func_wrapper
+
+    return outer_wrapper
 
 
 class ScreenCreator:
