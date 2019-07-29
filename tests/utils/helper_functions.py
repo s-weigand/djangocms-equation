@@ -92,22 +92,31 @@ def retry_on_browser_exception(
         StaleElementReferenceException,
         JavascriptException,
     ),
+    test_name="",
 ):
     def outer_wrapper(func):
         @functools.wraps(func)
         def func_wrapper(*args, **kwargs):
+            if "test_name" in kwargs:
+                func_wrapper.test_name = kwargs["test_name"]
             if func_wrapper.counter <= max_retry:
                 try:
                     return func(*args, **kwargs)
                 except exceptions as e:
+                    error_information = "In function: `{}`".format(func.__name__)
+                    if func_wrapper.test_name != "":
+                        error_information += ", run by the test: {}".format(
+                            func_wrapper.test_name
+                        )
                     print()
                     print(type(e).__name__, ": ")
-                    print("In function: `{}`".format(func.__name__))
+                    print(error_information)
                     print(e)
                     func_wrapper.counter += 1
                     return func_wrapper(*args, **kwargs)
 
         func_wrapper.counter = 0
+        func_wrapper.test_name = test_name
         return func_wrapper
 
     return outer_wrapper
