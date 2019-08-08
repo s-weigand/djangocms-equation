@@ -46,7 +46,38 @@ DjangoCMS plugin to write equations, utilizing KaTeX
 Features
 --------
 
-* TODO
+* Enables the use of LaTeX for equations with django-cms
+* Live editing of LaTeX Code, via KaTeX
+
+Installation
+------------
+Install the plugin from PyPi
+
+.. code-block:: bash
+
+    $ pip install djangocms_equation
+
+Add it to the installed apps in the ``settings.py`` of your django-cms project.
+
+.. code-block:: python
+
+    "INSTALLED_APPS": [..., "djangocms_equation"]
+
+For the Equations to be properly displayed in ``djangocms-text-ckeditor``,
+while edit it, you need to add the css file to the allowed of ckeditor.
+To do this simply add the following lines to the `settings.py`
+of your django-cms project.
+
+.. code-block:: python
+
+    "CKEDITOR_SETTINGS": {
+        "contentsCss": ["/static/djangocms_equation/css/change_form_template.css"]
+    }
+
+
+.. note::
+    The equations might be rendered properly in ckeditor-windows,when they are added the first
+    time. This can be fixed by saving the text plugin or having another equation on the page.
 
 Credits
 -------
