@@ -14,4 +14,4 @@ selenium>=3.141.0
 coverage>=4.5.1
 tox==3.5.2
 mixer>=6.1.3
-webdriver_manager
+webdriver_manager==1.8.2
