@@ -11,7 +11,7 @@ from .models import EquationPluginModel, ALLOWED_FONT_SIZE_UNITS
 class EquationForm(forms.ModelForm):
     tex_code = forms.CharField(
         help_text=_("Insert your LaTeX code here."),
-        widget=forms.Textarea(attrs={"rows": "2"}),
+        widget=forms.Textarea(attrs={"rows": "2", "spellcheck": "false"}),
     )
     is_inline = forms.BooleanField(
         help_text=_(

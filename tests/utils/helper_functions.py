@@ -1,18 +1,28 @@
-
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, print_function, unicode_literals
 
+import functools
 import os
 import socket
 
 from django.conf import settings
 
 
-from selenium.webdriver import Chrome
-from selenium.common.exceptions import WebDriverException
+from selenium.webdriver import Chrome, Firefox
 from selenium.webdriver.remote.webdriver import WebDriver as RemoteWebdriver
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from urllib3.exceptions import NewConnectionError, MaxRetryError
+
+from selenium.common.exceptions import (
+    NoSuchElementException,
+    TimeoutException,
+    ElementNotInteractableException,
+    StaleElementReferenceException,
+    JavascriptException,
+)
+
+from webdriver_manager.chrome import ChromeDriverManager
+from webdriver_manager.firefox import GeckoDriverManager
 
 import percy
 from six.moves.urllib.parse import quote
@@ -24,6 +34,10 @@ class DockerNotFoundException(Exception):
     pass
 
 
+class InvalidBrowserNameException(Exception):
+    pass
+
+
 def screen_shot_path(filename, browser_name, sub_dir=""):
     base_folder = get_screenshot_test_base_folder()
     dir_path = os.path.join(base_folder, browser_name, sub_dir)
@@ -32,19 +46,23 @@ def screen_shot_path(filename, browser_name, sub_dir=""):
     return os.path.join(dir_path, filename)
 
 
-def get_browser_instance(browser_port, desire_capabilities, interactive=False):
-    if interactive:
-        try:
-            return Chrome(
-                executable_path=os.getenv("chromedriver"),
-                desired_capabilities=DesiredCapabilities.CHROME,
-            )
-        except WebDriverException:
-            raise WebDriverException(
-                "'chromedriver' executable needs to be in PATH. "
-                "Please see https://sites.google.com/a/chromium.org/chromedriver/home "
-                "or run `pip install chromedriver_installer`."
-            )
+def get_browser_instance(
+    browser_port, desire_capabilities, interactive=False, browser_name="Chrome"
+):
+    if browser_name not in ["Chrome", "FireFox"]:
+        raise InvalidBrowserNameException(
+            "Only the browser_names 'Chrome' and 'FireFox' are supported"
+        )
+    if interactive and browser_name == "FireFox" and "TRAVIS" not in os.environ:
+        return Firefox(
+            executable_path=GeckoDriverManager().install(),
+            desired_capabilities=DesiredCapabilities.FIREFOX,
+        )
+    elif interactive and "TRAVIS" not in os.environ:
+        return Chrome(
+            ChromeDriverManager().install(),
+            desired_capabilities=DesiredCapabilities.CHROME,
+        )
     else:
         docker_container_ip = os.getenv("DOCKER_CONTAINER_IP", "127.0.0.1")
         remote_browser_url = "http://{ip}:{port}/wd/hub".format(
@@ -65,6 +83,45 @@ def get_browser_instance(browser_port, desire_capabilities, interactive=False):
             )
 
 
+def retry_on_browser_exception(
+    max_retry=2,
+    exceptions=(
+        NoSuchElementException,
+        TimeoutException,
+        ElementNotInteractableException,
+        StaleElementReferenceException,
+        JavascriptException,
+    ),
+    test_name="",
+):
+    def outer_wrapper(func):
+        @functools.wraps(func)
+        def func_wrapper(*args, **kwargs):
+            if "test_name" in kwargs:
+                func_wrapper.test_name = kwargs["test_name"]
+            if func_wrapper.counter <= max_retry:
+                try:
+                    return func(*args, **kwargs)
+                except exceptions as e:
+                    error_information = "In function: `{}`".format(func.__name__)
+                    if func_wrapper.test_name != "":
+                        error_information += ", run by the test: {}".format(
+                            func_wrapper.test_name
+                        )
+                    print()
+                    print(type(e).__name__, ": ")
+                    print(error_information)
+                    print(e)
+                    func_wrapper.counter += 1
+                    return func_wrapper(*args, **kwargs)
+
+        func_wrapper.counter = 0
+        func_wrapper.test_name = test_name
+        return func_wrapper
+
+    return outer_wrapper
+
+
 class ScreenCreator:
     def __init__(self, browser, browser_name="", use_percy=False):
         self.browser = browser
@@ -76,7 +133,7 @@ class ScreenCreator:
         if (
             "TRAVIS" in os.environ
             and use_percy
-            and os.environ.get("TRAVIS_PULL_REQUEST", "false") != "false"
+            and os.environ.get("TRAVIS_BRANCH", None) != "master"
         ):
             self.init_percy()
             return True
@@ -98,16 +155,40 @@ class ScreenCreator:
                 )
             else:
                 filename = "#{}_{}".format(self.counter, filename)
-                # sets the color of links to black, this is to prevent visual diffs with percy
-                script_code = (
-                    "document.styleSheets[document.styleSheets.length-1].insertRule("
-                    '"a{color: black}"'
-                    ", document.styleSheets[document.styleSheets.length-1].cssRules.length)"
+                # this is to prevent visual diffs with percy
+                self.insert_css_Rules(
+                    ["a{color: black;}"]  # sets the color of links to black
                 )
-                self.browser.execute_script(script_code)
+                self.hide_elements(
+                    [".cms-messages", "#nprogress"]  # popup messages  # progress bar
+                )
                 self.browser.save_screenshot(
                     screen_shot_path(filename, self.browser_name, sub_dir)
                 )
+
+    def insert_css_Rules(self, css_rules):
+        for css_rule in css_rules:
+            try:
+                script_code = (
+                    "document.styleSheets[document.styleSheets.length-1].insertRule("
+                    '"{}"'
+                    ", document.styleSheets[document.styleSheets.length-1].cssRules.length)"
+                    "".format(css_rule)
+                )
+                self.browser.execute_script(script_code)
+            except JavascriptException:
+                pass
+
+    def hide_elements(self, css_selectors):
+        for css_selector in css_selectors:
+            # in case the element doesn't exist
+            try:
+                script_code = 'document.querySelector("{}").style.display="none"'.format(
+                    css_selector
+                )
+                self.browser.execute_script(script_code)
+            except JavascriptException:
+                pass
 
     def init_percy(self):
         # Build a ResourceLoader that knows how to collect assets for this application.
