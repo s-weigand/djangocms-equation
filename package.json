@@ -42,7 +42,7 @@
   },
   "devDependencies": {
     "@types/katex": "^0.10.1",
-    "@types/node": "^12.7.0",
+    "@types/node": "^12.7.1",
     "less": "^3.9.0",
     "parcel": "^1.12.3",
     "sass": "^1.22.7",
