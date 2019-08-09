@@ -527,10 +527,10 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
             font_size_value=2, test_name="test_create_standalone_equation_2rem"
         )
 
-    def test_create_standalone_equation_1_in(self):
+    def test_create_standalone_equation_1_cm(self):
         self.js_injection_hack()
         self.create_standalone_equation(
-            font_size_unit="in", test_name="test_create_standalone_equation_1_in"
+            font_size_unit="cm", test_name="test_create_standalone_equation_1_cm"
         )
 
     def test_create_standalone_equation_inline_True(self):
@@ -549,10 +549,10 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
             font_size_value=2, test_name="test_create_text_equation_2rem"
         )
 
-    def test_create_text_equation_1_in(self):
+    def test_create_text_equation_1_cm(self):
         self.js_injection_hack()
         self.create_text_equation(
-            font_size_unit="in", test_name="test_create_text_equation_1_in"
+            font_size_unit="cm", test_name="test_create_text_equation_1_cm"
         )
 
     def test_create_text_equation_inline_True(self):
