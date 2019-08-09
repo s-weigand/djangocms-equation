@@ -40,12 +40,12 @@
   },
   "homepage": "https://github.com/s-weigand/djangocms-equation",
   "dependencies": {
-    "katex": "^0.10.1",
-    "materialize-css": "^1.0.0-rc.2"
   },
   "devDependencies": {
+    "@fortawesome/fontawesome-free": "^5.10.1",
     "@types/katex": "^0.10.1",
     "@types/node": "^12.7.1",
+    "katex": "^0.10.1",
     "less": "^3.9.0",
     "parcel": "^1.12.3",
     "sass": "^1.22.7",

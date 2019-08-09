@@ -9,10 +9,17 @@ const update_live_element_font_size = (
 ): void => {
   if (tex_out !== null && font_size_value !== null && font_size_unit !== null) {
     const font_size = font_size_value.value + font_size_unit.value
-    debug_printer(debug, 'update_live_element_font_size\nfont-size is: ', font_size)
+    debug_printer(
+      debug,
+      'update_live_element_font_size\nfont-size is: ',
+      font_size
+    )
     tex_out.style.fontSize = font_size
   } else {
-    debug_printer(debug, 'update_live_element_font_size\nError getting font-size')
+    debug_printer(
+      debug,
+      'update_live_element_font_size\nError getting font-size'
+    )
     debug_printer(debug, 'font_size_value is: ', font_size_value)
     debug_printer(debug, 'font_size_unit is: ', font_size_unit)
   }
@@ -78,11 +85,63 @@ const render_text = (
   }
 }
 
+const swap_classes = (
+  element: HTMLElement,
+  remove_classes: string[],
+  add_classes: string[]
+) => {
+  for (let remove_class of remove_classes) {
+    element.classList.remove(remove_class)
+  }
+  for (let add_class of add_classes) {
+    element.classList.add(add_class)
+  }
+}
+
+const change_orientation = (icon_container: HTMLDivElement, debug = true) => {
+  const icon: HTMLElement = document.querySelector(
+    '.orientation_selector i'
+  ) as HTMLElement
+  const form_container = document.querySelector(
+    '#equationpluginmodel_form > div'
+  ) as HTMLDivElement
+  const orientation_state: string = icon_container.getAttribute(
+    'data-orientation-setting'
+  ) as string
+  const icon_title_base = 'Selected orintation mode: '
+  debug_printer(
+    debug,
+    'change_orientation_icon\norientation_state is: ',
+    orientation_state
+  )
+  debug_printer(
+    debug,
+    'change_orientation_icon\form_container is: ',
+    form_container
+  )
+  if (orientation_state === 'auto') {
+    icon_container.setAttribute('data-orientation-setting', 'horizontal')
+    icon.setAttribute('title', icon_title_base + 'horizontal')
+    swap_classes(icon, ['fa-sync-alt'], ['fa-grip-horizontal'])
+    swap_classes(form_container, ['vertical_grid'], ['horizontal_grid'])
+  } else if (orientation_state === 'horizontal') {
+    icon_container.setAttribute('data-orientation-setting', 'vertical')
+    icon.setAttribute('title', icon_title_base + 'vertical')
+    swap_classes(icon, ['fa-grip-horizontal'], ['fa-grip-vertical'])
+    swap_classes(form_container, ['horizontal_grid'], ['vertical_grid'])
+  } else {
+    icon_container.setAttribute('data-orientation-setting', 'auto')
+    icon.setAttribute('title', icon_title_base + 'auto')
+    swap_classes(icon, ['fa-grip-vertical'], ['fa-sync-alt'])
+    swap_classes(form_container, ['horizontal_grid', 'vertical_grid'], [])
+  }
+}
+
 export const init_live_editor_render = (debug = true): void => {
-  const tex_in: HTMLTextAreaElement | null = document.getElementById(
+  const tex_in: HTMLTextAreaElement = document.getElementById(
     'id_tex_code'
   ) as HTMLTextAreaElement
-  const tex_out: HTMLSpanElement | null = document.getElementById(
+  const tex_out: HTMLSpanElement = document.getElementById(
     'katex_live_render_out'
   ) as HTMLSpanElement
 
@@ -90,15 +149,19 @@ export const init_live_editor_render = (debug = true): void => {
     render_text(tex_in, tex_out, debug)
   }
 
-  const font_size_value: HTMLInputElement | null = document.getElementById(
+  const font_size_value: HTMLInputElement = document.getElementById(
     'djangocms_equation_font_size_value'
   ) as HTMLInputElement
-  const font_size_unit: HTMLSelectElement | null = document.getElementById(
+  const font_size_unit: HTMLSelectElement = document.getElementById(
     'djangocms_equation_font_size_unit'
   ) as HTMLSelectElement
-  const inline_checkbox: HTMLInputElement | null = document.querySelector(
+  const inline_checkbox: HTMLInputElement = document.querySelector(
     '#id_is_inline'
   ) as HTMLInputElement
+
+  const icon_container: HTMLDivElement = document.querySelector(
+    '.orientation_selector'
+  ) as HTMLDivElement
 
   const update_font_size = () => {
     update_live_element_font_size(
@@ -114,6 +177,9 @@ export const init_live_editor_render = (debug = true): void => {
   inline_checkbox.onchange = () => {
     render_text(tex_in, tex_out, debug)
   }
+  icon_container.addEventListener('click', () => {
+    change_orientation(icon_container, (debug = true))
+  })
 
   update_font_size()
   render_text(tex_in, tex_out, debug)

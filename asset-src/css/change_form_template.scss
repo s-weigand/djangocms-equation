@@ -72,3 +72,36 @@ body.popup.app-djangocms_equation.model-equationpluginmodel #content-main {
     }
   }
 }
+
+#equationpluginmodel_form > div.vertical_grid {
+  grid-template-areas:
+    'tex_code_in tex_code_in'
+    'tex_code_out tex_code_out'
+    'advanced advanced';
+  #katex_live_render_out {
+    margin-top: -1rem;
+  }
+  > fieldset.advanced {
+    grid-area: advanced;
+    div.form-row.field-is_inline.field-font_size_value.field-font_size_unit {
+      grid-template-areas:
+        'is_inline is_inline is_inline'
+        'font_size_value font_size_value font_size_value'
+        'font_size_unit font_size_unit font_size_unit';
+    }
+  }
+}
+#equationpluginmodel_form > div.horizontal_grid {
+  grid-template-areas:
+    'tex_code_in tex_code_out'
+    'advanced advanced';
+  #katex_live_render_out {
+    margin-top: 31px;
+  }
+  > fieldset.advanced {
+    grid-area: advanced;
+    div.form-row.field-is_inline.field-font_size_value.field-font_size_unit {
+      grid-template-areas: 'is_inline font_size_value font_size_unit';
+    }
+  }
+}
