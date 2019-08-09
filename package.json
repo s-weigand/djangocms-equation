@@ -10,12 +10,14 @@
     "publish": "npm run clean && npm run build",
     "build": "npm run clean && npm run build:css && npm run build:js",
     "build:css": "parcel build --no-cache asset-src/css/change_form_template.scss --out-file change_form_template.css -d djangocms_equation/static/djangocms_equation/css --no-source-maps --public-url ./",
-    "build:js": "npm run build:change_form_template_js && npm run build:render_template_js",
+    "build:js": "npm run build:change_form_template_js && npm run build:render_equation_js && npm run build:render_equation_edit_mode_js",
     "build:change_form_template_js": "parcel build --no-cache asset-src/ts/change_form_template.ts --out-file change_form_template.js -d djangocms_equation/static/djangocms_equation/js --no-source-maps --public-url ./",
-    "build:render_template_js": "parcel build --no-cache asset-src/ts/render_template.ts --out-file render_template.js -d djangocms_equation/static/djangocms_equation/js --no-source-maps --public-url ./",
+    "build:render_equation_js": "parcel build --no-cache asset-src/ts/render_equation.ts --out-file render_equation.js -d djangocms_equation/static/djangocms_equation/js --no-source-maps --public-url ./",
+    "build:render_equation_edit_mode_js": "parcel build --no-cache asset-src/ts/render_equation_edit_mode.ts --out-file render_equation_edit_mode.js -d djangocms_equation/static/djangocms_equation/js --no-source-maps --public-url ./",
     "watch:css": "parcel watch asset-src/css/change_form_template.scss --out-file change_form_template.css -d djangocms_equation/static/djangocms_equation/css --public-url ./",
     "watch:change_form_template_js": "parcel watch asset-src/ts/change_form_template.ts --out-file change_form_template.js -d djangocms_equation/static/djangocms_equation/js --public-url ./",
-    "watch:render_template_js": "parcel watch asset-src/ts/render_template.ts --out-file render_template.js -d djangocms_equation/static/djangocms_equation/js --public-url ./",
+    "watch:render_equation_js": "parcel watch asset-src/ts/render_equation.ts --out-file render_equation.js -d djangocms_equation/static/djangocms_equation/js --public-url ./",
+    "watch:render_equation_edit_mode_js": "parcel watch asset-src/ts/render_equation_edit_mode.ts --out-file render_equation_edit_mode.js -d djangocms_equation/static/djangocms_equation/js --public-url ./",
     "clean": "rm -rf djangocms_equation/static/djangocms_equation/*"
   },
   "repository": {
@@ -38,7 +40,8 @@
   },
   "homepage": "https://github.com/s-weigand/djangocms-equation",
   "dependencies": {
-    "katex": "^0.10.1"
+    "katex": "^0.10.1",
+    "materialize-css": "^1.0.0-rc.2"
   },
   "devDependencies": {
     "@types/katex": "^0.10.1",

@@ -10,6 +10,11 @@ body.popup.app-djangocms_equation.model-equationpluginmodel #content-main {
   float: none;
 }
 
+#katex_live_render_out {
+  grid-area: tex_code_out;
+  margin-top: 31px;
+}
+
 #equationpluginmodel_form > div {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -24,6 +29,9 @@ body.popup.app-djangocms_equation.model-equationpluginmodel #content-main {
       'tex_code_in tex_code_in'
       'tex_code_out tex_code_out'
       'advanced advanced';
+    #katex_live_render_out {
+      margin-top: -1rem;
+    }
   }
 
   fieldset.tex_code_in {
@@ -63,8 +71,4 @@ body.popup.app-djangocms_equation.model-equationpluginmodel #content-main {
       }
     }
   }
-}
-#katex_live_render_out {
-  grid-area: tex_code_out;
-  margin-top: 31px;
 }

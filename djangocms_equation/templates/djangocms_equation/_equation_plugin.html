@@ -5,11 +5,23 @@
 <link rel="stylesheet" href="{% static 'djangocms_equation/css/change_form_template.css' %}">
 {% endaddtoblock %}
 
+{% if request.toolbar and request.toolbar.edit_mode_active or request.toolbar and request.toolbar.edit_mode %}
+  {% addtoblock "js" %}
+    {% spaceless %}
+      <script src="{% static 'djangocms_equation/js/render_equation_edit_mode.js' %}"
+              class="cms-execute-js-to-render cms-trigger-event-document-DOMContentLoaded">
+      </script>
+    {% endspaceless %}
+  {% endaddtoblock %}
+
+{% else %}
 {% addtoblock "js" %}
-  <script src="{% static 'djangocms_equation/js/render_template.js' %}"
-          class="cms-execute-js-to-render cms-trigger-event-document-DOMContentLoaded">
-  </script>
-{% endaddtoblock %}
+    {% spaceless %}
+      <script src="{% static 'djangocms_equation/js/render_equation.js' %}">
+      </script>
+    {% endspaceless %}
+  {% endaddtoblock %}
+{% endif %}
 
 <span class="katex {% if instance.is_inline %}inline{% endif %}"
       style="font-size:{{instance.font_size_value|format_float_dot_delimiter}}{{instance.font_size_unit}};">
