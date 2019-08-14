@@ -25,9 +25,9 @@ html{
 (function($) {
 // CMS.$ will be passed for $
 $(document).ready(function () {
-    console.log("change_form.html is loading")
-    let katex_live_render_out = document.querySelector("#katex_live_render_out")
-    let new_parent = document.querySelector("#equationpluginmodel_form > div").appendChild(katex_live_render_out)
+  console.log("change_form.html is loading")
+  let katex_live_render_out = document.querySelector("#katex_live_render_out")
+  let new_parent = document.querySelector("#equationpluginmodel_form > div").appendChild(katex_live_render_out)
 
 	CMS.API.Helpers.csrf('{{ csrf_token }}');
 });
@@ -36,9 +36,11 @@ $(document).ready(function () {
 {% endblock %}
 
 {% block content %}
-
-  <div class="orientation_selector" data-orientation-setting="auto">
-    <i  class="fa fa-sync-alt" aria-hidden="true" title="Selected orintation mode: auto"></i>
+  <div class="help-container">
+    <div class="orientation_selector" data-orientation-setting="auto">
+      <i  class="fa fa-sync-alt" aria-hidden="true" title="Selected orintation mode: auto"></i>
+    </div>
+    <a href="https://katex.org/docs/supported.html" target="_blank">Supported commands</a>
   </div>
 
   {{ block.super }}

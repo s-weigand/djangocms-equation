@@ -15,6 +15,17 @@ body.popup.app-djangocms_equation.model-equationpluginmodel #content-main {
   margin-top: 31px;
 }
 
+#content > div.help-container {
+  display: flex;
+  a {
+    margin-left: 0.5rem;
+  }
+  .orientation_selector {
+    width: 1rem;
+    height: 1rem;
+  }
+}
+
 #equationpluginmodel_form > div {
   display: grid;
   grid-template-columns: 1fr 1fr;
