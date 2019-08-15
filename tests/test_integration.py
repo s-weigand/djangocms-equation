@@ -111,10 +111,13 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
         cls.wait.until(lambda driver: driver.find_element_by_link_text(link_text))
         return cls.browser.find_element_by_link_text(link_text)
 
-    def wait_for_element_to_disapear(self, css_selector):
+    @retry_on_browser_exception(
+        max_retry=1, exceptions=(StaleElementReferenceException, NoSuchElementException)
+    )
+    def wait_for_element_to_disappear(self, css_selector):
         try:
             self.browser.find_element_by_css_selector(css_selector)
-        except StaleElementReferenceException:
+        except (StaleElementReferenceException, NoSuchElementException):
             pass
         else:
             if self.browser.find_element_by_css_selector(css_selector).is_displayed():
@@ -124,7 +127,8 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
                     ).is_displayed()
                 )
 
-    def wait_for_element_to_be_visable(self, css_selector):
+    @retry_on_browser_exception(max_retry=1, exceptions=(StaleElementReferenceException))
+    def wait_for_element_to_be_visible(self, css_selector):
         try:
             self.browser.find_element_by_css_selector(css_selector)
         except StaleElementReferenceException:
@@ -189,7 +193,7 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
 
     def logout_user(self):
         # visiting the logout link is a fallback since FireFox
-        # sometimes doesn't logout properly by just deleting the coockies
+        # sometimes doesn't logout properly by just deleting the cookies
         self.browser.get(self.live_server_url + "/admin/logout/")
         # self.browser.delete_all_cookies()
 
@@ -271,7 +275,7 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
         )
         add_plugin_btn.click()
         # #### Firefox Hack, since it fails sometimes to open the modal
-        self.wait_for_element_to_be_visable(".cms-modal")
+        self.wait_for_element_to_be_visible(".cms-modal")
         # prevent scroll errors
         quick_search = self.wait_get_element_css(".cms-quicksearch input")
         quick_search.click()
@@ -303,6 +307,30 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
                 '.cms-toolbar-item-cms-mode-switcher a[href="?edit"]'
             )
             content_link.click()
+
+    @retry_on_browser_exception(
+        max_retry=2,
+        exceptions=(
+            StaleElementReferenceException,
+            TimeoutException,
+            NoSuchElementException,
+        ),
+    )
+    def click_element_css(self, css_selector):
+        element = self.wait_get_element_css(css_selector)
+        element.click()
+
+    def publish_and_take_scree_shot(self, not_js_injection_hack, test_name):
+        if not_js_injection_hack:
+            self.click_element_css(".cms-btn-publish")
+            self.wait_for_element_to_disappear(".cms-btn-publish")
+            self.logout_user()
+            self.wait_get_element_css(".djangocms-admin-style")
+            self.browser.get(self.live_server_url)
+            self.wait_get_element_css("span.katex")
+            self.screenshot.take(
+                "equation_rendered_no_edit_mode.png", test_name, take_screen_shot=True
+            )
 
     def create_standalone_equation(
         self,
@@ -341,7 +369,7 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
         save_btn = self.wait_get_element_css(".cms-btn.cms-btn-action.default")
         save_btn.click()
 
-        self.wait_for_element_to_disapear(".cms-modal")
+        self.wait_for_element_to_disappear(".cms-modal")
 
         self.hide_structure_mode_cms_34()
 
@@ -349,6 +377,7 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
         self.screenshot.take(
             "equation_rendered.png", test_name, take_screen_shot=not_js_injection_hack
         )
+        self.publish_and_take_scree_shot(not_js_injection_hack, test_name)
 
     def create_text_equation(
         self,
@@ -412,7 +441,7 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
 
             # making sure that equation properly propagated, to the text editor
             switch_to_cke_wysiwyg_frame()
-            # self.wait_for_element_to_be_visable("span.katex")
+            # self.wait_for_element_to_be_visible("span.katex")
             self.wait_get_element_css("span.katex")
 
             switch_to_text_edit_frame()
@@ -448,12 +477,13 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
         save_equation_text_plugin()
 
         self.browser.switch_to.default_content()
-        self.wait_for_element_to_disapear(".cms-modal")
+        self.wait_for_element_to_disappear(".cms-modal")
 
         self.hide_structure_mode_cms_34()
 
         self.wait_get_element_css("span.katex-html")
         self.screenshot.take("equation_rendered.png", test_name, take_screen_shot=True)
+        self.publish_and_take_scree_shot(True, test_name)
 
     def delete_plugin(self, delete_all=True):
         self.open_structure_board()
@@ -476,7 +506,7 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
             )
             self.browser.refresh()
             # self.delete_plugin(delete_all=True)
-            # self.wait_for_element_to_disapear(".cms-messages")
+            # self.wait_for_element_to_disappear(".cms-messages")
             # self.screenshot.hide_elements([".cms-modal-iframe"])
             # # adding the css back
             # script_code = (
@@ -498,7 +528,7 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
     def test_login_user(self):
         self.login_user(take_screen_shot=True)
         self.browser.get(self.live_server_url + "/?edit")
-        self.screenshot.take("start_page_user_loged_in.png", "test_login_user")
+        self.screenshot.take("start_page_user_logged_in.png", "test_login_user")
         cms_navigation = self.wait_get_element_css(".cms-toolbar-item-navigation span")
         self.assertEquals(
             cms_navigation.text,
@@ -510,7 +540,7 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
         self.login_user()
         self.logout_user()
         self.browser.get(self.live_server_url)
-        self.screenshot.take("start_page_user_loged_out.png", "test_logout_user")
+        self.screenshot.take("start_page_user_logged_out.png", "test_logout_user")
         self.assertRaises(
             NoSuchElementException,
             self.browser.find_element_by_css_selector,
