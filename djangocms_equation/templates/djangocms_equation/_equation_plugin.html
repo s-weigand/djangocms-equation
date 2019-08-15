@@ -15,11 +15,21 @@
   {% endaddtoblock %}
 
 {% else %}
-{% addtoblock "js" %}
+  {% addtoblock "js" %}
     {% spaceless %}
       <script src="{% static 'djangocms_equation/js/render_equation.js' %}">
       </script>
     {% endspaceless %}
+  {% endaddtoblock %}
+{% endif %}
+
+{% if katex_allow_copy %}
+  {% addtoblock "css" %}
+    <link href="{% static 'djangocms_equation/css/copy-tex.min.css' %}" rel="stylesheet" type="text/css">
+  {% endaddtoblock %}
+
+  {% addtoblock "js" %}
+    <script src="{% static 'djangocms_equation/js/copy-tex.min.js' %}"></script>
   {% endaddtoblock %}
 {% endif %}
 

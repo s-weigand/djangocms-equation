@@ -13,6 +13,7 @@ HELPER_SETTINGS = {
     "CKEDITOR_SETTINGS": {
         "contentsCss": ["/static/djangocms_equation/css/change_form_template.css"]
     },
+    "KATEX_EQUATION_SETTINGS": {"allow_copy": True},
 }
 
 

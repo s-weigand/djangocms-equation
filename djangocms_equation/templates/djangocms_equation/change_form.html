@@ -7,7 +7,9 @@
 <script src="{% static_with_version "cms/js/dist/bundle.admin.base.min.js" %}"></script>
 
 <link rel="stylesheet" href="{% static 'djangocms_equation/css/change_form_template.css' %}">
-<link rel="stylesheet" href="https://pagecdn.io/lib/font-awesome/5.10.0-12/css/all.min.css" integrity="sha256-cC4ByuxbguozEVx8jcKy94MFiGvxN9GwjCqZ8f3+yBk=" crossorigin="anonymous">
+<link rel="stylesheet" href="https://pagecdn.io/lib/font-awesome/5.10.0-12/css/all.min.css"
+      integrity="sha256-cC4ByuxbguozEVx8jcKy94MFiGvxN9GwjCqZ8f3+yBk="
+      crossorigin="anonymous">
 <script src="{% static 'djangocms_equation/js/change_form_template.js' %}" ></script>
 
 <style>
@@ -25,7 +27,6 @@ html{
 (function($) {
 // CMS.$ will be passed for $
 $(document).ready(function () {
-  console.log("change_form.html is loading")
   let katex_live_render_out = document.querySelector("#katex_live_render_out")
   let new_parent = document.querySelector("#equationpluginmodel_form > div").appendChild(katex_live_render_out)
 
@@ -40,7 +41,10 @@ $(document).ready(function () {
     <div class="orientation_selector" data-orientation-setting="auto">
       <i  class="fa fa-sync-alt" aria-hidden="true" title="Selected orintation mode: auto"></i>
     </div>
-    <a href="https://katex.org/docs/supported.html" target="_blank">Supported commands</a>
+    <span>Supported commands: </span>
+    <a href="https://katex.org/docs/supported.html" target="_blank">KaTeX</a>
+    <span> / </span>
+    <a href="https://mhchem.github.io/MathJax-mhchem/" target="_blank">mhchem</a>
   </div>
 
   {{ block.super }}

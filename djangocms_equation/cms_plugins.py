@@ -9,6 +9,7 @@ from cms.plugin_pool import plugin_pool
 
 from .forms import EquationForm
 from .models import EquationPluginModel
+from .settings import KATEX_EQUATION_SETTINGS
 
 
 @plugin_pool.register_plugin  # register the plugin
@@ -56,7 +57,13 @@ class EquationPlugin(CMSPluginBase):
 
         if not self.is_in_text_editor(instance):
             instance.is_inline = False
-        context.update({"instance": instance, "placeholder": placeholder})
+        context.update(
+            {
+                "instance": instance,
+                "placeholder": placeholder,
+                "katex_allow_copy": KATEX_EQUATION_SETTINGS["allow_copy"],
+            }
+        )
         return context
 
     def icon_src(self, instance):

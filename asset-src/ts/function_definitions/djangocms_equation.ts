@@ -2,6 +2,8 @@ import renderMathInElement, {
   RenderMathInElementOptions,
 } from 'katex/dist/contrib/auto-render'
 
+import 'katex/contrib/mhchem/mhchem'
+
 export const debug_printer = (debug = true, ...args: any[]): void => {
   if (process.env.NODE_ENV === 'development' && debug) {
     // Or, `process.env.NODE_ENV !== 'production'`
@@ -24,7 +26,6 @@ export const render_full_page = (target = document.body): void => {
     ...katex_delimiters_setting,
   })
 }
-
 
 export const init_render_edit_mode = (debug = true): void => {
   debug_printer(debug, 'init_render_edit_mode did run')
@@ -49,7 +50,10 @@ export const init_render_edit_mode = (debug = true): void => {
     if (structure_content !== null) {
       // check if the element is visible
       if (structure_content.offsetParent !== null) {
-        debug_printer(debug, 'init_render_edit_mode\ncms_btn clicked => rendering all')
+        debug_printer(
+          debug,
+          'init_render_edit_mode\ncms_btn clicked => rendering all'
+        )
         renderMathInElement(structure_content, {
           throwOnError: false,
           ...katex_delimiters_setting,

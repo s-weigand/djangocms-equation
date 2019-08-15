@@ -17,8 +17,9 @@ body.popup.app-djangocms_equation.model-equationpluginmodel #content-main {
 
 #content > div.help-container {
   display: flex;
-  a {
+  span {
     margin-left: 0.5rem;
+    margin-right: 0.5rem;
   }
   .orientation_selector {
     width: 1rem;

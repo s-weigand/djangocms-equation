@@ -1,4 +1,4 @@
-import { render } from 'katex'
+import katex from 'katex'
 import { debug_printer } from './djangocms_equation'
 
 const update_live_element_font_size = (
@@ -78,7 +78,7 @@ const render_text = (
     }
     const displayMode = use_displayMode_rendering(true)
     debug_printer(debug, 'render_text\ntex_code to render: ', tex_code)
-    render(tex_code, tex_out, {
+    katex.render(tex_code, tex_out, {
       throwOnError: false,
       displayMode: displayMode,
     })
@@ -116,7 +116,7 @@ const change_orientation = (icon_container: HTMLDivElement, debug = true) => {
   )
   debug_printer(
     debug,
-    'change_orientation_icon\form_container is: ',
+    'change_orientation_icon\nform_container is: ',
     form_container
   )
   if (orientation_state === 'auto') {
@@ -178,7 +178,7 @@ export const init_live_editor_render = (debug = true): void => {
     render_text(tex_in, tex_out, debug)
   }
   icon_container.addEventListener('click', () => {
-    change_orientation(icon_container, (debug = true))
+    change_orientation(icon_container, (debug = debug))
   })
 
   update_font_size()

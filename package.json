@@ -8,7 +8,7 @@
   },
   "scripts": {
     "publish": "npm run clean && npm run build",
-    "build": "npm run clean && npm run build:css && npm run build:js",
+    "build": "npm run build:css && npm run build:js && npm run copy_katex_assets",
     "build:css": "parcel build --no-cache asset-src/css/change_form_template.scss --out-file change_form_template.css -d djangocms_equation/static/djangocms_equation/css --no-source-maps --public-url ./",
     "build:js": "npm run build:change_form_template_js && npm run build:render_equation_js && npm run build:render_equation_edit_mode_js",
     "build:change_form_template_js": "parcel build --no-cache asset-src/ts/change_form_template.ts --out-file change_form_template.js -d djangocms_equation/static/djangocms_equation/js --no-source-maps --public-url ./",
@@ -18,6 +18,9 @@
     "watch:change_form_template_js": "parcel watch asset-src/ts/change_form_template.ts --out-file change_form_template.js -d djangocms_equation/static/djangocms_equation/js --public-url ./",
     "watch:render_equation_js": "parcel watch asset-src/ts/render_equation.ts --out-file render_equation.js -d djangocms_equation/static/djangocms_equation/js --public-url ./",
     "watch:render_equation_edit_mode_js": "parcel watch asset-src/ts/render_equation_edit_mode.ts --out-file render_equation_edit_mode.js -d djangocms_equation/static/djangocms_equation/js --public-url ./",
+    "copy_katex_assets": "npm run copy_katex_assets:copy-tex_js && npm run copy_katex_assets:copy-tex_css",
+    "copy_katex_assets:copy-tex_js": "cp node_modules/katex/dist/contrib/copy-tex.min.js djangocms_equation/static/djangocms_equation/js/copy-tex.min.js",
+    "copy_katex_assets:copy-tex_css": "cp node_modules/katex/dist/contrib/copy-tex.min.css djangocms_equation/static/djangocms_equation/css/copy-tex.min.css",
     "clean": "rm -rf djangocms_equation/static/djangocms_equation/*"
   },
   "repository": {
@@ -39,8 +42,7 @@
     "url": "https://github.com/s-weigand/djangocms-equation/issues"
   },
   "homepage": "https://github.com/s-weigand/djangocms-equation",
-  "dependencies": {
-  },
+  "dependencies": {},
   "devDependencies": {
     "@fortawesome/fontawesome-free": "^5.10.1",
     "@types/katex": "^0.10.1",
