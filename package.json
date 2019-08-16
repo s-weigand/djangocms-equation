@@ -19,7 +19,8 @@
     "watch:change_form_template_js": "parcel watch asset-src/ts/change_form_template.ts --out-file change_form_template.js -d djangocms_equation/static/djangocms_equation/js --public-url ./",
     "watch:render_equation_js": "parcel watch asset-src/ts/render_equation.ts --out-file render_equation.js -d djangocms_equation/static/djangocms_equation/js --public-url ./",
     "watch:render_equation_edit_mode_js": "parcel watch asset-src/ts/render_equation_edit_mode.ts --out-file render_equation_edit_mode.js -d djangocms_equation/static/djangocms_equation/js --public-url ./",
-    "copy_katex_assets": "cp node_modules/katex/dist/contrib/copy-tex.min.js djangocms_equation/static/djangocms_equation/js/copy-tex.min.js",
+    "watch:copy_tex_js": "parcel watch asset-src/ts/copy_tex.ts --out-file copy_tex.js -d djangocms_equation/static/djangocms_equation/js --public-url ./",
+    "copy_katex_assets": "cp node_modules/katex/dist/contrib/copy-tex.min.css djangocms_equation/static/djangocms_equation/css/copy-tex.min.css",
     "clean": "rm -rf djangocms_equation/static/djangocms_equation/*"
   },
   "repository": {
@@ -43,7 +44,6 @@
   "homepage": "https://github.com/s-weigand/djangocms-equation",
   "dependencies": {},
   "devDependencies": {
-    "@fortawesome/fontawesome-free": "^5.10.1",
     "@types/katex": "^0.10.1",
     "@types/node": "^12.7.1",
     "katex": "^0.10.1",

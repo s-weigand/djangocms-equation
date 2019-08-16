@@ -6,6 +6,8 @@
 // @ts-ignore
 import katexReplaceWithTex from 'katex/contrib/copy-tex/katex2tex'
 
+import { debug_printer } from './function_definitions/djangocms_equation'
+
 /**
  * Function to strip additional newline character which were added incorrectly.
  *
@@ -13,7 +15,9 @@ import katexReplaceWithTex from 'katex/contrib/copy-tex/katex2tex'
  */
 
 const replace_empty_lines = (tex_code: string) => {
-  return tex_code.replace(/(\n\s*[\n\s]+\n)/g, '\n\n')
+  let striped_string = tex_code.replace(/(\n\s*[\n\s]+\n)/g, '\n\n')
+  striped_string = striped_string.replace(/([\n\s]+\$[\s\n]+)/g, ' $$ ')
+  return striped_string.replace(/\$\$[\n\s]*(.+?)[\s\n]*\$\$/g, '\n$$$$ $1 $$$$\n')
 }
 
 // Global copy handler to modify behavior on .katex elements.
@@ -23,7 +27,9 @@ document.addEventListener('copy', function(event: ClipboardEvent) {
     return // default action OK if selection is empty
   }
   const fragment = selection.getRangeAt(0).cloneContents()
+  debug_printer(true, 'copy_tex:\n fragment is:', fragment)
   if (!fragment.querySelector('.katex-mathml')) {
+    debug_printer(true, 'copy_tex:\n Nothing to replace!')
     return // default action OK if no .katex-mathml elements
   }
   // Preserve usual HTML copy/paste behavior.
