@@ -9,6 +9,7 @@ from django.conf import settings
 
 
 from selenium.webdriver import Chrome, Firefox
+from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.remote.webdriver import WebDriver as RemoteWebdriver
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from urllib3.exceptions import NewConnectionError, MaxRetryError
@@ -54,10 +55,15 @@ def get_browser_instance(
             "Only the browser_names 'Chrome' and 'FireFox' are supported"
         )
     if interactive and browser_name == "FireFox" and "TRAVIS" not in os.environ:
+        options = Options()
+        # allows to copy paste in console when in interactive session
+        options.preferences.update({"devtools.selfxss.count": 100})
         return Firefox(
+            options=options,
             executable_path=GeckoDriverManager().install(),
             desired_capabilities=DesiredCapabilities.FIREFOX,
         )
+
     elif interactive and "TRAVIS" not in os.environ:
         return Chrome(
             ChromeDriverManager().install(),
@@ -99,11 +105,14 @@ def retry_on_browser_exception(
         def func_wrapper(*args, **kwargs):
             if "test_name" in kwargs:
                 func_wrapper.test_name = kwargs["test_name"]
-            if func_wrapper.counter <= max_retry:
-                try:
-                    return func(*args, **kwargs)
-                except exceptions as e:
-                    error_information = "In function: `{}`".format(func.__name__)
+            try:
+                return func(*args, **kwargs)
+            except exceptions as e:
+                if func_wrapper.counter <= max_retry:
+
+                    error_information = "In function: `{}`, args:{}, kwargs: {}`".format(
+                        func.__name__, args, kwargs
+                    )
                     if func_wrapper.test_name != "":
                         error_information += ", run by the test: {}".format(
                             func_wrapper.test_name
@@ -114,6 +123,8 @@ def retry_on_browser_exception(
                     print(e)
                     func_wrapper.counter += 1
                     return func_wrapper(*args, **kwargs)
+                else:
+                    raise e
 
         func_wrapper.counter = 0
         func_wrapper.test_name = test_name

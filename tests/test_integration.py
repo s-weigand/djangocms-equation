@@ -127,7 +127,9 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
                     ).is_displayed()
                 )
 
-    @retry_on_browser_exception(max_retry=1, exceptions=(StaleElementReferenceException))
+    @retry_on_browser_exception(
+        max_retry=1, exceptions=(StaleElementReferenceException)
+    )
     def wait_for_element_to_be_visible(self, css_selector):
         try:
             self.browser.find_element_by_css_selector(css_selector)
@@ -151,28 +153,21 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
         if (INTERACTIVE and "TRAVIS" not in os.environ) or allways_sleep:
             sleep(time)
 
-    def is_logged_in(self):
+    def element_exists(self, css_selector):
         try:
-            self.browser.find_element_by_css_selector(".cms-btn-switch-save")
+            self.browser.find_element_by_css_selector(css_selector)
             return True
         except NoSuchElementException:
             return False
 
     def login_user(self, take_screen_shot=False):
-        @retry_on_browser_exception(exceptions=(TimeoutException))
-        def enter_edit_mode():
-            # check if the user is in edit mode
-            if not self.is_logged_in():
-                edit_btn = self.wait_get_element_css(".cms-btn-switch-edit")
-                edit_btn.click()
-
-        if not self.is_logged_in():
+        if not self.element_exists(".cms-btn-switch-save"):
             self.browser.get(self.live_server_url + "/?edit")
             try:
                 username = self.wait_get_element_css("#id_username")
-                username.send_keys(self._admin_user_username)
+                username.send_keys(self._admin_user_username)  # admin
                 password = self.wait_get_element_css("#id_password")
-                password.send_keys(self._admin_user_password)
+                password.send_keys(self._admin_user_password)  # admin
                 self.screenshot.take(
                     "added_credentials.png",
                     "test_login_user",
@@ -189,7 +184,6 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
                 print("Didn't find `form.cms-form-login`.")
                 self.screenshot.take("login_fail.png", "login_fail")
                 raise TimeoutException(e.msg)
-        enter_edit_mode()
 
     def logout_user(self):
         # visiting the logout link is a fallback since FireFox
@@ -197,16 +191,44 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
         self.browser.get(self.live_server_url + "/admin/logout/")
         # self.browser.delete_all_cookies()
 
-    @retry_on_browser_exception(exceptions=(ElementNotInteractableException))
+    @retry_on_browser_exception(
+        exceptions=(ElementNotInteractableException, StaleElementReferenceException)
+    )
     def open_structure_board(
         self, self_test=False, test_name="test_create_standalone_equation"
     ):
-        structure_board = self.wait_get_element_css(".cms-structure")
+        if self.element_exists("a.cms-btn-switch-edit"):
+            self.click_element_css("a.cms-btn-switch-edit")
+
+        structure_board = self.wait_get_element_css(
+            ".cms-structure"
+        )
         if not structure_board.is_displayed():
-            sidebar_toggle_btn = self.wait_get_element_css(
-                ".cms-toolbar-item-cms-mode-switcher a"
-            )
-            sidebar_toggle_btn.click()
+            # sidebar_toggle_btn
+            self.click_element_css(".cms-toolbar-item-cms-mode-switcher a")
+        # This is needed so structure_board won't be stale
+        structure_board = self.wait_get_element_css(
+            ".cms-structure"
+        )
+        if not structure_board.is_displayed():
+            if self.element_exists("a.cms-btn-switch-edit"):
+                self.click_element_css("a.cms-btn-switch-edit")
+            self.open_structure_board(self_test=self_test, test_name=test_name)
+
+    def change_form_orientation(self, test_name="test_equation_orientation"):
+        orientation_changer = self.wait_get_element_css(".orientation_selector")
+        orientation_changer.click()
+        self.screenshot.take(
+            "horizontal_orientation.png", test_name, take_screen_shot=True
+        )
+        orientation_changer.click()
+        self.screenshot.take(
+            "vertical_orientation.png", test_name, take_screen_shot=True
+        )
+        orientation_changer.click()
+        self.screenshot.take(
+            "default_orientation_auto_again.png", test_name, take_screen_shot=True
+        )
 
     @retry_on_browser_exception(exceptions=(TimeoutException))
     def enter_equation(
@@ -218,10 +240,10 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
         is_inline=False,
         test_name="test_create_standalone_equation",
         not_js_injection_hack=True,
+        test_orientation=False,
     ):
-        latex_input = self.wait_get_element_css("#id_tex_code")
         # the click is needed for firefox to select the element
-        latex_input.click()
+        latex_input = self.click_element_css("#id_tex_code")
         self.set_text_input_value(latex_input, tex_code)
         if font_size_value != 1 or font_size_unit != "rem" or is_inline is True:
             try:
@@ -231,8 +253,8 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
             except NoSuchElementException:
                 pass
             else:
-                advanced_setting_toggle = self.wait_get_element_css(".collapse-toggle")
-                advanced_setting_toggle.click()
+                # advanced_setting_toggle
+                self.click_element_css(".collapse-toggle")
 
             if font_size_value != 1:
                 font_size_value_input = self.wait_get_element_css(
@@ -242,24 +264,24 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
                 font_size_value_input.send_keys(str(font_size_value))
 
             if font_size_unit != "rem":
-                font_size_unit_input = self.wait_get_element_css(
-                    "#djangocms_equation_font_size_unit"
-                )
-                font_size_unit_input.click()
-                unit_option = self.wait_get_element_css(
+                # font_size_unit_input
+                self.click_element_css("#djangocms_equation_font_size_unit")
+                # unit_option
+                self.click_element_css(
                     "#djangocms_equation_font_size_unit option[value={}]".format(
                         font_size_unit
                     )
                 )
-                unit_option.click()
 
             if is_inline is True:
-                is_inline_input = self.wait_get_element_css("#id_is_inline")
-                is_inline_input.click()
+                # is_inline_input
+                self.click_element_css("#id_is_inline")
             self.sleep(2)
         self.screenshot.take(
             "equation_entered.png", test_name, take_screen_shot=not_js_injection_hack
         )
+        if test_orientation:
+            self.change_form_orientation(test_name=test_name)
 
     @retry_on_browser_exception(
         exceptions=(StaleElementReferenceException, TimeoutException)
@@ -270,15 +292,13 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
         test_name="test_create_standalone_equation",
         plugin_to_add="equation",
     ):
-        add_plugin_btn = self.wait_get_element_css(
-            ".cms-submenu-btn.cms-submenu-add.cms-btn"
-        )
-        add_plugin_btn.click()
+        # add_plugin_btn
+        self.click_element_css(".cms-submenu-btn.cms-submenu-add.cms-btn")
         # #### Firefox Hack, since it fails sometimes to open the modal
         self.wait_for_element_to_be_visible(".cms-modal")
         # prevent scroll errors
-        quick_search = self.wait_get_element_css(".cms-quicksearch input")
-        quick_search.click()
+        # quick_search
+        self.click_element_css(".cms-quicksearch input")
         # since the element sometimes isn't visible the selection is
         # done via with javascript
         self.browser.execute_script(
@@ -303,10 +323,10 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
     @retry_on_browser_exception(max_retry=1)
     def hide_structure_mode_cms_34(self):
         if self.cms_version_tuple < (3, 5):
-            content_link = self.wait_get_element_css(
+            # content_link
+            self.click_element_css(
                 '.cms-toolbar-item-cms-mode-switcher a[href="?edit"]'
             )
-            content_link.click()
 
     @retry_on_browser_exception(
         max_retry=2,
@@ -319,18 +339,27 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
     def click_element_css(self, css_selector):
         element = self.wait_get_element_css(css_selector)
         element.click()
+        return element
 
-    def publish_and_take_scree_shot(self, not_js_injection_hack, test_name):
+    @retry_on_browser_exception(
+        max_retry=2, exceptions=(ElementNotInteractableException)
+    )
+    def publish_and_take_screen_shot(self, not_js_injection_hack, test_name):
         if not_js_injection_hack:
-            self.click_element_css(".cms-btn-publish")
-            self.wait_for_element_to_disappear(".cms-btn-publish")
-            self.logout_user()
-            self.wait_get_element_css(".djangocms-admin-style")
-            self.browser.get(self.live_server_url)
-            self.wait_get_element_css("span.katex")
-            self.screenshot.take(
-                "equation_rendered_no_edit_mode.png", test_name, take_screen_shot=True
-            )
+            self.click_element_css(".cms-btn-publish-active")
+            self.wait_for_element_to_disappear(".cms-btn-publish-active")
+            if not self.element_exists(".cms-btn-publish-active"):
+                self.logout_user()
+                self.wait_get_element_css(".djangocms-admin-style")
+                self.browser.get(self.live_server_url)
+                self.wait_get_element_css("span.katex")
+                self.screenshot.take(
+                    "equation_rendered_no_edit_mode.png",
+                    test_name,
+                    take_screen_shot=True,
+                )
+            else:
+                raise ElementNotInteractableException("Could publish page")
 
     def create_standalone_equation(
         self,
@@ -341,6 +370,7 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
         is_inline=False,
         test_name="test_create_standalone_equation",
         not_js_injection_hack=True,
+        test_orientation=False,
     ):
 
         self.login_user()
@@ -364,20 +394,25 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
             is_inline=is_inline,
             test_name=test_name,
             not_js_injection_hack=not_js_injection_hack,
+            test_orientation=test_orientation,
         )
         self.browser.switch_to.default_content()
-        save_btn = self.wait_get_element_css(".cms-btn.cms-btn-action.default")
-        save_btn.click()
+
+        # save_btn
+        self.click_element_css(".cms-btn.cms-btn-action.default")
 
         self.wait_for_element_to_disappear(".cms-modal")
 
         self.hide_structure_mode_cms_34()
 
         self.wait_get_element_css("span.katex")
-        self.screenshot.take(
-            "equation_rendered.png", test_name, take_screen_shot=not_js_injection_hack
-        )
-        self.publish_and_take_scree_shot(not_js_injection_hack, test_name)
+        if not test_orientation:
+            self.screenshot.take(
+                "equation_rendered.png",
+                test_name,
+                take_screen_shot=not_js_injection_hack,
+            )
+            self.publish_and_take_screen_shot(not_js_injection_hack, test_name)
 
     def create_text_equation(
         self,
@@ -387,6 +422,7 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
         font_size_unit="rem",
         is_inline=False,
         test_name="test_create_text_equation",
+        test_orientation=False,
     ):
         def switch_to_text_edit_frame():
             self.browser.switch_to.default_content()
@@ -410,10 +446,9 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
                 "iframe.cke_panel_frame"
             )
             self.browser.switch_to.frame(text_edit_pannel_iframe)
-            equation_option = self.wait_get_element_css(
-                '.cke_panel_listItem a[rel="EquationPlugin"]'
-            )
-            equation_option.click()
+
+            # equation_options
+            self.click_element_css('.cke_panel_listItem a[rel="EquationPlugin"]')
             switch_to_text_edit_frame()
             equation_edit_iframe = self.wait_get_element_css(
                 "iframe.cke_dialog_ui_html"
@@ -435,23 +470,22 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
         def save_equation_text_plugin():
             switch_to_text_edit_frame()
 
-            OK_btn = self.wait_get_element_css(".cke_dialog_ui_button_ok")
-            OK_btn.click()
-            # self.sleep()
+            # OK_btn
+            self.click_element_css(".cke_dialog_ui_button_ok")
 
             # making sure that equation properly propagated, to the text editor
             switch_to_cke_wysiwyg_frame()
-            # self.wait_for_element_to_be_visible("span.katex")
             self.wait_get_element_css("span.katex")
 
             switch_to_text_edit_frame()
-            self.screenshot.take(
-                "equation_in_text_editor.png", test_name, take_screen_shot=self_test
-            )
+            if not test_orientation:
+                self.screenshot.take(
+                    "equation_in_text_editor.png", test_name, take_screen_shot=True
+                )
 
             self.browser.switch_to.default_content()
-            save_btn = self.wait_get_element_css(".cms-btn.cms-btn-action.default")
-            save_btn.click()
+            # save_btn
+            self.click_element_css(".cms-btn.cms-btn-action.default")
 
         self.login_user()
         self.open_structure_board(self_test=self_test, test_name=test_name)
@@ -472,6 +506,7 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
             is_inline=is_inline,
             test_name=test_name,
             not_js_injection_hack=True,
+            test_orientation=test_orientation,
         )
 
         save_equation_text_plugin()
@@ -482,8 +517,12 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
         self.hide_structure_mode_cms_34()
 
         self.wait_get_element_css("span.katex-html")
-        self.screenshot.take("equation_rendered.png", test_name, take_screen_shot=True)
-        self.publish_and_take_scree_shot(True, test_name)
+
+        if not test_orientation:
+            self.screenshot.take(
+                "equation_rendered.png", test_name, take_screen_shot=True
+            )
+            self.publish_and_take_screen_shot(True, test_name)
 
     def delete_plugin(self, delete_all=True):
         self.open_structure_board()
@@ -496,13 +535,15 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
             self.browser.execute_script(
                 'document.querySelector("a[data-rel=delete]").click()'
             )
-            delete_confirm = self.wait_get_element_css(".deletelink")
-            delete_confirm.click()
+            # delete_confirm
+            self.click_element_css(".deletelink")
 
     def js_injection_hack(self):
-        if self.cms_version_tuple < (3, 7):
+        patched_cms_version = (3, 8)
+        if self.cms_version_tuple < patched_cms_version:
             self.create_standalone_equation(
-                tex_code="js~injection~hack~for~cms<3.7", not_js_injection_hack=False
+                tex_code="js~injection~hack~for~cms<{}.{}".format(*patched_cms_version),
+                not_js_injection_hack=False,
             )
             self.browser.refresh()
             # self.delete_plugin(delete_all=True)
@@ -518,6 +559,8 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
             #     "/>'"
             # )
             # self.browser.execute_script(script_code)
+
+    # ACTUAL TESTS
 
     def test_page_exists(self):
         self.browser.get(self.live_server_url)
@@ -569,6 +612,19 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
             is_inline=True, test_name="test_create_standalone_equation_inline_True"
         )
 
+    def test_create_standalone_mhchem_equation(self):
+        self.js_injection_hack()
+        self.create_standalone_equation(
+            tex_code=r"\ce{A <=>>[\Delta] B3^2-_{(aq)}}",
+            test_name="test_create_standalone_mhchem_equation",
+        )
+
+    def test_orientation_swap_standalone_equation(self):
+        self.js_injection_hack()
+        self.create_standalone_equation(
+            test_orientation=True, test_name="test_orientation_swap_standalone_equation"
+        )
+
     def test_create_text_equation(self):
         self.js_injection_hack()
         self.create_text_equation(self_test=True)
@@ -589,6 +645,19 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
         self.js_injection_hack()
         self.create_text_equation(
             is_inline=True, test_name="test_create_text_equation_inline_True"
+        )
+
+    def test_create_text_mhchem_equation(self):
+        self.js_injection_hack()
+        self.create_standalone_equation(
+            tex_code=r"\ce{A <=>>[\Delta] B3^2-_{(aq)}}",
+            test_name="test_create_text_mhchem_equation",
+        )
+
+    def test_orientation_swap_text_equation(self):
+        self.js_injection_hack()
+        self.create_text_equation(
+            test_orientation=True, test_name="test_orientation_swap_text_equation"
         )
 
 
