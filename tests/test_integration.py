@@ -200,16 +200,12 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
         if self.element_exists("a.cms-btn-switch-edit"):
             self.click_element_css("a.cms-btn-switch-edit")
 
-        structure_board = self.wait_get_element_css(
-            ".cms-structure"
-        )
+        structure_board = self.wait_get_element_css(".cms-structure")
         if not structure_board.is_displayed():
             # sidebar_toggle_btn
             self.click_element_css(".cms-toolbar-item-cms-mode-switcher a")
         # This is needed so structure_board won't be stale
-        structure_board = self.wait_get_element_css(
-            ".cms-structure"
-        )
+        structure_board = self.wait_get_element_css(".cms-structure")
         if not structure_board.is_displayed():
             if self.element_exists("a.cms-btn-switch-edit"):
                 self.click_element_css("a.cms-btn-switch-edit")
