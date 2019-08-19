@@ -17,7 +17,10 @@ import { debug_printer } from './function_definitions/djangocms_equation'
 const replace_empty_lines = (tex_code: string) => {
   let striped_string = tex_code.replace(/(\n\s*[\n\s]+\n)/g, '\n\n')
   striped_string = striped_string.replace(/([\n\s]+\$[\s\n]+)/g, ' $$ ')
-  return striped_string.replace(/\$\$[\n\s]*(.+?)[\s\n]*\$\$/g, '\n$$$$ $1 $$$$\n')
+  return striped_string.replace(
+    /\$\$[\n\s]*(.+?)[\s\n]*\$\$/g,
+    '\n$$$$ $1 $$$$\n'
+  )
 }
 
 // Global copy handler to modify behavior on .katex elements.

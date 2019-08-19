@@ -1,7 +1,4 @@
-import {
-  debug_printer,
-  render_full_page,
-} from './djangocms_equation'
+import { debug_printer, render_full_page } from './djangocms_equation'
 
 // Abstract mutation observer definitions
 
