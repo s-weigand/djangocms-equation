@@ -43,7 +43,7 @@
   "devDependencies": {
     "@types/katex": "^0.10.1",
     "@types/node": "^12.7.2",
-    "less": "^3.9.0",
+    "less": "^3.10.3",
     "parcel": "^1.12.3",
     "sass": "^1.22.7",
     "tslint": "^5.15.0",
