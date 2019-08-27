@@ -42,7 +42,7 @@ class InvalidBrowserNameException(Exception):
 
 def get_docker_ip():
     docker_host = os.environ.get("DOCKER_HOST", "127.0.0.1")
-    docker_ip = re.search("(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})", docker_host)
+    docker_ip = re.search(r"(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})", docker_host)
     return docker_ip.group(1)
 
 
