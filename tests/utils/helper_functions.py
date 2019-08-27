@@ -3,6 +3,7 @@ from __future__ import absolute_import, print_function, unicode_literals
 
 import functools
 import os
+import re
 import socket
 
 from django.conf import settings
@@ -39,6 +40,12 @@ class InvalidBrowserNameException(Exception):
     pass
 
 
+def get_docker_ip():
+    docker_host = os.environ.get("DOCKER_HOST", "127.0.0.1")
+    docker_ip = re.search("(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})", docker_host)
+    return docker_ip.group(1)
+
+
 def screen_shot_path(filename, browser_name, sub_dir=""):
     base_folder = get_screenshot_test_base_folder()
     dir_path = os.path.join(base_folder, browser_name, sub_dir)
@@ -70,7 +77,7 @@ def get_browser_instance(
             desired_capabilities=DesiredCapabilities.CHROME,
         )
     else:
-        docker_container_ip = os.getenv("DOCKER_CONTAINER_IP", "127.0.0.1")
+        docker_container_ip = get_docker_ip()
         remote_browser_url = "http://{ip}:{port}/wd/hub".format(
             ip=docker_container_ip, port=browser_port
         )
@@ -81,7 +88,7 @@ def get_browser_instance(
                 "Couldn't connect to remote host for browser.\n "
                 "If you use a docker container with an ip different from '127.0.0.1' "
                 "you need to expose the ip address via the Environment variable "
-                "'DOCKER_CONTAINER_IP'. "
+                "'DOCKER_HOST'. "
                 "Also make sure that the docker images are running (`docker-compose ps`)."
                 "If not change to the root directory of 'djangocms-equation' and run "
                 "`docker-compose up -d`."
@@ -133,6 +140,39 @@ def retry_on_browser_exception(
     return outer_wrapper
 
 
+def insert_css_Rules(browser, css_rules):
+    for css_rule in css_rules:
+        try:
+            script_code = (
+                "document.styleSheets[document.styleSheets.length-1].insertRule("
+                '"{}"'
+                ", document.styleSheets[document.styleSheets.length-1].cssRules.length)"
+                "".format(css_rule)
+            )
+            browser.execute_script(script_code)
+        except JavascriptException:
+            pass
+
+
+def hide_elements(browser, css_selectors):
+    for css_selector in css_selectors:
+        # in case the element doesn't exist
+        try:
+            script_code = 'document.querySelector("{}").style.display="none"'.format(
+                css_selector
+            )
+            browser.execute_script(script_code)
+        except JavascriptException:
+            pass
+
+
+def normalize_screenshot(browser):
+    insert_css_Rules(browser, ["a{color: black;}"])  # sets the color of links to black
+    hide_elements(
+        browser, [".cms-messages", "#nprogress"]  # popup messages  # progress bar
+    )
+
+
 class ScreenCreator:
     def __init__(self, browser, browser_name="", use_percy=False):
         self.browser = browser
@@ -167,39 +207,10 @@ class ScreenCreator:
             else:
                 filename = "#{}_{}".format(self.counter, filename)
                 # this is to prevent visual diffs with percy
-                self.insert_css_Rules(
-                    ["a{color: black;}"]  # sets the color of links to black
-                )
-                self.hide_elements(
-                    [".cms-messages", "#nprogress"]  # popup messages  # progress bar
-                )
+                normalize_screenshot(self.browser)
                 self.browser.save_screenshot(
                     screen_shot_path(filename, self.browser_name, sub_dir)
                 )
-
-    def insert_css_Rules(self, css_rules):
-        for css_rule in css_rules:
-            try:
-                script_code = (
-                    "document.styleSheets[document.styleSheets.length-1].insertRule("
-                    '"{}"'
-                    ", document.styleSheets[document.styleSheets.length-1].cssRules.length)"
-                    "".format(css_rule)
-                )
-                self.browser.execute_script(script_code)
-            except JavascriptException:
-                pass
-
-    def hide_elements(self, css_selectors):
-        for css_selector in css_selectors:
-            # in case the element doesn't exist
-            try:
-                script_code = 'document.querySelector("{}").style.display="none"'.format(
-                    css_selector
-                )
-                self.browser.execute_script(script_code)
-            except JavascriptException:
-                pass
 
     def init_percy(self):
         # Build a ResourceLoader that knows how to collect assets for this application.

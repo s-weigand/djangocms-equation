@@ -25,8 +25,9 @@ from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from .utils.helper_functions import (
     get_browser_instance,
     get_own_ip,
-    ScreenCreator,
+    normalize_screenshot,
     retry_on_browser_exception,
+    ScreenCreator,
 )
 
 INTERACTIVE = False
@@ -184,6 +185,9 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
                 print("Didn't find `form.cms-form-login`.")
                 self.screenshot.take("login_fail.png", "login_fail")
                 raise TimeoutException(e.msg)
+
+        # make sure that the css for proper screenshots is applied
+        normalize_screenshot(browser=self.browser)
 
     def logout_user(self):
         # visiting the logout link is a fallback since FireFox
@@ -542,19 +546,6 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
                 not_js_injection_hack=False,
             )
             self.browser.refresh()
-            # self.delete_plugin(delete_all=True)
-            # self.wait_for_element_to_disappear(".cms-messages")
-            # self.screenshot.hide_elements([".cms-modal-iframe"])
-            # # adding the css back
-            # script_code = (
-            #     "document.querySelector('head').innerHTML += '"
-            #     "<link "
-            #     'rel="stylesheet" '
-            #     'href="/static/djangocms_equation/css/change_form_template.css" '
-            #     'type="text/css"'
-            #     "/>'"
-            # )
-            # self.browser.execute_script(script_code)
 
     # ACTUAL TESTS
 
