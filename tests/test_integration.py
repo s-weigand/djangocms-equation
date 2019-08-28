@@ -359,7 +359,7 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
                     take_screen_shot=True,
                 )
             else:
-                raise ElementNotInteractableException("Could publish page")
+                raise ElementNotInteractableException("Couldn't publish page")
 
     def create_standalone_equation(
         self,
