@@ -69,6 +69,7 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
 
     @classmethod
     def setUpClass(cls):
+        super(TestIntegrationChrome, cls).setUpClass()
         cls.browser = get_browser_instance(
             cls.browser_port,
             cls.desire_capabilities,
@@ -88,7 +89,8 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
 
     def setUp(self):
         # This is needed so the users will be recreated each time,
-        # since TransactionTestCase drops its db per test
+        # since TransactionTestCase (base class of StaticLiveServerTestCase)
+        # drops its db per test
         super(TestIntegrationChrome, self).setUpClass()
         self.get_pages()
         self.logout_user()
@@ -342,23 +344,26 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
         return element
 
     @retry_on_browser_exception(
-        max_retry=2, exceptions=(ElementNotInteractableException)
+        max_retry=1, exceptions=(ElementNotInteractableException, TimeoutException)
     )
     def publish_and_take_screen_shot(self, not_js_injection_hack, test_name):
         if not_js_injection_hack:
-            self.click_element_css(".cms-btn-publish-active")
-            self.wait_for_element_to_disappear(".cms-btn-publish-active")
+            if self.element_exists(".cms-btn-publish-active"):
+                self.click_element_css(".cms-btn-publish-active")
+            # making sure the page got updated
+            self.wait_get_element_css("a.cms-btn-switch-edit")
             if not self.element_exists(".cms-btn-publish-active"):
                 self.logout_user()
                 self.wait_get_element_css(".djangocms-admin-style")
                 self.browser.get(self.live_server_url)
-                self.wait_get_element_css("span.katex")
+                self.wait_get_element_css("span.katex-html")
                 self.screenshot.take(
                     "equation_rendered_no_edit_mode.png",
                     test_name,
                     take_screen_shot=True,
                 )
             else:
+                self.browser.refresh()
                 raise ElementNotInteractableException("Couldn't publish page")
 
     def create_standalone_equation(
