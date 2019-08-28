@@ -409,8 +409,8 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
         self.wait_for_element_to_disappear(".cms-modal")
 
         self.hide_structure_mode_cms_34()
-
-        self.wait_get_element_css("span.katex")
+        if not not_js_injection_hack:
+            self.wait_get_element_css("span.katex")
         if not test_orientation:
             self.screenshot.take(
                 "equation_rendered.png",
