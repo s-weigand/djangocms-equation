@@ -336,6 +336,7 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
             StaleElementReferenceException,
             TimeoutException,
             NoSuchElementException,
+            ElementNotInteractableException
         ),
     )
     def click_element_css(self, css_selector):
@@ -409,7 +410,7 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
         self.wait_for_element_to_disappear(".cms-modal")
 
         self.hide_structure_mode_cms_34()
-        if not not_js_injection_hack:
+        if not_js_injection_hack:
             self.wait_get_element_css("span.katex")
         if not test_orientation:
             self.screenshot.take(
