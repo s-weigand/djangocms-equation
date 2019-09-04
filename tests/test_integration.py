@@ -6,6 +6,8 @@ from time import sleep
 
 from cms import __version__ as cms_version
 
+from cms.api import add_plugin, create_page
+
 from django.test import override_settings
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 
@@ -25,6 +27,7 @@ from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from .utils.helper_functions import (
     get_browser_instance,
     get_own_ip,
+    get_page_placeholders,
     normalize_screenshot,
     retry_on_browser_exception,
     ScreenCreator,
@@ -88,11 +91,26 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
         super(TestIntegrationChrome, cls).tearDownClass()
 
     def setUp(self):
-        # This is needed so the users will be recreated each time,
+        # This is needed so the user will be recreated each time,
         # since TransactionTestCase (base class of StaticLiveServerTestCase)
         # drops its db per test
-        super(TestIntegrationChrome, self).setUpClass()
-        self.get_pages()
+        self.user = self.create_user(
+            self._admin_user_username,
+            self._admin_user_email,
+            self._admin_user_password,
+            is_staff=True,
+            is_superuser=True,
+        )
+        testpage = create_page(
+            "testpage",
+            "page.html",
+            "en",
+            menu_title="test_page",
+            in_navigation=True,
+            published=True,
+        )
+        testpage.set_as_homepage()
+        self.placeholder = get_page_placeholders(testpage, "en").get(slot="content")
         self.logout_user()
         self.screenshot.reset_counter()
         super(TestIntegrationChrome, self).setUp()
@@ -232,7 +250,9 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
             "default_orientation_auto_again.png", test_name, take_screen_shot=True
         )
 
-    @retry_on_browser_exception(exceptions=(TimeoutException))
+    @retry_on_browser_exception(
+        exceptions=(TimeoutException, ElementNotInteractableException)
+    )
     def enter_equation(
         self,
         self_test=False,
@@ -244,9 +264,8 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
         not_js_injection_hack=True,
         test_orientation=False,
     ):
-        # the click is needed for firefox to select the element
+        # the click is needed for firefox to select the frame again
         latex_input = self.click_element_css("#id_tex_code")
-        self.set_text_input_value(latex_input, tex_code)
         if font_size_value != 1 or font_size_unit != "rem" or is_inline is True:
             try:
                 self.browser.find_element_by_css_selector(
@@ -278,7 +297,13 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
             if is_inline is True:
                 # is_inline_input
                 self.click_element_css("#id_is_inline")
-            self.sleep(2)
+        # the click is needed for firefox to select the element
+        latex_input = self.click_element_css("#id_tex_code")
+        # the input of the equation is done here so the browsers
+        # have more time to render the settings, since this appers
+        # to be a problem on travis
+        self.set_text_input_value(latex_input, tex_code)
+
         self.screenshot.take(
             "equation_entered.png", test_name, take_screen_shot=not_js_injection_hack
         )
@@ -336,7 +361,7 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
             StaleElementReferenceException,
             TimeoutException,
             NoSuchElementException,
-            ElementNotInteractableException
+            ElementNotInteractableException,
         ),
     )
     def click_element_css(self, css_selector):
@@ -410,8 +435,7 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
         self.wait_for_element_to_disappear(".cms-modal")
 
         self.hide_structure_mode_cms_34()
-        if not_js_injection_hack:
-            self.wait_get_element_css("span.katex")
+        self.wait_get_element_css("span.katex")
         if not test_orientation:
             self.screenshot.take(
                 "equation_rendered.png",
@@ -547,10 +571,18 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
     def js_injection_hack(self):
         patched_cms_version = (3, 8)
         if self.cms_version_tuple < patched_cms_version:
-            self.create_standalone_equation(
-                tex_code="js~injection~hack~for~cms<{}.{}".format(*patched_cms_version),
-                not_js_injection_hack=False,
-            )
+            with self.login_user_context(self.user):
+                add_plugin(
+                    self.placeholder,
+                    "EquationPlugin",
+                    language="en",
+                    tex_code="js~injection~hack~for~cms<{}.{}".format(
+                        *patched_cms_version
+                    ),
+                    is_inline=False,
+                    font_size_value=1,
+                    font_size_unit="rem",
+                )
             self.browser.refresh()
 
     # ACTUAL TESTS

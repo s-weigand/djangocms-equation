@@ -229,6 +229,14 @@ class ScreenCreator:
             self.percy_runner.finalize_build()
 
 
+def get_page_placeholders(page, language=None):
+    try:
+        # cms3.6 compat
+        return page.get_placeholders()
+    except TypeError:
+        return page.get_placeholders(language)
+
+
 def get_own_ip():
     """
     returns own ip
