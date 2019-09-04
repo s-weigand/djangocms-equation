@@ -14,7 +14,7 @@ import { debug_printer } from './function_definitions/djangocms_equation'
  * @param tex_code Latex code to be striped from too many new line character
  */
 
-const replace_empty_lines = (tex_code: string) => {
+const replace_empty_lines = (tex_code: string): string => {
   let striped_string = tex_code.replace(/(\n\s*[\n\s]+\n)/g, '\n\n')
   striped_string = striped_string.replace(/([\n\s]+\$[\s\n]+)/g, ' $$ ')
   return striped_string.replace(
@@ -47,7 +47,7 @@ document.addEventListener('copy', function(event: ClipboardEvent) {
     // Rewrite plain-text version.
     clipboardData.setData(
       'text/plain',
-      replace_empty_lines(katexReplaceWithTex(fragment).textContent)
+      replace_empty_lines(katexReplaceWithTex(fragment).textContent as string)
     )
   }
   // Prevent normal copy handling.
