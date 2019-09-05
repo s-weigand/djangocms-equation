@@ -109,7 +109,8 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
             in_navigation=True,
             published=True,
         )
-        testpage.set_as_homepage()
+        if self.cms_version_tuple >= (3, 5):
+            testpage.set_as_homepage()
         self.placeholder = get_page_placeholders(testpage, "en").get(slot="content")
         self.logout_user()
         self.screenshot.reset_counter()
