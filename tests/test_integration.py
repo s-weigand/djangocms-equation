@@ -57,6 +57,7 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
     desire_capabilities = DesiredCapabilities.CHROME
     desire_capabilities["unexpectedAlertBehaviour"] = "accept"
     browser_name = "Chrome"
+    # browser_name = "Firefox"
     _pages_data = (
         {
             "en": {
@@ -132,6 +133,17 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
     def wait_get_element_link_text(cls, link_text):
         cls.wait.until(lambda driver: driver.find_element_by_link_text(link_text))
         return cls.browser.find_element_by_link_text(link_text)
+
+    def element_is_displayed_css(self, css_selector):
+        if self.element_exists(css_selector):
+            try:
+                return self.browser.find_element_by_css_selector(
+                    css_selector
+                ).is_displayed()
+            except ElementNotInteractableException:
+                return False
+        else:
+            return False
 
     @retry_on_browser_exception(
         max_retry=1, exceptions=(StaleElementReferenceException, NoSuchElementException)
@@ -217,12 +229,16 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
         # self.browser.delete_all_cookies()
 
     @retry_on_browser_exception(
-        exceptions=(ElementNotInteractableException, StaleElementReferenceException)
+        exceptions=(ElementNotInteractableException, StaleElementReferenceException),
     )
     def open_structure_board(
         self, self_test=False, test_name="test_create_standalone_equation"
     ):
-        if self.element_exists("a.cms-btn-switch-edit"):
+        if self.cms_version_tuple < (3, 5):
+            if not self.element_is_displayed_css(".cms-toolbar"):
+                # cms_toolbar_btn only exists in django-cms 3.4
+                self.click_element_css(".cms-toolbar-trigger a")
+        if self.element_is_displayed_css("a.cms-btn-switch-edit"):
             self.click_element_css("a.cms-btn-switch-edit")
 
         structure_board = self.wait_get_element_css(".cms-structure")
@@ -232,7 +248,7 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
         # This is needed so structure_board won't be stale
         structure_board = self.wait_get_element_css(".cms-structure")
         if not structure_board.is_displayed():
-            if self.element_exists("a.cms-btn-switch-edit"):
+            if self.element_is_displayed_css("a.cms-btn-switch-edit"):
                 self.click_element_css("a.cms-btn-switch-edit")
             self.open_structure_board(self_test=self_test, test_name=test_name)
 
@@ -436,7 +452,7 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
         self.wait_for_element_to_disappear(".cms-modal")
 
         self.hide_structure_mode_cms_34()
-        self.wait_get_element_css("span.katex")
+        # self.wait_get_element_css("span.katex")
         if not test_orientation:
             self.screenshot.take(
                 "equation_rendered.png",
@@ -570,15 +586,15 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
             self.click_element_css(".deletelink")
 
     def js_injection_hack(self):
-        patched_cms_version = (3, 8)
-        if self.cms_version_tuple < patched_cms_version:
+        patched_cms_version_tuple = (3, 8)
+        if self.cms_version_tuple < patched_cms_version_tuple:
             with self.login_user_context(self.user):
                 add_plugin(
                     self.placeholder,
                     "EquationPlugin",
                     language="en",
                     tex_code="js~injection~hack~for~cms<{}.{}".format(
-                        *patched_cms_version
+                        *patched_cms_version_tuple
                     ),
                     is_inline=False,
                     font_size_value=1,
@@ -618,7 +634,7 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
 
     def test_create_standalone_equation(self):
         self.js_injection_hack()
-        self.create_standalone_equation(True)
+        self.create_standalone_equation(self_test=True)
 
     def test_create_standalone_equation_2rem(self):
         self.js_injection_hack()

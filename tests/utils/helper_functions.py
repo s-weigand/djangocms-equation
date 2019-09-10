@@ -5,6 +5,7 @@ import functools
 import os
 import re
 import socket
+from time import sleep
 
 from django.conf import settings
 
@@ -88,7 +89,7 @@ def get_browser_instance(
                 "Couldn't connect to remote host for browser.\n "
                 "If you use a docker container with an ip different from '127.0.0.1' "
                 "you need to expose the ip address via the Environment variable "
-                "'DOCKER_HOST'. "
+                "'DOCKER_HOST' (normally done by docker itself). "
                 "Also make sure that the docker images are running (`docker-compose ps`)."
                 "If not change to the root directory of 'djangocms-equation' and run "
                 "`docker-compose up -d`."
@@ -106,6 +107,7 @@ def retry_on_browser_exception(
         JavascriptException,
     ),
     test_name="",
+    sleep_time_on_exception=0,
 ):
     def outer_wrapper(func):
         @functools.wraps(func)
@@ -115,6 +117,9 @@ def retry_on_browser_exception(
             try:
                 return func(*args, **kwargs)
             except exceptions as e:
+                # used for interactive testing
+                if func_wrapper.sleep_time_on_exception is not 0:
+                    sleep(sleep_time_on_exception)
                 if func_wrapper.counter <= max_retry:
 
                     error_information = "In function: `{}`, args:{}, kwargs: {}`".format(
@@ -135,6 +140,7 @@ def retry_on_browser_exception(
 
         func_wrapper.counter = 0
         func_wrapper.test_name = test_name
+        func_wrapper.sleep_time_on_exception = sleep_time_on_exception
         return func_wrapper
 
     return outer_wrapper
