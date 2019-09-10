@@ -118,7 +118,7 @@ def retry_on_browser_exception(
                 return func(*args, **kwargs)
             except exceptions as e:
                 # used for interactive testing
-                if func_wrapper.sleep_time_on_exception is not 0:
+                if func_wrapper.sleep_time_on_exception != 0:
                     sleep(sleep_time_on_exception)
                 if func_wrapper.counter <= max_retry:
 

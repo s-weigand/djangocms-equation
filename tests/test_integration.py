@@ -343,17 +343,20 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
         # prevent scroll errors
         # quick_search
         self.click_element_css(".cms-quicksearch input")
+        # TODO: clean up
         # since the element sometimes isn't visible the selection is
         # done via with javascript
-        self.browser.execute_script(
-            'document.querySelector(".cms-quicksearch input").select()'
-        )
+        # self.browser.execute_script(
+        #     'document.querySelector(".cms-quicksearch input").select()'
+        # )
         if plugin_to_add == "equation":
+            # TODO: clean up
             # self.set_text_input_value(quick_search, "eq")
             plugin_option = self.wait_get_element_css(
                 '.cms-submenu-item a[href="EquationPlugin"]'
             )
         elif plugin_to_add == "text":
+            # TODO: clean up
             # self.set_text_input_value(quick_search, "text")
             plugin_option = self.wait_get_element_css(
                 '.cms-submenu-item a[href="TextPlugin"]'
