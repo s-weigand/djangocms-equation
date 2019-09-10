@@ -11,7 +11,7 @@ from cms.api import add_plugin, create_page
 from django.test import override_settings
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 
-from djangocms_helper.base_test import BaseTransactionTestCase
+from djangocms_helper.base_test import BaseTestCaseMixin
 
 
 from selenium.common.exceptions import (
@@ -39,7 +39,7 @@ INTERACTIVE = False
 # uncomment the next line if the server throws errors
 @override_settings(DEBUG=False)
 @override_settings(ALLOWED_HOSTS=["*"])
-class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
+class TestIntegrationChrome(BaseTestCaseMixin, StaticLiveServerTestCase):
     """
     Baseclass for Integration tests with Selenium running in a docker.
     The settings default to chrome (see. docker-compose.yml),
@@ -229,7 +229,7 @@ class TestIntegrationChrome(BaseTransactionTestCase, StaticLiveServerTestCase):
         # self.browser.delete_all_cookies()
 
     @retry_on_browser_exception(
-        exceptions=(ElementNotInteractableException, StaleElementReferenceException),
+        exceptions=(ElementNotInteractableException, StaleElementReferenceException)
     )
     def open_structure_board(
         self, self_test=False, test_name="test_create_standalone_equation"
