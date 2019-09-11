@@ -41,7 +41,7 @@
     "katex": "^0.11.0"
   },
   "devDependencies": {
-    "@types/katex": "^0.10.1",
+    "@types/katex": "^0.10.2",
     "@types/node": "^12.7.4",
     "less": "^3.10.3",
     "parcel": "^1.12.3",
