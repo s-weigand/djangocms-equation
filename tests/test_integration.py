@@ -146,7 +146,9 @@ class TestIntegrationChrome(BaseTestCaseMixin, StaticLiveServerTestCase):
             return False
 
     @retry_on_browser_exception(
-        max_retry=1, exceptions=(StaleElementReferenceException, NoSuchElementException)
+        max_retry=1,
+        exceptions=(StaleElementReferenceException, NoSuchElementException),
+        raise_exception=False,
     )
     def wait_for_element_to_disappear(self, css_selector):
         try:

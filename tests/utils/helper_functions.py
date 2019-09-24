@@ -108,6 +108,7 @@ def retry_on_browser_exception(
     ),
     test_name="",
     sleep_time_on_exception=0,
+    raise_exception=True,
 ):
     def outer_wrapper(func):
         @functools.wraps(func)
@@ -136,7 +137,8 @@ def retry_on_browser_exception(
                     func_wrapper.counter += 1
                     return func_wrapper(*args, **kwargs)
                 else:
-                    raise e
+                    if raise_exception:
+                        raise e
 
         func_wrapper.counter = 0
         func_wrapper.test_name = test_name
