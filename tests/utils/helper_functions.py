@@ -3,12 +3,15 @@ from __future__ import absolute_import, print_function, unicode_literals
 
 import functools
 import os
+import re
 import socket
+from time import sleep
 
 from django.conf import settings
 
 
 from selenium.webdriver import Chrome, Firefox
+from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.remote.webdriver import WebDriver as RemoteWebdriver
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from urllib3.exceptions import NewConnectionError, MaxRetryError
@@ -38,6 +41,12 @@ class InvalidBrowserNameException(Exception):
     pass
 
 
+def get_docker_ip():
+    docker_host = os.environ.get("DOCKER_HOST", "127.0.0.1")
+    docker_ip = re.search(r"(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})", docker_host)
+    return docker_ip.group(1)
+
+
 def screen_shot_path(filename, browser_name, sub_dir=""):
     base_folder = get_screenshot_test_base_folder()
     dir_path = os.path.join(base_folder, browser_name, sub_dir)
@@ -54,17 +63,22 @@ def get_browser_instance(
             "Only the browser_names 'Chrome' and 'FireFox' are supported"
         )
     if interactive and browser_name == "FireFox" and "TRAVIS" not in os.environ:
+        options = Options()
+        # allows to copy paste in console when in interactive session
+        options.preferences.update({"devtools.selfxss.count": 100})
         return Firefox(
+            options=options,
             executable_path=GeckoDriverManager().install(),
             desired_capabilities=DesiredCapabilities.FIREFOX,
         )
+
     elif interactive and "TRAVIS" not in os.environ:
         return Chrome(
             ChromeDriverManager().install(),
             desired_capabilities=DesiredCapabilities.CHROME,
         )
     else:
-        docker_container_ip = os.getenv("DOCKER_CONTAINER_IP", "127.0.0.1")
+        docker_container_ip = get_docker_ip()
         remote_browser_url = "http://{ip}:{port}/wd/hub".format(
             ip=docker_container_ip, port=browser_port
         )
@@ -75,7 +89,7 @@ def get_browser_instance(
                 "Couldn't connect to remote host for browser.\n "
                 "If you use a docker container with an ip different from '127.0.0.1' "
                 "you need to expose the ip address via the Environment variable "
-                "'DOCKER_CONTAINER_IP'. "
+                "'DOCKER_HOST' (normally done by docker itself). "
                 "Also make sure that the docker images are running (`docker-compose ps`)."
                 "If not change to the root directory of 'djangocms-equation' and run "
                 "`docker-compose up -d`."
@@ -93,17 +107,25 @@ def retry_on_browser_exception(
         JavascriptException,
     ),
     test_name="",
+    sleep_time_on_exception=0,
+    raise_exception=True,
 ):
     def outer_wrapper(func):
         @functools.wraps(func)
         def func_wrapper(*args, **kwargs):
             if "test_name" in kwargs:
                 func_wrapper.test_name = kwargs["test_name"]
-            if func_wrapper.counter <= max_retry:
-                try:
-                    return func(*args, **kwargs)
-                except exceptions as e:
-                    error_information = "In function: `{}`".format(func.__name__)
+            try:
+                return func(*args, **kwargs)
+            except exceptions as e:
+                # used for interactive testing
+                if func_wrapper.sleep_time_on_exception != 0:
+                    sleep(sleep_time_on_exception)
+                if func_wrapper.counter <= max_retry:
+
+                    error_information = "In function: `{}`, args:{}, kwargs: {}`".format(
+                        func.__name__, args, kwargs
+                    )
                     if func_wrapper.test_name != "":
                         error_information += ", run by the test: {}".format(
                             func_wrapper.test_name
@@ -114,12 +136,49 @@ def retry_on_browser_exception(
                     print(e)
                     func_wrapper.counter += 1
                     return func_wrapper(*args, **kwargs)
+                else:
+                    if raise_exception:
+                        raise e
 
         func_wrapper.counter = 0
         func_wrapper.test_name = test_name
+        func_wrapper.sleep_time_on_exception = sleep_time_on_exception
         return func_wrapper
 
     return outer_wrapper
+
+
+def insert_css_Rules(browser, css_rules):
+    for css_rule in css_rules:
+        try:
+            script_code = (
+                "document.styleSheets[document.styleSheets.length-1].insertRule("
+                '"{}"'
+                ", document.styleSheets[document.styleSheets.length-1].cssRules.length)"
+                "".format(css_rule)
+            )
+            browser.execute_script(script_code)
+        except JavascriptException:
+            pass
+
+
+def hide_elements(browser, css_selectors):
+    for css_selector in css_selectors:
+        # in case the element doesn't exist
+        try:
+            script_code = 'document.querySelector("{}").style.display="none"'.format(
+                css_selector
+            )
+            browser.execute_script(script_code)
+        except JavascriptException:
+            pass
+
+
+def normalize_screenshot(browser):
+    insert_css_Rules(browser, ["a{color: black;}"])  # sets the color of links to black
+    hide_elements(
+        browser, [".cms-messages", "#nprogress"]  # popup messages  # progress bar
+    )
 
 
 class ScreenCreator:
@@ -156,39 +215,10 @@ class ScreenCreator:
             else:
                 filename = "#{}_{}".format(self.counter, filename)
                 # this is to prevent visual diffs with percy
-                self.insert_css_Rules(
-                    ["a{color: black;}"]  # sets the color of links to black
-                )
-                self.hide_elements(
-                    [".cms-messages", "#nprogress"]  # popup messages  # progress bar
-                )
+                normalize_screenshot(self.browser)
                 self.browser.save_screenshot(
                     screen_shot_path(filename, self.browser_name, sub_dir)
                 )
-
-    def insert_css_Rules(self, css_rules):
-        for css_rule in css_rules:
-            try:
-                script_code = (
-                    "document.styleSheets[document.styleSheets.length-1].insertRule("
-                    '"{}"'
-                    ", document.styleSheets[document.styleSheets.length-1].cssRules.length)"
-                    "".format(css_rule)
-                )
-                self.browser.execute_script(script_code)
-            except JavascriptException:
-                pass
-
-    def hide_elements(self, css_selectors):
-        for css_selector in css_selectors:
-            # in case the element doesn't exist
-            try:
-                script_code = 'document.querySelector("{}").style.display="none"'.format(
-                    css_selector
-                )
-                self.browser.execute_script(script_code)
-            except JavascriptException:
-                pass
 
     def init_percy(self):
         # Build a ResourceLoader that knows how to collect assets for this application.
@@ -205,6 +235,14 @@ class ScreenCreator:
     def stop(self):
         if self.run_percy:
             self.percy_runner.finalize_build()
+
+
+def get_page_placeholders(page, language=None):
+    try:
+        # cms3.6 compat
+        return page.get_placeholders()
+    except TypeError:
+        return page.get_placeholders(language)
 
 
 def get_own_ip():
