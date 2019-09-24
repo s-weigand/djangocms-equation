@@ -241,13 +241,11 @@ class TestIntegrationChrome(BaseTestCaseMixin, StaticLiveServerTestCase):
         if self.element_is_displayed_css("a.cms-btn-switch-edit"):
             self.click_element_css("a.cms-btn-switch-edit")
 
-        structure_board = self.wait_get_element_css(".cms-structure")
-        if not structure_board.is_displayed():
+        if not self.element_is_displayed_css(".cms-structure"):
             # sidebar_toggle_btn
             self.click_element_css(".cms-toolbar-item-cms-mode-switcher a")
         # This is needed so structure_board won't be stale
-        structure_board = self.wait_get_element_css(".cms-structure")
-        if not structure_board.is_displayed():
+        if not self.element_is_displayed_css(".cms-structure"):
             if self.element_is_displayed_css("a.cms-btn-switch-edit"):
                 self.click_element_css("a.cms-btn-switch-edit")
             self.open_structure_board(self_test=self_test, test_name=test_name)
@@ -451,8 +449,8 @@ class TestIntegrationChrome(BaseTestCaseMixin, StaticLiveServerTestCase):
 
         # save_btn
         self.click_element_css(".cms-btn.cms-btn-action.default")
-
-        self.wait_for_element_to_disappear(".cms-modal")
+        if self.element_is_displayed_css(".cms-modal"):
+            self.wait_for_element_to_disappear(".cms-modal")
 
         self.hide_structure_mode_cms_34()
         # self.wait_get_element_css("span.katex")
