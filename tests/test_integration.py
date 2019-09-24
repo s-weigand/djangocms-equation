@@ -140,7 +140,7 @@ class TestIntegrationChrome(BaseTestCaseMixin, StaticLiveServerTestCase):
                 return self.browser.find_element_by_css_selector(
                     css_selector
                 ).is_displayed()
-            except ElementNotInteractableException:
+            except (ElementNotInteractableException, StaleElementReferenceException):
                 return False
         else:
             return False
