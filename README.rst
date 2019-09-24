@@ -32,8 +32,12 @@ djangocms-equation
         :alt: This project is using Percy.io for visual regression testing.
 
 .. image:: https://img.shields.io/badge/code%20style-black-000000.svg
-        :target: https://github.com/python/black
-        :alt: TCode style: black
+        :target: https://github.com/psf/black
+        :alt: Code style Python: black
+
+.. image:: https://img.shields.io/badge/code_style-prettier-ff69b4.svg
+        :target: https://prettier.io/
+        :alt: Code style TypeScript: prettier
 
 
 DjangoCMS plugin to write equations, utilizing KaTeX
