@@ -49,7 +49,7 @@
     "@types/node": "^12.7.8",
     "less": "^3.10.3",
     "parcel": "^1.12.3",
-    "sass": "^1.22.7",
+    "sass": "^1.23.0",
     "tslint": "^5.15.0",
     "tslint-config-prettier": "^1.18.0",
     "tslint-config-standard": "^8.0.1",
