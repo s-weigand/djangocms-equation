@@ -48,7 +48,7 @@
     "katex": "^0.11.1",
     "@types/node": "^12.7.10",
     "less": "^3.10.3",
-    "parcel": "^1.12.3",
+    "parcel": "^1.12.4",
     "sass": "^1.23.0",
     "tslint": "^5.15.0",
     "tslint-config-prettier": "^1.18.0",
