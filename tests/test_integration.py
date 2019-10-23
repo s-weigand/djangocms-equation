@@ -570,7 +570,10 @@ class TestIntegrationChrome(BaseTestCaseMixin, StaticLiveServerTestCase):
 
         self.hide_structure_mode_cms_34()
 
-        self.wait_get_element_css("span.katex-html")
+        try:
+            self.wait_for_element_to_be_visible("span.katex-html")
+        except TimeoutException:
+            pass
 
         if not test_orientation:
             self.screenshot.take(
