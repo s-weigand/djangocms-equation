@@ -572,7 +572,7 @@ class TestIntegrationChrome(BaseTestCaseMixin, StaticLiveServerTestCase):
 
         try:
             self.wait_for_element_to_be_visible("span.katex-html")
-        except TimeoutException:
+        except (TimeoutException, NoSuchElementException):
             pass
 
         if not test_orientation:
