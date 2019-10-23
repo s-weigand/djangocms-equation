@@ -168,7 +168,7 @@ class TestIntegrationChrome(BaseTestCaseMixin, StaticLiveServerTestCase):
                 )
 
     @retry_on_browser_exception(
-        max_retry=1, exceptions=(StaleElementReferenceException)
+        max_retry=1, exceptions=(StaleElementReferenceException, NoSuchElementException)
     )
     def wait_for_element_to_be_visible(self, css_selector):
         try:
