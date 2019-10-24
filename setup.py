@@ -51,6 +51,6 @@ setup(
     python_requires=">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*",
     test_suite="tests.settings.run",
     url="https://github.com/s-weigand/djangocms-equation",
-    version="0.1.0",
+    version="0.0.1",
     zip_safe=False,
 )
