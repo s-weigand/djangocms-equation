@@ -25,8 +25,12 @@ env:
     - DJANGO="1.11" CMS="3.4"
     - DJANGO="1.11" CMS="3.5"
     - DJANGO="1.11" CMS="3.6"
+    - DJANGO="1.11" CMS="3.7"
     - DJANGO="2.0"  CMS="3.6"
+    - DJANGO="2.0"  CMS="3.7"
     - DJANGO="2.1"  CMS="3.6"
+    - DJANGO="2.1"  CMS="3.7"
+    - DJANGO="2.2"  CMS="3.7"
 
 matrix:
   fast_finish: true
@@ -62,6 +66,24 @@ matrix:
       after_success:
         - echo "skip after_success"
 
+    - stage: deploy
+      name: PiPy-release
+      if: type == push AND tag IS present
+      install: echo "skip install"
+      before_script: echo "skip before_script"
+      script: echo "skip install"
+      after_success: echo "skip after_success"
+      deploy:
+        provider: pypi
+        distributions: sdist bdist_wheel
+        user: s-weigand
+        password:
+          secure: WX0UN8mLHfKbrSfI4ZJ9yaKMpE1OhbMhB7Eaa3HydziJT0Hlkecw2Jy/avOwpcxT2HOJzkFxNSUghr4ZanziejiSUkXjFRTIaP44gLw5LqXc+KNLPTB3keZYm6s2rxQuE2H6zOheDmaGKIh8ppyxWpAuW4noEVzCPeQTATQ7/iw5OChHjHLn7MBmBChVhO4+/EujvjYzA7Q9ZbdEcmNGKdLBCp7Oak2x4MesgCxjT5eMe0JkyEP1dGKZMtaTp9cuc6C1GwkAW4OUoAr3j9xDq744v2H+1DF4eII2s/0BNc6uhf0s+dhcvWp2juA3u3QpZ/zqEngaCr/rtKYjTMkUrPV34tpAcWajvvs/HNqlfck+jQSCkm9wa7gM5E6eLFbIKVF8dvF2AARFQh+9uxVx5LhJuMFrJdzRpxm/+rBffm8gqesb2tHQOIQwgRvg8czI4hJ5Qw6Tcs9jepTLFdMeTc/PS/LYk1uFnlhIijkO5fXxBQuwjkR4bLHBRSF1kU9zToLEPw745lmO3Q1Y4ZJmsNXqDpdA70MyEKED/KrRIn5rBia+a+tjOU3V08aX0w3VqBTAgQqhzq7HX1E2rYYAOOmI2NrLaNnZyFvbWh+bWIa1oJ6mJ6WB90f6mH2/jeB8TdLl8xHuWgHREz4L6Kwg1mmGEVdYsseWaoD5FCs55H4=
+        on:
+          tags: true
+          branch: master
+          repo: s-weigand/djangocms-equation
+
   allow_failures:
     #      this tests are allowed to fail since they rely external resources
     - env: TOXENV=docs-links
@@ -92,18 +114,3 @@ after_success:
   - ls -la test_screenshots
   - coveralls
   - coverage erase
-
-# Assuming you have installed the travis-ci CLI tool, after you
-# create the Github repo and add it to Travis, run the
-# following command to finish PyPI deployment setup:
-# $ travis encrypt --add deploy.password
-deploy:
-  provider: pypi
-  distributions: sdist bdist_wheel
-  user: s-weigand
-  password:
-    secure: PLEASE_REPLACE_ME
-  on:
-    tags: true
-    repo: s-weigand/djangocms_equation
-    python: 3.6
