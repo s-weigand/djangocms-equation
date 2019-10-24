@@ -14,7 +14,6 @@ language: python
 python:
   - 3.7
   - 3.6
-  - 3.5
 
 env:
   global:
@@ -44,6 +43,33 @@ matrix:
     - python: 2.7
       env:
         - DJANGO="1.11" CMS="3.6"
+    - python: 2.7
+      env:
+        - DJANGO="1.11" CMS="3.7"
+    - python: 3.5
+      env:
+        - DJANGO="1.11" CMS="3.4"
+    - python: 3.5
+      env:
+        - DJANGO="1.11" CMS="3.5"
+    - python: 3.5
+      env:
+        - DJANGO="1.11" CMS="3.6"
+    - python: 3.5
+      env:
+        - DJANGO="1.11" CMS="3.7"
+    - python: 3.5
+      env:
+        - DJANGO="2.0" CMS="3.6"
+    - python: 3.5
+      env:
+        - DJANGO="2.0" CMS="3.7"
+    - python: 3.5
+      env:
+        - DJANGO="2.1" CMS="3.6"
+    - python: 3.5
+      env:
+        - DJANGO="2.1" CMS="3.7"
 
     - python: 3.6
       env: TOXENV=flake8
