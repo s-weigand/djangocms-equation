@@ -84,10 +84,6 @@ body.popup.app-djangocms_equation.model-equationpluginmodel #content-main {
     }
   }
 }
-form .form-row:not(tr):after,
-form .form-row:not(tr):before {
-  display: none;
-}
 
 #equationpluginmodel_form > div.vertical_grid {
   grid-template-areas:
@@ -120,4 +116,32 @@ form .form-row:not(tr):before {
       grid-template-areas: 'is_inline font_size_value font_size_unit';
     }
   }
+}
+
+// Overwriting defaults
+
+@media (max-width: 1024px) {
+  fieldset .fieldBox + .fieldBox.field-font_size_value,
+  fieldset .fieldBox + .fieldBox.field-font_size_unit,
+  fieldset .field-box + .field-box.field-font_size_value,
+  fieldset .field-box + .field-box.field-font_size_unit {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: 0;
+  }
+}
+
+@media (max-width: $break-small) {
+  fieldset .fieldBox + .fieldBox.field-font_size_value,
+  fieldset .fieldBox + .fieldBox.field-font_size_unit,
+  fieldset .field-box + .field-box.field-font_size_value,
+  fieldset .field-box + .field-box.field-font_size_unit {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid #eee;
+  }
+}
+form .form-row:not(tr):after,
+form .form-row:not(tr):before {
+  display: none;
 }
