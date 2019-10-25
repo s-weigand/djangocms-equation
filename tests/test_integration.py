@@ -5,32 +5,28 @@ import os
 from time import sleep
 
 from cms import __version__ as cms_version
-
 from cms.api import add_plugin, create_page
-
-from django.test import override_settings
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
-
+from django.test import override_settings
 from djangocms_helper.base_test import BaseTestCaseMixin
-
-
 from selenium.common.exceptions import (
-    NoSuchElementException,
-    TimeoutException,
+    ElementClickInterceptedException,
     ElementNotInteractableException,
-    StaleElementReferenceException,
     JavascriptException,
+    NoSuchElementException,
+    StaleElementReferenceException,
+    TimeoutException,
 )
-from selenium.webdriver.support import ui
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
+from selenium.webdriver.support import ui
 
 from .utils.helper_functions import (
+    ScreenCreator,
     get_browser_instance,
     get_own_ip,
     get_page_placeholders,
     normalize_screenshot,
     retry_on_browser_exception,
-    ScreenCreator,
 )
 
 INTERACTIVE = False
@@ -376,6 +372,7 @@ class TestIntegrationChrome(BaseTestCaseMixin, StaticLiveServerTestCase):
             TimeoutException,
             NoSuchElementException,
             ElementNotInteractableException,
+            ElementClickInterceptedException
         ),
     )
     def click_element_css(self, css_selector):
