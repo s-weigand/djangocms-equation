@@ -74,7 +74,7 @@ of your django-cms project.
 
 .. code-block:: python
 
-    "CKEDITOR_SETTINGS": {
+    CKEDITOR_SETTINGS = {
         "contentsCss": ["/static/djangocms_equation/css/change_form_template.css"]
     }
 
