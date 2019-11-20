@@ -115,7 +115,7 @@ jobs:
           name: screenshots
           path: test_screenshots
       - name: Percy Upload
-        if: matrix.version_combinations.django == 2.2 && matrix.version_combinations.cms == 3.7 && matrix.python-version == 3.7
+        if: matrix.version_combinations.django == 2.1 && matrix.version_combinations.cms == 3.7 && matrix.python-version == 3.7
         run: |
           python tests/manage.py test utils.percy_upload
           printenv
