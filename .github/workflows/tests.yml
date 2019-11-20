@@ -105,7 +105,7 @@ jobs:
   deploy:
     runs-on: [ubuntu-latest]
     if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
-    needs: [test, flake8-nightly]
+    needs: test
     steps:
       - uses: actions/checkout@v1
       - name: Setup Node.js
