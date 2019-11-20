@@ -132,6 +132,10 @@ jobs:
             { "django": 1.11, "cms": 3.5, "python-version": 3.5 },
             { "django": 1.11, "cms": 3.6, "python-version": 3.5 },
             { "django": 1.11, "cms": 3.7, "python-version": 3.5 },
+            { "django": "2.0", "cms": 3.6, "python-version": 3.5 },
+            { "django": "2.0", "cms": 3.7, "python-version": 3.5 },
+            { "django": 2.1, "cms": 3.6, "python-version": 3.5 },
+            { "django": 2.1, "cms": 3.7, "python-version": 3.5 },
           ]
 
     steps:
@@ -148,10 +152,10 @@ jobs:
         run: |
           docker-compose up -d
           docker-compose ps
-      - name: Set up Python 2.7
+      - name: Set up Python ${{ matrix.version_combinations.python-version }}
         uses: actions/setup-python@v1
         with:
-          python-version: 2.7
+          python-version: ${{ matrix.version_combinations.python-version }}
 
       - name: Install dependencies
         run: |
