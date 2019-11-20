@@ -234,8 +234,13 @@ class TestIntegrationChrome(BaseTestCaseMixin, StaticLiveServerTestCase):
         exceptions=(ElementNotInteractableException, StaleElementReferenceException)
     )
     def open_structure_board(
-        self, self_test=False, test_name="test_create_standalone_equation"
+        self,
+        self_test=False,
+        test_name="test_create_standalone_equation",
+        execution_count=0,
     ):
+        if execution_count >= 2:
+            self.browser.refresh()
         if self.cms_version_tuple < (3, 5):
             if not self.element_is_displayed_css(".cms-toolbar"):
                 # cms_toolbar_btn only exists in django-cms 3.4
@@ -250,7 +255,11 @@ class TestIntegrationChrome(BaseTestCaseMixin, StaticLiveServerTestCase):
         if not self.element_is_displayed_css(".cms-structure"):
             if self.element_is_displayed_css("a.cms-btn-switch-edit"):
                 self.click_element_css("a.cms-btn-switch-edit")
-            self.open_structure_board(self_test=self_test, test_name=test_name)
+            self.open_structure_board(
+                self_test=self_test,
+                test_name=test_name,
+                execution_count=execution_count + 1,
+            )
 
     def change_form_orientation(self, test_name="test_equation_orientation"):
         orientation_changer = self.wait_get_element_css(".orientation_selector")
@@ -372,7 +381,7 @@ class TestIntegrationChrome(BaseTestCaseMixin, StaticLiveServerTestCase):
             TimeoutException,
             NoSuchElementException,
             ElementNotInteractableException,
-            ElementClickInterceptedException
+            ElementClickInterceptedException,
         ),
     )
     def click_element_css(self, css_selector):
