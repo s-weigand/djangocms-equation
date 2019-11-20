@@ -61,8 +61,19 @@ jobs:
         python-version: [3.6, 3.7]
         version_combinations:
           [
-            { "django": 1.11, "cms": [3.4, 3.5, 3.6, 3.7] },
-            { "django": [2.0, 2.1], "cms": [3.6, 3.7] },
+            { "django": 1.11, "cms": 3.4, "python-version": "" },
+            { "django": 1.11, "cms": 3.5, "python-version": "" },
+            { "django": 1.11, "cms": 3.6, "python-version": "" },
+            { "django": 1.11, "cms": 3.7, "python-version": "" },
+            { "django": 1.11, "cms": 3.4, "python-version": 2.7 },
+            { "django": 1.11, "cms": 3.5, "python-version": 2.7 },
+            { "django": 1.11, "cms": 3.6, "python-version": 2.7 },
+            { "django": 1.11, "cms": 3.7, "python-version": 2.7 },
+            { "django": 2.0, "cms": 3.6, "python-version": "" },
+            { "django": 2.0, "cms": 3.7, "python-version": "" },
+            { "django": 2.1, "cms": 3.7, "python-version": "" },
+            { "django": 2.1, "cms": 3.6, "python-version": "" },
+            { "django": 2.2, "cms": 3.7, "python-version": "" },
           ]
 
     steps:
@@ -73,16 +84,16 @@ jobs:
           node-version: 12.x
       - name: Compile assets
         run: |
-          npm ci
+          npm i
           npm run publish
       - name: Start docker-compose
         run: |
           docker-compose up -d
           docker-compose ps
-      - name: Set up Python ${{ matrix.python-version }}
+      - name: Set up Python ${{ matrix.version_combinations.python-version }} || ${{ matrix.python-version }}
         uses: actions/setup-python@v1
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: ${{ matrix.version_combinations.python-version }} || ${{ matrix.python-version }}
 
       - name: Install dependencies
         run: |
@@ -114,7 +125,7 @@ jobs:
           node-version: 12.x
       - name: Compile assets
         run: |
-          npm ci
+          npm i
           npm run publish
       - name: Set up Python 3.7
         uses: actions/setup-python@v1
