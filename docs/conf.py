@@ -85,6 +85,9 @@ pygments_style = "sphinx"
 todo_include_todos = False
 
 
+linkcheck_ignore = [r'https://github\.com/s-weigand/djangocms-equation/actions']
+
+
 # -- Options for HTML output -------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
