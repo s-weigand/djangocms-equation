@@ -209,15 +209,11 @@ class ScreenCreator:
     def __init__(self, browser, browser_name="", use_percy=False):
         self.browser = browser
         self.browser_name = browser_name
-        self.run_percy = self.is_on_travis(use_percy)
+        self.run_percy = self.is_CI(use_percy)
         self.counter = 0
 
-    def is_on_travis(self, use_percy):
-        if (
-            "TRAVIS" in os.environ
-            and use_percy
-            and os.environ.get("TRAVIS_BRANCH", None) == "master"
-        ):
+    def is_CI(self, use_percy):
+        if use_percy and os.environ.get("GITHUB_REF", "").lower().endswith("master"):
             self.init_percy()
             return True
         else:
