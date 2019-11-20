@@ -74,6 +74,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v1
+
       - name: Setup Node.js
         uses: actions/setup-node@v1
         with:
@@ -97,18 +98,27 @@ jobs:
           pip install -U -e .
           pip install -U -r requirements_dev.txt
           pip install 'django==${{ matrix.version_combinations.django }}.*' 'django-cms==${{ matrix.version_combinations.cms }}.*'
-
       - name: Show installed packages
         run: pip freeze
+
       - name: Run tests django==${{ matrix.version_combinations.django }} && django-cms==${{ matrix.version_combinations.cms }}
         run: |
           coverage erase
           coverage run setup.py test
           coverage report
           coverage xml
+
+      - name: Upload Screenshots Artifact on fail
+        if: failure()
+        uses: actions/upload-artifact@master
+        with:
+          name: screenshots
+          path: test_screenshots
       - name: Percy Upload
         if: matrix.version_combinations.django == 2.2 && matrix.version_combinations.cms == 3.7 && matrix.python-version == 3.7
-        run: python tests/manage.py test utils.percy_upload
+        run: |
+          python tests/manage.py test utils.percy_upload
+          printenv
       - name: Codecov Upload
         continue-on-error: true
         uses: codecov/codecov-action@v1
@@ -140,6 +150,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v1
+
       - name: Setup Node.js
         uses: actions/setup-node@v1
         with:
@@ -163,15 +174,22 @@ jobs:
           pip install -U -e .
           pip install -U -r requirements_dev.txt
           pip install 'django==${{ matrix.version_combinations.django }}.*' 'django-cms==${{ matrix.version_combinations.cms }}.*'
-
       - name: Show installed packages
         run: pip freeze
+
       - name: Run tests django==${{ matrix.version_combinations.django }} && django-cms==${{ matrix.version_combinations.cms }}
         run: |
           coverage erase
           coverage run setup.py test
           coverage report
           coverage xml
+
+      - name: Upload Screenshots Artifact on fail
+        if: failure()
+        uses: actions/upload-artifact@master
+        with:
+          name: screenshots
+          path: test_screenshots
       - name: Codecov Upload
         continue-on-error: true
         uses: codecov/codecov-action@v1
