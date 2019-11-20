@@ -125,6 +125,14 @@ jobs:
             { "django": 1.11, "cms": 3.5, "python-version": 2.7 },
             { "django": 1.11, "cms": 3.6, "python-version": 2.7 },
             { "django": 1.11, "cms": 3.7, "python-version": 2.7 },
+            { "django": 1.11, "cms": 3.4, "python-version": 3.5 },
+            { "django": 1.11, "cms": 3.5, "python-version": 3.5 },
+            { "django": 1.11, "cms": 3.6, "python-version": 3.5 },
+            { "django": 1.11, "cms": 3.7, "python-version": 3.5 },
+            { "django": 2.0, "cms": 3.6, "python-version": 3.5 },
+            { "django": 2.0, "cms": 3.7, "python-version": 3.5 },
+            { "django": 2.1, "cms": 3.6, "python-version": 3.5 },
+            { "django": 2.1, "cms": 3.7, "python-version": 3.5 },
           ]
 
     steps:
