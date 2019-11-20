@@ -5,32 +5,28 @@ import os
 from time import sleep
 
 from cms import __version__ as cms_version
-
 from cms.api import add_plugin, create_page
-
-from django.test import override_settings
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
-
+from django.test import override_settings
 from djangocms_helper.base_test import BaseTestCaseMixin
-
-
 from selenium.common.exceptions import (
-    NoSuchElementException,
-    TimeoutException,
+    ElementClickInterceptedException,
     ElementNotInteractableException,
-    StaleElementReferenceException,
     JavascriptException,
+    NoSuchElementException,
+    StaleElementReferenceException,
+    TimeoutException,
 )
-from selenium.webdriver.support import ui
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
+from selenium.webdriver.support import ui
 
 from .utils.helper_functions import (
+    ScreenCreator,
     get_browser_instance,
     get_own_ip,
     get_page_placeholders,
     normalize_screenshot,
     retry_on_browser_exception,
-    ScreenCreator,
 )
 
 INTERACTIVE = False
@@ -140,7 +136,11 @@ class TestIntegrationChrome(BaseTestCaseMixin, StaticLiveServerTestCase):
                 return self.browser.find_element_by_css_selector(
                     css_selector
                 ).is_displayed()
-            except (ElementNotInteractableException, StaleElementReferenceException):
+            except (
+                ElementNotInteractableException,
+                StaleElementReferenceException,
+                NoSuchElementException,
+            ):
                 return False
         else:
             return False
@@ -164,7 +164,7 @@ class TestIntegrationChrome(BaseTestCaseMixin, StaticLiveServerTestCase):
                 )
 
     @retry_on_browser_exception(
-        max_retry=1, exceptions=(StaleElementReferenceException)
+        max_retry=1, exceptions=(StaleElementReferenceException, NoSuchElementException)
     )
     def wait_for_element_to_be_visible(self, css_selector):
         try:
@@ -234,8 +234,13 @@ class TestIntegrationChrome(BaseTestCaseMixin, StaticLiveServerTestCase):
         exceptions=(ElementNotInteractableException, StaleElementReferenceException)
     )
     def open_structure_board(
-        self, self_test=False, test_name="test_create_standalone_equation"
+        self,
+        self_test=False,
+        test_name="test_create_standalone_equation",
+        execution_count=0,
     ):
+        if execution_count >= 2:
+            self.browser.refresh()
         if self.cms_version_tuple < (3, 5):
             if not self.element_is_displayed_css(".cms-toolbar"):
                 # cms_toolbar_btn only exists in django-cms 3.4
@@ -250,7 +255,11 @@ class TestIntegrationChrome(BaseTestCaseMixin, StaticLiveServerTestCase):
         if not self.element_is_displayed_css(".cms-structure"):
             if self.element_is_displayed_css("a.cms-btn-switch-edit"):
                 self.click_element_css("a.cms-btn-switch-edit")
-            self.open_structure_board(self_test=self_test, test_name=test_name)
+            self.open_structure_board(
+                self_test=self_test,
+                test_name=test_name,
+                execution_count=execution_count + 1,
+            )
 
     def change_form_orientation(self, test_name="test_equation_orientation"):
         orientation_changer = self.wait_get_element_css(".orientation_selector")
@@ -343,21 +352,11 @@ class TestIntegrationChrome(BaseTestCaseMixin, StaticLiveServerTestCase):
         # prevent scroll errors
         # quick_search
         self.click_element_css(".cms-quicksearch input")
-        # TODO: clean up
-        # since the element sometimes isn't visible the selection is
-        # done via with javascript
-        # self.browser.execute_script(
-        #     'document.querySelector(".cms-quicksearch input").select()'
-        # )
         if plugin_to_add == "equation":
-            # TODO: clean up
-            # self.set_text_input_value(quick_search, "eq")
             plugin_option = self.wait_get_element_css(
                 '.cms-submenu-item a[href="EquationPlugin"]'
             )
         elif plugin_to_add == "text":
-            # TODO: clean up
-            # self.set_text_input_value(quick_search, "text")
             plugin_option = self.wait_get_element_css(
                 '.cms-submenu-item a[href="TextPlugin"]'
             )
@@ -382,6 +381,7 @@ class TestIntegrationChrome(BaseTestCaseMixin, StaticLiveServerTestCase):
             TimeoutException,
             NoSuchElementException,
             ElementNotInteractableException,
+            ElementClickInterceptedException,
         ),
     )
     def click_element_css(self, css_selector):
@@ -566,7 +566,10 @@ class TestIntegrationChrome(BaseTestCaseMixin, StaticLiveServerTestCase):
 
         self.hide_structure_mode_cms_34()
 
-        self.wait_get_element_css("span.katex-html")
+        try:
+            self.wait_for_element_to_be_visible("span.katex-html")
+        except (TimeoutException, NoSuchElementException):
+            pass
 
         if not test_orientation:
             self.screenshot.take(

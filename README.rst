@@ -7,8 +7,8 @@ djangocms-equation
            :target: https://pypi.python.org/pypi/djangocms-equation
            :alt: Latest PyPi Release
 
-.. image:: https://api.travis-ci.org/s-weigand/djangocms-equation.svg?branch=master
-        :target: https://travis-ci.org/s-weigand/djangocms-equation
+.. image:: https://github.com/s-weigand/djangocms-equation/workflows/Tests/badge.svg
+        :target: https://github.com/s-weigand/djangocms-equation/actions
         :alt: Test Status
 
 .. image:: https://readthedocs.org/projects/djangocms-equation/badge/?version=latest
@@ -23,8 +23,8 @@ djangocms-equation
         :target: https://greenkeeper.io/
         :alt: Typescript/Javascript Updates
 
-.. image:: https://coveralls.io/repos/github/s-weigand/djangocms-equation/badge.svg?branch=master
-        :target: https://coveralls.io/github/s-weigand/djangocms-equation?branch=master
+.. image:: https://codecov.io/gh/s-weigand/djangocms-equation/branch/master/graph/badge.svg
+        :target: https://codecov.io/gh/s-weigand/djangocms-equation
         :alt: Code Coverage
 
 .. image:: https://percy.io/static/images/percy-badge.svg
@@ -74,7 +74,7 @@ of your django-cms project.
 
 .. code-block:: python
 
-    "CKEDITOR_SETTINGS": {
+    CKEDITOR_SETTINGS = {
         "contentsCss": ["/static/djangocms_equation/css/change_form_template.css"]
     }
 

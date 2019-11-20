@@ -4,7 +4,7 @@
 @import './cms_style_overwrite.scss';
 @import '../../node_modules/katex/dist/katex.css';
 
-$break-small: 768px;
+$break-small: 767px;
 
 body.popup.app-djangocms_equation.model-equationpluginmodel #content-main {
   float: none;
@@ -56,7 +56,11 @@ body.popup.app-djangocms_equation.model-equationpluginmodel #content-main {
   }
   > fieldset.advanced {
     grid-area: advanced;
-    div.form-row.field-is_inline.field-font_size_value.field-font_size_unit {
+    &.collapsed
+      > div.form-row.field-is_inline.field-font_size_value.field-font_size_unit {
+      display: none;
+    }
+    > div.form-row.field-is_inline.field-font_size_value.field-font_size_unit {
       display: grid;
       grid-template-columns: 1fr 1fr 1fr;
       grid-column-gap: 1rem;
@@ -69,17 +73,19 @@ body.popup.app-djangocms_equation.model-equationpluginmodel #content-main {
           'font_size_value font_size_value font_size_value'
           'font_size_unit font_size_unit font_size_unit';
       }
-      div.field-box.field-is_inline {
-        grid-area: is_inline;
+      div.field-box,
+      div.fieldBox {
         margin-right: 0px !important;
-      }
-      div.field-box.field-font_size_value {
-        grid-area: font_size_value;
-        margin-right: 0px !important;
-      }
-      div.field-box.field-font_size_unit {
-        grid-area: font_size_unit;
-        margin-right: 0px !important;
+        display: block;
+        &.field-is_inline {
+          grid-area: is_inline;
+        }
+        &.field-font_size_value {
+          grid-area: font_size_value;
+        }
+        &.field-font_size_unit {
+          grid-area: font_size_unit;
+        }
       }
     }
   }
@@ -116,4 +122,34 @@ body.popup.app-djangocms_equation.model-equationpluginmodel #content-main {
       grid-template-areas: 'is_inline font_size_value font_size_unit';
     }
   }
+}
+
+// Overwriting django 2 responsive styles
+
+@media (min-width: $break-small) {
+  fieldset .fieldBox + .fieldBox,
+  fieldset .field-box + .field-box {
+    &.field-font_size_value,
+    &.field-font_size_unit {
+      margin-top: 0;
+      padding-top: 0;
+      border-top: 0;
+    }
+  }
+}
+
+@media (max-width: $break-small) {
+  fieldset .fieldBox + .fieldBox,
+  fieldset .field-box + .field-box {
+    &.field-font_size_value,
+    &.field-font_size_unit {
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid #eee;
+    }
+  }
+}
+form .form-row:not(tr):after,
+form .form-row:not(tr):before {
+  display: none;
 }

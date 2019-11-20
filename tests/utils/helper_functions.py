@@ -109,6 +109,7 @@ def retry_on_browser_exception(
     test_name="",
     sleep_time_on_exception=0,
     raise_exception=True,
+    suppress_report=False,
 ):
     def outer_wrapper(func):
         @functools.wraps(func)
@@ -130,10 +131,11 @@ def retry_on_browser_exception(
                         error_information += ", run by the test: {}".format(
                             func_wrapper.test_name
                         )
-                    print()
-                    print(type(e).__name__, ": ")
-                    print(error_information)
-                    print(e)
+                    if not func_wrapper.suppress_report:
+                        print()
+                        print(type(e).__name__, ": ")
+                        print(error_information)
+                        print(e)
                     func_wrapper.counter += 1
                     return func_wrapper(*args, **kwargs)
                 else:
@@ -143,12 +145,17 @@ def retry_on_browser_exception(
         func_wrapper.counter = 0
         func_wrapper.test_name = test_name
         func_wrapper.sleep_time_on_exception = sleep_time_on_exception
+        func_wrapper.suppress_report = suppress_report
         return func_wrapper
 
     return outer_wrapper
 
 
+@retry_on_browser_exception(
+    exceptions=(JavascriptException,), raise_exception=False, suppress_report=True
+)
 def insert_css_Rules(browser, css_rules):
+    exception_counter = 0
     for css_rule in css_rules:
         try:
             script_code = (
@@ -159,23 +166,40 @@ def insert_css_Rules(browser, css_rules):
             )
             browser.execute_script(script_code)
         except JavascriptException:
-            pass
+            exception_counter += 1
+    if exception_counter:
+        raise JavascriptException("exception, found in insert_css_Rules")
 
 
+@retry_on_browser_exception(
+    exceptions=(JavascriptException,), raise_exception=False, suppress_report=True
+)
 def hide_elements(browser, css_selectors):
+    exception_counter = 0
     for css_selector in css_selectors:
-        # in case the element doesn't exist
         try:
             script_code = 'document.querySelector("{}").style.display="none"'.format(
                 css_selector
             )
             browser.execute_script(script_code)
         except JavascriptException:
-            pass
+            exception_counter += 1
+    if exception_counter:
+        raise JavascriptException("exception, found in hide_elements")
 
 
 def normalize_screenshot(browser):
-    insert_css_Rules(browser, ["a{color: black;}"])  # sets the color of links to black
+    insert_css_Rules(
+        browser,
+        [
+            "a{color: black;}",  # sets the color of links to black
+            "div.cms .cms-form-login input[type=password]:focus, "  # removes outline on focus
+            "div.cms .cms-form-login input[type=text]:focus"
+            "{border: 1px solid #d9d9d9;"
+            "box-shadow: 0 1px 0 #fff;"
+            "outline: none;}",
+        ],
+    )
     hide_elements(
         browser, [".cms-messages", "#nprogress"]  # popup messages  # progress bar
     )
@@ -185,15 +209,11 @@ class ScreenCreator:
     def __init__(self, browser, browser_name="", use_percy=False):
         self.browser = browser
         self.browser_name = browser_name
-        self.run_percy = self.is_on_travis(use_percy)
+        self.run_percy = self.is_CI(use_percy)
         self.counter = 0
 
-    def is_on_travis(self, use_percy):
-        if (
-            "TRAVIS" in os.environ
-            and use_percy
-            and os.environ.get("TRAVIS_BRANCH", None) == "master"
-        ):
+    def is_CI(self, use_percy):
+        if use_percy and os.environ.get("GITHUB_BASE_REF", "").lower() == "master":
             self.init_percy()
             return True
         else:

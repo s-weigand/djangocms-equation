@@ -11,7 +11,7 @@ with open("README.rst") as readme_file:
 with open("HISTORY.rst") as history_file:
     history = history_file.read()
 
-requirements = ["django-cms>=3.4,<3.7", "django>=1.11,<2.2", "djangocms-text-ckeditor>=3.2.1"]
+requirements = ["django-cms>=3.4,<3.8", "django>=1.11,<3.0", "djangocms-text-ckeditor>=3.2.1"]
 
 setup(
     author="Sebastian Weigand",
@@ -26,6 +26,7 @@ setup(
         "Framework :: Django :: 1.11",
         "Framework :: Django :: 2.0",
         "Framework :: Django :: 2.1",
+        "Framework :: Django :: 2.2",
         "Intended Audience :: Developers",
         "Operating System :: OS Independent",
         "Topic :: Communications",
@@ -44,11 +45,12 @@ setup(
     long_description=readme + "\n\n" + history,
     long_description_content_type="text/x-rst",
     include_package_data=True,
-    keywords="djangocms_equation",
-    name="djangocms_equation",
+    keywords="djangocms-equation",
+    name="djangocms-equation",
     packages=find_packages(include=["djangocms_equation"]),
+    python_requires=">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*",
     test_suite="tests.settings.run",
-    url="https://github.com/s-weigand/djangocms_equation",
-    version="0.1.0",
+    url="https://github.com/s-weigand/djangocms-equation",
+    version="0.0.1",
     zip_safe=False,
 )

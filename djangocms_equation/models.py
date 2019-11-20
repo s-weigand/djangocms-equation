@@ -30,14 +30,12 @@ ALLOWED_FONT_SIZE_UNITS = (
 
 @python_2_unicode_compatible
 class EquationPluginModel(CMSPlugin):
-    tex_code = models.CharField(_("tex_code"), max_length=256, blank=True)
+    tex_code = models.CharField(_("tex_code"), max_length=512, blank=True)
     is_inline = models.BooleanField(_("is_inline"), blank=True)
 
-    font_size_value = models.FloatField(_("font_size_value"), default=1, )
+    font_size_value = models.FloatField(_("font_size_value"), default=1)
     font_size_unit = models.CharField(
-        _("font_size_unit"),
-        max_length=5,
-        choices=ALLOWED_FONT_SIZE_UNITS,
+        _("font_size_unit"), max_length=5, choices=ALLOWED_FONT_SIZE_UNITS
     )
 
     def __str__(self):
