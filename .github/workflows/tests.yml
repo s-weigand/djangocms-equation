@@ -107,6 +107,7 @@ jobs:
           coverage report
           coverage xml
       - name: Codecov Upload
+        continue-on-error: true
         uses: codecov/codecov-action@v1
         with:
           token: ${{secrets.CODECOV_TOKEN}}
@@ -161,6 +162,7 @@ jobs:
           coverage report
           coverage xml
       - name: Codecov Upload
+        continue-on-error: true
         uses: codecov/codecov-action@v1
         with:
           token: ${{secrets.CODECOV_TOKEN}}
