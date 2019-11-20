@@ -40,7 +40,7 @@ class PercyScreenshotGenerator(StaticLiveServerTestCase):
 
     def test_generate_percy_screenshot(self):
         report_filenames = generate_test_screenshot_report(percy_local_develop=True)
-        if self.screenshot.is_on_travis(True):
+        if self.screenshot.is_CI(True):
             for report_filename in report_filenames:
                 self.browser.get(
                     "{}/static/{}".format(self.live_server_url, report_filename)
