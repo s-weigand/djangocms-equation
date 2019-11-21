@@ -9,7 +9,7 @@ Sphinx>=1.8.1
 
 # tests
 percy>=2.0.2
-djangocms-helper>=1.2.5
+django-app-helper>=2.0.0
 selenium>=3.141.0
 coverage>=4.5.1
 tox>=3.13.2
