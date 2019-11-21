@@ -7,16 +7,16 @@ interface NodeCallback {
   nodeName: string
 }
 
-interface baseArgsGenerateMutationCallback {
+interface BaseArgsGenerateMutationCallback {
   nodeCallbacks: NodeCallback[]
   debugName?: string
   debug?: boolean
 }
-interface argsGenerateMutationCallback
-  extends baseArgsGenerateMutationCallback {
+interface ArgsGenerateMutationCallback
+  extends BaseArgsGenerateMutationCallback {
   parentNode: Node | HTMLElement
 }
-interface args_add_mutation_observer extends baseArgsGenerateMutationCallback {
+interface ArgsAddMutationObserver extends BaseArgsGenerateMutationCallback {
   targetBodyElement: Node | HTMLElement
   observerSettings?: MutationObserverInit
 }
@@ -25,25 +25,25 @@ const generateMutationCallback = ({
   nodeCallbacks,
   debugName = 'observerDebugName',
   debug = false,
-}: argsGenerateMutationCallback): MutationCallback => {
+}: ArgsGenerateMutationCallback): MutationCallback => {
   const mutation_callback = (records: MutationRecord[]) => {
     debug_printer(debug, `running MutationCallback ${debugName}`)
     records.forEach(function(record: MutationRecord) {
-      let AddedNodeList = record.addedNodes
-      let i = AddedNodeList.length - 1
+      let addedNodeList = record.addedNodes
+      let i = addedNodeList.length - 1
       for (; i > -1; i--) {
-        let AddedNode = AddedNodeList[i]
+        let addedNode = addedNodeList[i]
         // debug_printer(debug, `new element`, AddedNode)
         for (let nodeCallback of nodeCallbacks) {
-          if (AddedNode.nodeName === nodeCallback.nodeName) {
+          if (addedNode.nodeName === nodeCallback.nodeName) {
             for (let callbackFunc of nodeCallback.callbackFuncs) {
               debug_printer(
                 debug,
                 `new ${nodeCallback.nodeName} added\n`,
-                AddedNode
+                addedNode
               )
 
-              callbackFunc(AddedNode)
+              callbackFunc(addedNode)
             }
           }
         }
@@ -67,7 +67,7 @@ const add_mutation_observer = ({
     childList: true,
     subtree: true,
   },
-}: args_add_mutation_observer) => {
+}: ArgsAddMutationObserver) => {
   var callbackFunc = generateMutationCallback({
     nodeCallbacks,
     parentNode: targetBodyElement,
@@ -81,22 +81,22 @@ const add_mutation_observer = ({
 
 // Concrete implementations for the CkEditor implementations
 
-const CKEditor_render_equation = (RootIFrameNode: Node, debug = false) => {
+const CKEditor_render_equation = (rootIFrameNode: Node, debug = false) => {
   debug_printer(debug, '# running CKEditor_render_equation')
-  debug_printer(debug, '## RootIFrameNode', RootIFrameNode)
-  var RootIFrame = RootIFrameNode as HTMLIFrameElement
+  debug_printer(debug, '## rootIFrameNode', rootIFrameNode)
+  var rootIFrame = rootIFrameNode as HTMLIFrameElement
 
-  RootIFrame.onload = () => {
-    var RootIFrameBody = (RootIFrame.contentDocument as HTMLDocument).body
+  rootIFrame.onload = () => {
+    var rootIFrameBody = (rootIFrame.contentDocument as HTMLDocument).body
     debug_printer(debug, '### RootIFrame loaded')
-    const ChildIFrame = RootIFrameBody.querySelector('iframe')
-    if (ChildIFrame !== null) {
+    const childIFrame = rootIFrameBody.querySelector('iframe')
+    if (childIFrame !== null) {
       debug_printer(debug, '#### ChildIFrame exists')
-      CKEditor_render_equation_normal(ChildIFrame)
+      CKEditor_render_equation_normal(childIFrame)
     } else {
       debug_printer(debug, '#### ChildIFrame exists NOT')
       add_mutation_observer({
-        targetBodyElement: RootIFrameBody,
+        targetBodyElement: rootIFrameBody,
         nodeCallbacks: [
           {
             nodeName: 'IFRAME',
@@ -109,37 +109,37 @@ const CKEditor_render_equation = (RootIFrameNode: Node, debug = false) => {
           },
         ],
         debug: debug,
-        debugName: 'RootIFrameBody observer',
+        debugName: 'rootIFrameBody observer',
       })
     }
   }
 }
 
 const CKEditor_render_equation_normal = (
-  ChildIFrameNode: Node,
+  childIFrameNode: Node,
   debug = false
 ) => {
   debug_printer(debug, 'running CKEditor_render_equation_normal')
-  const ChildIFrame = ChildIFrameNode as HTMLIFrameElement
-  debug_printer(debug, 'ChildIFrame', ChildIFrame)
-  debug_printer(debug, 'ChildIFrame.classList', ChildIFrame.classList)
-  if (ChildIFrame.classList.contains('cke_wysiwyg_frame')) {
-    const EditorIFrame = ChildIFrame
-    debug_printer(debug, 'EditorIFrame', EditorIFrame)
+  const childIFrame = childIFrameNode as HTMLIFrameElement
+  debug_printer(debug, 'childIFrame', childIFrame)
+  debug_printer(debug, 'childIFrame.classList', childIFrame.classList)
+  if (childIFrame.classList.contains('cke_wysiwyg_frame')) {
+    const editorIFrame = childIFrame
+    debug_printer(debug, 'editorIFrame', editorIFrame)
 
-    EditorIFrame.onload = () => {
-      debug_printer(debug, 'EditorIFrame iframe_is_loaded')
-      const EditorIFrameBody = (EditorIFrame.contentDocument as HTMLDocument)
+    editorIFrame.onload = () => {
+      debug_printer(debug, 'editorIFrame iframe_is_loaded')
+      const editorIFrameBody = (editorIFrame.contentDocument as HTMLDocument)
         .body as HTMLBodyElement
-      render_spans(EditorIFrameBody)
+      render_spans(editorIFrameBody)
       add_mutation_observer({
-        targetBodyElement: EditorIFrameBody,
+        targetBodyElement: editorIFrameBody,
         nodeCallbacks: [
           {
             nodeName: 'SPAN',
             callbackFuncs: [
               foo => {
-                render_spans(EditorIFrameBody)
+                render_spans(editorIFrameBody)
               },
             ],
           },
