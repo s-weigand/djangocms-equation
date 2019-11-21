@@ -222,7 +222,7 @@ class ScreenCreator:
     def reset_counter(self):
         self.counter = 0
 
-    def take(self, filename, sub_dir="", take_screen_shot=True):
+    def take(self, filename, sub_dir="", take_screen_shot=True, current_frames=None):
         if take_screen_shot:
             self.counter += 1
             if self.run_percy:
@@ -233,12 +233,17 @@ class ScreenCreator:
                     )
                 )
             else:
+                if current_frames and self.browser_name == "FireFox":
+                    self.browser.switch_to.default_content()
                 filename = "#{}_{}".format(self.counter, filename)
                 # this is to prevent visual diffs with percy
                 normalize_screenshot(self.browser)
                 self.browser.save_screenshot(
                     screen_shot_path(filename, self.browser_name, sub_dir)
                 )
+                if current_frames and self.browser_name == "FireFox":
+                    for current_frame in current_frames:
+                        self.browser.switch_to.frame(current_frame)
 
     def init_percy(self):
         # Build a ResourceLoader that knows how to collect assets for this application.

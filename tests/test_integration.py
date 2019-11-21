@@ -8,7 +8,7 @@ from cms import __version__ as cms_version
 from cms.api import add_plugin, create_page
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from django.test import override_settings
-from djangocms_helper.base_test import BaseTestCaseMixin
+from app_helper.base_test import BaseTestCaseMixin
 from selenium.common.exceptions import (
     ElementClickInterceptedException,
     ElementNotInteractableException,
@@ -261,19 +261,30 @@ class TestIntegrationChrome(BaseTestCaseMixin, StaticLiveServerTestCase):
                 execution_count=execution_count + 1,
             )
 
-    def change_form_orientation(self, test_name="test_equation_orientation"):
+    def change_form_orientation(
+        self, test_name="test_equation_orientation", current_frames=None
+    ):
         orientation_changer = self.wait_get_element_css(".orientation_selector")
         orientation_changer.click()
         self.screenshot.take(
-            "horizontal_orientation.png", test_name, take_screen_shot=True
+            "horizontal_orientation.png",
+            test_name,
+            take_screen_shot=True,
+            current_frames=current_frames,
         )
         orientation_changer.click()
         self.screenshot.take(
-            "vertical_orientation.png", test_name, take_screen_shot=True
+            "vertical_orientation.png",
+            test_name,
+            take_screen_shot=True,
+            current_frames=current_frames,
         )
         orientation_changer.click()
         self.screenshot.take(
-            "default_orientation_auto_again.png", test_name, take_screen_shot=True
+            "default_orientation_auto_again.png",
+            test_name,
+            take_screen_shot=True,
+            current_frames=current_frames,
         )
 
     @retry_on_browser_exception(
@@ -289,6 +300,7 @@ class TestIntegrationChrome(BaseTestCaseMixin, StaticLiveServerTestCase):
         test_name="test_create_standalone_equation",
         not_js_injection_hack=True,
         test_orientation=False,
+        current_frames=None,
     ):
         # the click is needed for firefox to select the frame again
         latex_input = self.click_element_css("#id_tex_code")
@@ -331,10 +343,15 @@ class TestIntegrationChrome(BaseTestCaseMixin, StaticLiveServerTestCase):
         self.set_text_input_value(latex_input, tex_code)
 
         self.screenshot.take(
-            "equation_entered.png", test_name, take_screen_shot=not_js_injection_hack
+            "equation_entered.png",
+            test_name,
+            take_screen_shot=not_js_injection_hack,
+            current_frames=current_frames,
         )
         if test_orientation:
-            self.change_form_orientation(test_name=test_name)
+            self.change_form_orientation(
+                test_name=test_name, current_frames=current_frames
+            )
 
     @retry_on_browser_exception(
         exceptions=(StaleElementReferenceException, TimeoutException)
@@ -446,6 +463,7 @@ class TestIntegrationChrome(BaseTestCaseMixin, StaticLiveServerTestCase):
             test_name=test_name,
             not_js_injection_hack=not_js_injection_hack,
             test_orientation=test_orientation,
+            current_frames=(equation_edit_iframe,),
         )
         self.browser.switch_to.default_content()
 
@@ -478,18 +496,23 @@ class TestIntegrationChrome(BaseTestCaseMixin, StaticLiveServerTestCase):
             self.browser.switch_to.default_content()
             text_edit_iframe = self.wait_get_element_css("iframe")
             self.browser.switch_to.frame(text_edit_iframe)
+            return text_edit_iframe
 
         def switch_to_cke_wysiwyg_frame():
             switch_to_text_edit_frame()
             cke_wysiwyg_frame = self.wait_get_element_css("iframe.cke_wysiwyg_frame")
             self.browser.switch_to.frame(cke_wysiwyg_frame)
+            return cke_wysiwyg_frame
 
         @retry_on_browser_exception(exceptions=(TimeoutException), test_name=test_name)
         def add_equation_text_plugin():
-            switch_to_text_edit_frame()
+            text_edit_frame = switch_to_text_edit_frame()
             plugin_select = self.wait_get_element_css(".cke_button__cmsplugins")
             self.screenshot.take(
-                "text_edit_iframe.png", test_name, take_screen_shot=self_test
+                "text_edit_iframe.png",
+                test_name,
+                take_screen_shot=self_test,
+                current_frames=(text_edit_frame,),
             )
             plugin_select.click()
             text_edit_pannel_iframe = self.wait_get_element_css(
@@ -499,11 +522,12 @@ class TestIntegrationChrome(BaseTestCaseMixin, StaticLiveServerTestCase):
 
             # equation_options
             self.click_element_css('.cke_panel_listItem a[rel="EquationPlugin"]')
-            switch_to_text_edit_frame()
+            text_edit_frame = switch_to_text_edit_frame()
             equation_edit_iframe = self.wait_get_element_css(
                 "iframe.cke_dialog_ui_html"
             )
             self.browser.switch_to.frame(equation_edit_iframe)
+            return (text_edit_frame, equation_edit_iframe)
 
         @retry_on_browser_exception(
             exceptions=(TimeoutException, JavascriptException), test_name=test_name
@@ -527,10 +551,13 @@ class TestIntegrationChrome(BaseTestCaseMixin, StaticLiveServerTestCase):
             switch_to_cke_wysiwyg_frame()
             self.wait_get_element_css("span.katex")
 
-            switch_to_text_edit_frame()
+            text_edit_frame = switch_to_text_edit_frame()
             if not test_orientation:
                 self.screenshot.take(
-                    "equation_in_text_editor.png", test_name, take_screen_shot=True
+                    "equation_in_text_editor.png",
+                    test_name,
+                    take_screen_shot=True,
+                    current_frames=(text_edit_frame,),
                 )
 
             self.browser.switch_to.default_content()
@@ -546,7 +573,7 @@ class TestIntegrationChrome(BaseTestCaseMixin, StaticLiveServerTestCase):
 
         add_text()
 
-        add_equation_text_plugin()
+        current_frames = add_equation_text_plugin()
 
         self.enter_equation(
             self_test=self_test,
@@ -557,6 +584,7 @@ class TestIntegrationChrome(BaseTestCaseMixin, StaticLiveServerTestCase):
             test_name=test_name,
             not_js_injection_hack=True,
             test_orientation=test_orientation,
+            current_frames=current_frames,
         )
 
         save_equation_text_plugin()

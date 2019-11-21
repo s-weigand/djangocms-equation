@@ -27,6 +27,10 @@ djangocms-equation
         :target: https://codecov.io/gh/s-weigand/djangocms-equation
         :alt: Code Coverage
 
+.. image:: https://api.codacy.com/project/badge/Grade/f3c0be01f67b43b082810a0d86a79b4d
+        :target: https://www.codacy.com/manual/s.weigand.phy/djangocms-equation?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=s-weigand/djangocms-equation&amp;utm_campaign=Badge_Grade
+        :alt: Codacy code quality
+
 .. image:: https://percy.io/static/images/percy-badge.svg
         :target: https://percy.io/s-weigand/djangocms-equation
         :alt: This project is using Percy.io for visual regression testing.

@@ -119,6 +119,9 @@ jobs:
         run: |
           python tests/manage.py test utils.percy_upload
           printenv
+        env:
+          PERCY_TOKEN: ${{ secrets.PERCY_TOKEN }}
+
       - name: Codecov Upload
         continue-on-error: true
         uses: codecov/codecov-action@v1
