@@ -23,7 +23,7 @@ def run():
     # clean screenshots from last run
     rmtree(get_screenshot_test_base_folder(), ignore_errors=True)
     # run test and generate new screenshots
-    from djangocms_helper import runner
+    from app_helper import runner
 
     runner.cms("djangocms_equation")
 

@@ -8,7 +8,7 @@ from cms import __version__ as cms_version
 from cms.api import add_plugin, create_page
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from django.test import override_settings
-from djangocms_helper.base_test import BaseTestCaseMixin
+from app_helper.base_test import BaseTestCaseMixin
 from selenium.common.exceptions import (
     ElementClickInterceptedException,
     ElementNotInteractableException,
