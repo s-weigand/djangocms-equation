@@ -42,6 +42,10 @@ djangocms-equation
 
 DjangoCMS plugin to write equations, utilizing KaTeX
 
+.. only:: html
+
+   .. figure:: demo.gif
+
 
 * Free software: Apache Software License 2.0
 * Documentation: https://djangocms-equation.readthedocs.io.
