@@ -3,7 +3,7 @@ on: [push, pull_request]
 
 jobs:
   flake8:
-    runs-on: [ubuntu-latest]
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
       - name: Set up Python 3.7
@@ -19,7 +19,7 @@ jobs:
           flake8 djangocms_equation tests
 
   docs:
-    runs-on: [ubuntu-latest]
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
       - name: Set up Python 3.7
@@ -36,7 +36,7 @@ jobs:
           make --directory=docs clean html
 
   docs-links:
-    runs-on: [ubuntu-latest]
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
       - name: Set up Python 3.7
@@ -199,7 +199,7 @@ jobs:
           file: ./coverage.xml
 
   deploy:
-    runs-on: [ubuntu-latest]
+    runs-on: ubuntu-latest
     if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
     needs: [test-py36-37, test-py27-35]
     steps:
