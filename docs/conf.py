@@ -22,6 +22,9 @@ import os
 import sys
 
 sys.path.insert(0, os.path.abspath(".."))
+from tests.settings import doc_setup
+
+doc_setup()
 
 import djangocms_equation
 
