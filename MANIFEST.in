@@ -1,9 +1,9 @@
 graft djangocms_equation
 include AUTHORS.rst
 include CONTRIBUTING.rst
-include HISTORY.rst
 include LICENSE
-include README.rst
+include HISTORY.md
+include README.md
 
 recursive-exclude * __pycache__
 recursive-exclude * *.py[co]

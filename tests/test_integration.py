@@ -53,7 +53,6 @@ class TestIntegrationChrome(BaseTestCaseMixin, StaticLiveServerTestCase):
     desire_capabilities = DesiredCapabilities.CHROME
     desire_capabilities["unexpectedAlertBehaviour"] = "accept"
     browser_name = "Chrome"
-    # browser_name = "Firefox"
     _pages_data = (
         {
             "en": {
