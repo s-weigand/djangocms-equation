@@ -39,7 +39,7 @@ class EquationPluginModel(CMSPlugin):
     Database model of saved Equations.
     """
 
-    tex_code = models.CharField(_("tex_code"), max_length=512, blank=True)
+    tex_code = models.TextField(_("tex_code"), blank=True)
     """
     Latex code of the equation.
     """
