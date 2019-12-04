@@ -49,6 +49,7 @@ jobs:
           pip install .
           pip install -r requirements_dev.txt
       - name: Check doc links
+        continue-on-error: true
         run: |
           make --directory=docs clean linkcheck
 
