@@ -41,7 +41,7 @@ project.
 For the Equations to be properly displayed in `djangocms-text-ckeditor`,
 while edit it, you need to add the css file to the allowed of ckeditor.
 To do this simply add the following lines to the
-[settings.py]{.title-ref} of your django-cms project.
+`settings.py` of your django-cms project.
 
 ```python
 CKEDITOR_SETTINGS = {
@@ -49,15 +49,11 @@ CKEDITOR_SETTINGS = {
 }
 ```
 
-::: {.note}
-::: {.admonition-title}
-Note
-:::
+**Note:**
 
 The equations might be rendered properly in ckeditor-windows,when they
 are added the first time. This can be fixed by saving the text plugin or
 having another equation on the page.
-:::
 
 ## Credits
 
