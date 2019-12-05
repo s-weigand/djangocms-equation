@@ -32,7 +32,7 @@ from .utils.helper_functions import (
 INTERACTIVE = False
 
 CMS_VERSION_TUPLE = tuple(map(int, cms_version.split(".")))
-PATCHED_CMS_VERSION_TUPLE = (3,8)
+PATCHED_CMS_VERSION_TUPLE = (3, 8)
 if CMS_VERSION_TUPLE < PATCHED_CMS_VERSION_TUPLE:
     USE_JS_INJECTION = True
 else:
@@ -190,7 +190,7 @@ class TestIntegrationChrome(BaseTestCaseMixin, StaticLiveServerTestCase):
             input.send_keys(value)
 
     def sleep(self, time=60, allways_sleep=False):
-        if (INTERACTIVE and "TRAVIS" not in os.environ) or allways_sleep:
+        if (INTERACTIVE and "GITHUB_WORKSPACE" not in os.environ) or allways_sleep:
             sleep(time)
 
     def element_exists(self, css_selector):

@@ -62,7 +62,11 @@ def get_browser_instance(
         raise InvalidBrowserNameException(
             "Only the browser_names 'Chrome' and 'FireFox' are supported"
         )
-    if interactive and browser_name == "FireFox" and "TRAVIS" not in os.environ:
+    if (
+        interactive
+        and browser_name == "FireFox"
+        and "GITHUB_WORKSPACE" not in os.environ
+    ):
         options = Options()
         # allows to copy paste in console when in interactive session
         options.preferences.update({"devtools.selfxss.count": 100})
@@ -72,7 +76,7 @@ def get_browser_instance(
             desired_capabilities=DesiredCapabilities.FIREFOX,
         )
 
-    elif interactive and "TRAVIS" not in os.environ:
+    elif interactive and "GITHUB_WORKSPACE" not in os.environ:
         return Chrome(
             ChromeDriverManager().install(),
             desired_capabilities=DesiredCapabilities.CHROME,
@@ -226,12 +230,7 @@ class ScreenCreator:
         if take_screen_shot:
             self.counter += 1
             if self.run_percy:
-                tox_env = os.getenv("TOX_ENV_NAME", "")
-                self.percy_runner.snapshot(
-                    name="{} - {} - #{}_{}".format(
-                        tox_env, sub_dir, self.counter, filename
-                    )
-                )
+                self.percy_runner.snapshot(name="{} - {}".format(sub_dir, filename))
             else:
                 if current_frames and self.browser_name == "FireFox":
                     self.browser.switch_to.default_content()
