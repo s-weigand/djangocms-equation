@@ -217,7 +217,10 @@ class ScreenCreator:
         self.counter = 0
 
     def is_CI(self, use_percy):
-        if use_percy and os.environ.get("GITHUB_BASE_REF", "").lower() == "master":
+        if use_percy and (
+            os.environ.get("GITHUB_BASE_REF", "").lower() == "master"
+            or os.environ.get("GITHUB_REF", "").lower().endswith("/master")
+        ):
             self.init_percy()
             return True
         else:
