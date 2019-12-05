@@ -306,6 +306,12 @@ class TestIntegrationChrome(BaseTestCaseMixin, StaticLiveServerTestCase):
         test_orientation=False,
         current_frames=None,
     ):
+        # this is to prevent random errors, when
+        # chrome does not manage to click #id_tex_code
+        if current_frames is not None:
+            self.browser.switch_to.default_content()
+            for current_frame in current_frames:
+                self.browser.switch_to.frame(current_frame)
         # the click is needed for firefox to select the frame again
         latex_input = self.click_element_css("#id_tex_code")
         if font_size_value != 1 or font_size_unit != "rem" or is_inline is True:
