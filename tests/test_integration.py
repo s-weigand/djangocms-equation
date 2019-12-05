@@ -87,7 +87,6 @@ class TestIntegrationChrome(BaseTestCaseMixin, StaticLiveServerTestCase):
 
     @classmethod
     def tearDownClass(cls):
-        cls.screenshot.stop()
         cls.browser.quit()
         super(TestIntegrationChrome, cls).tearDownClass()
 

@@ -10,7 +10,6 @@ sphinx-copybutton>=0.2.5
 recommonmark>=0.6.0
 
 # tests
-percy>=2.0.2
 django-app-helper>=2.0.0
 selenium>=3.141.0
 coverage>=4.5.1

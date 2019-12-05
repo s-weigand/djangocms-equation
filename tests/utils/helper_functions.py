@@ -7,9 +7,6 @@ import re
 import socket
 from time import sleep
 
-from django.conf import settings
-
-
 from selenium.webdriver import Chrome, Firefox
 from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.remote.webdriver import WebDriver as RemoteWebdriver
@@ -26,9 +23,6 @@ from selenium.common.exceptions import (
 
 from webdriver_manager.chrome import ChromeDriverManager
 from webdriver_manager.firefox import GeckoDriverManager
-
-import percy
-from six.moves.urllib.parse import quote
 
 from .generate_screenshot_test_report import get_screenshot_test_base_folder
 
@@ -210,21 +204,10 @@ def normalize_screenshot(browser):
 
 
 class ScreenCreator:
-    def __init__(self, browser, browser_name="", use_percy=False):
+    def __init__(self, browser, browser_name=""):
         self.browser = browser
         self.browser_name = browser_name
-        self.run_percy = self.is_CI(use_percy)
         self.counter = 0
-
-    def is_CI(self, use_percy):
-        if use_percy and (
-            os.environ.get("GITHUB_BASE_REF", "").lower() == "master"
-            or os.environ.get("GITHUB_REF", "").lower().endswith("/master")
-        ):
-            self.init_percy()
-            return True
-        else:
-            return False
 
     def reset_counter(self):
         self.counter = 0
@@ -232,36 +215,17 @@ class ScreenCreator:
     def take(self, filename, sub_dir="", take_screen_shot=True, current_frames=None):
         if take_screen_shot:
             self.counter += 1
-            if self.run_percy:
-                self.percy_runner.snapshot(name="{} - {}".format(sub_dir, filename))
-            else:
-                if current_frames and self.browser_name == "FireFox":
-                    self.browser.switch_to.default_content()
-                filename = "#{}_{}".format(self.counter, filename)
-                # this is to prevent visual diffs with percy
-                normalize_screenshot(self.browser)
-                self.browser.save_screenshot(
-                    screen_shot_path(filename, self.browser_name, sub_dir)
-                )
-                if current_frames and self.browser_name == "FireFox":
-                    for current_frame in current_frames:
-                        self.browser.switch_to.frame(current_frame)
-
-    def init_percy(self):
-        # Build a ResourceLoader that knows how to collect assets for this application.
-        loader = percy.ResourceLoader(
-            # root_dir=settings.STATIC_ROOT,
-            root_dir=get_screenshot_test_base_folder(),
-            base_url=quote(settings.STATIC_URL),
-            webdriver=self.browser,
-        )
-        percy_config = percy.Config(default_widths=[1200])
-        self.percy_runner = percy.Runner(loader=loader, config=percy_config)
-        self.percy_runner.initialize_build()
-
-    def stop(self):
-        if self.run_percy:
-            self.percy_runner.finalize_build()
+            if current_frames and self.browser_name == "FireFox":
+                self.browser.switch_to.default_content()
+            filename = "#{}_{}".format(self.counter, filename)
+            # this is to prevent visual diffs with percy
+            normalize_screenshot(self.browser)
+            self.browser.save_screenshot(
+                screen_shot_path(filename, self.browser_name, sub_dir)
+            )
+            if current_frames and self.browser_name == "FireFox":
+                for current_frame in current_frames:
+                    self.browser.switch_to.frame(current_frame)
 
 
 def get_page_placeholders(page, language=None):
@@ -278,10 +242,6 @@ def get_own_ip():
     original from:
     https://stackoverflow.com/a/25850698/3990615
     """
-    # alternativ use travis env vars
-    # SSH_CONNECTION=10.10.16.23 35284 10.20.0.218 22
-    # matching regex:
-    # ".*?\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\s+\d+\s(?P<ip>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})"
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     s.connect(("8.8.8.8", 1))  # connect() for UDP doesn't send packets
     local_ip_address = s.getsockname()[0]

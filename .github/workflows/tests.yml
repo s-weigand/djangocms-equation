@@ -114,15 +114,18 @@ jobs:
         with:
           name: screenshots
           path: test_screenshots
+      - name: Generate screenshot report
+        if: matrix.version_combinations.django == 2.1 && matrix.version_combinations.cms == 3.7 && matrix.python-version == 3.7 && (endsWith( '/master', github.ref ) || github.base_ref == 'master' )
+        run: |
+          python tests/utils/generate_screenshot_test_report.py
       - name: Percy Upload
-        if: matrix.version_combinations.django == 2.1 && matrix.version_combinations.cms == 3.7 && matrix.python-version == 3.7
+        if: matrix.version_combinations.django == 2.1 && matrix.version_combinations.cms == 3.7 && matrix.python-version == 3.7 && (endsWith( '/master', github.ref ) || github.base_ref == 'master' )
+        uses: percy/snapshot-action@v0.1.0
+        with:
+          build-directory: "test_screenshots"
+          verbose: true
         env:
           PERCY_TOKEN: ${{ secrets.PERCY_TOKEN }}
-          PERCY_BRANCH: ${{ github.ref }}
-          PERCY_TARGET_BRANCH: ${{ github.base_ref }}
-        run: |
-          python tests/manage.py test utils.percy_upload
-          printenv
       - name: Codecov Upload
         continue-on-error: true
         uses: codecov/codecov-action@v1
