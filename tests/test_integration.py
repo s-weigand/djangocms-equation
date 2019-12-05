@@ -31,6 +31,12 @@ from .utils.helper_functions import (
 
 INTERACTIVE = False
 
+CMS_VERSION_TUPLE = tuple(map(int, cms_version.split(".")))
+PATCHED_CMS_VERSION_TUPLE = (3,8)
+if CMS_VERSION_TUPLE < PATCHED_CMS_VERSION_TUPLE:
+    USE_JS_INJECTION = True
+else:
+    USE_JS_INJECTION = False
 
 # uncomment the next line if the server throws errors
 @override_settings(DEBUG=False)
@@ -48,7 +54,6 @@ class TestIntegrationChrome(BaseTestCaseMixin, StaticLiveServerTestCase):
     """
 
     host = get_own_ip()
-    cms_version_tuple = tuple(map(int, cms_version.split(".")))
     browser_port = 4444
     desire_capabilities = DesiredCapabilities.CHROME
     desire_capabilities["unexpectedAlertBehaviour"] = "accept"
@@ -105,7 +110,7 @@ class TestIntegrationChrome(BaseTestCaseMixin, StaticLiveServerTestCase):
             in_navigation=True,
             published=True,
         )
-        if self.cms_version_tuple >= (3, 5):
+        if CMS_VERSION_TUPLE >= (3, 5):
             testpage.set_as_homepage()
         self.placeholder = get_page_placeholders(testpage, "en").get(slot="content")
         self.logout_user()
@@ -240,7 +245,7 @@ class TestIntegrationChrome(BaseTestCaseMixin, StaticLiveServerTestCase):
     ):
         if execution_count >= 2:
             self.browser.refresh()
-        if self.cms_version_tuple < (3, 5):
+        if CMS_VERSION_TUPLE < (3, 5):
             if not self.element_is_displayed_css(".cms-toolbar"):
                 # cms_toolbar_btn only exists in django-cms 3.4
                 self.click_element_css(".cms-toolbar-trigger a")
@@ -384,7 +389,7 @@ class TestIntegrationChrome(BaseTestCaseMixin, StaticLiveServerTestCase):
 
     @retry_on_browser_exception(max_retry=1)
     def hide_structure_mode_cms_34(self):
-        if self.cms_version_tuple < (3, 5):
+        if CMS_VERSION_TUPLE < (3, 5):
             # content_link
             self.click_element_css(
                 '.cms-toolbar-item-cms-mode-switcher a[href="?edit"]'
@@ -619,15 +624,14 @@ class TestIntegrationChrome(BaseTestCaseMixin, StaticLiveServerTestCase):
             self.click_element_css(".deletelink")
 
     def js_injection_hack(self):
-        patched_cms_version_tuple = (3, 8)
-        if self.cms_version_tuple < patched_cms_version_tuple:
+        if USE_JS_INJECTION:
             with self.login_user_context(self.user):
                 add_plugin(
                     self.placeholder,
                     "EquationPlugin",
                     language="en",
                     tex_code="js~injection~hack~for~cms<{}.{}".format(
-                        *patched_cms_version_tuple
+                        *PATCHED_CMS_VERSION_TUPLE
                     ),
                     is_inline=False,
                     font_size_value=1,
