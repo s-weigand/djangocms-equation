@@ -116,12 +116,13 @@ jobs:
           path: test_screenshots
       - name: Percy Upload
         if: matrix.version_combinations.django == 2.1 && matrix.version_combinations.cms == 3.7 && matrix.python-version == 3.7
+        env:
+          PERCY_TOKEN: ${{ secrets.PERCY_TOKEN }}
+          PERCY_BRANCH: ${{ github.ref }}
+          PERCY_TARGET_BRANCH: ${{ github.base_ref }}
         run: |
           python tests/manage.py test utils.percy_upload
           printenv
-        env:
-          PERCY_TOKEN: ${{ secrets.PERCY_TOKEN }}
-
       - name: Codecov Upload
         continue-on-error: true
         uses: codecov/codecov-action@v1
