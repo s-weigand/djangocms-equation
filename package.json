@@ -44,7 +44,7 @@
   "homepage": "https://github.com/s-weigand/djangocms-equation",
   "dependencies": {},
   "devDependencies": {
-    "@types/katex": "^0.10.2",
+    "@types/katex": "^0.11.0",
     "katex": "^0.11.1",
     "@types/node": "^12.12.11",
     "less": "^3.10.3",
