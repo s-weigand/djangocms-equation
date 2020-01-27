@@ -50,7 +50,7 @@
     "less": "^3.10.3",
     "parcel": "^1.12.4",
     "sass": "^1.23.5",
-    "tslint": "^5.15.0",
+    "tslint": "^6.0.0",
     "tslint-config-prettier": "^1.18.0",
     "tslint-config-standard": "^9.0.0",
     "typescript": "^3.4.1"
