@@ -1,4 +1,4 @@
-name: "Tests"
+name: 'Tests'
 on: [push, pull_request]
 
 jobs:
@@ -61,15 +61,15 @@ jobs:
         python-version: [3.6, 3.7]
         version_combinations:
           [
-            { "django": 1.11, "cms": 3.4 },
-            { "django": 1.11, "cms": 3.5 },
-            { "django": 1.11, "cms": 3.6 },
-            { "django": 1.11, "cms": 3.7 },
-            { "django": "2.0", "cms": 3.6 },
-            { "django": "2.0", "cms": 3.7 },
-            { "django": 2.1, "cms": 3.7 },
-            { "django": 2.1, "cms": 3.6 },
-            { "django": 2.2, "cms": 3.7 },
+            { 'django': 1.11, 'cms': 3.4 },
+            { 'django': 1.11, 'cms': 3.5 },
+            { 'django': 1.11, 'cms': 3.6 },
+            { 'django': 1.11, 'cms': 3.7 },
+            { 'django': '2.0', 'cms': 3.6 },
+            { 'django': '2.0', 'cms': 3.7 },
+            { 'django': 2.1, 'cms': 3.7 },
+            { 'django': 2.1, 'cms': 3.6 },
+            { 'django': 2.2, 'cms': 3.7 },
           ]
 
     steps:
@@ -115,14 +115,14 @@ jobs:
           name: screenshots
           path: test_screenshots
       - name: Generate screenshot report
-        if: matrix.version_combinations.django == 2.1 && matrix.version_combinations.cms == 3.7 && matrix.python-version == 3.7 && (endsWith( '/master', github.ref ) || github.base_ref == 'master' )
+        if: matrix.version_combinations.django == 2.1 && matrix.version_combinations.cms == 3.7 && matrix.python-version == 3.7 && (github.ref == 'refs/heads/master' || github.base_ref == 'master' )
         run: |
           python tests/utils/generate_screenshot_test_report.py
       - name: Percy Upload
-        if: matrix.version_combinations.django == 2.1 && matrix.version_combinations.cms == 3.7 && matrix.python-version == 3.7 && (endsWith( '/master', github.ref ) || github.base_ref == 'master' )
+        if: matrix.version_combinations.django == 2.1 && matrix.version_combinations.cms == 3.7 && matrix.python-version == 3.7 && (github.ref == 'refs/heads/master' || github.base_ref == 'master' )
         uses: percy/snapshot-action@master
         with:
-          build-directory: "test_screenshots"
+          build-directory: 'test_screenshots'
           verbose: true
         env:
           PERCY_TOKEN: ${{ secrets.PERCY_TOKEN }}
@@ -140,14 +140,14 @@ jobs:
       matrix:
         version_combinations:
           [
-            { "django": 1.11, "cms": 3.4 },
-            { "django": 1.11, "cms": 3.5 },
-            { "django": 1.11, "cms": 3.6 },
-            { "django": 1.11, "cms": 3.7 },
-            { "django": "2.0", "cms": 3.6 },
-            { "django": "2.0", "cms": 3.7 },
-            { "django": 2.1, "cms": 3.6 },
-            { "django": 2.1, "cms": 3.7 },
+            { 'django': 1.11, 'cms': 3.4 },
+            { 'django': 1.11, 'cms': 3.5 },
+            { 'django': 1.11, 'cms': 3.6 },
+            { 'django': 1.11, 'cms': 3.7 },
+            { 'django': '2.0', 'cms': 3.6 },
+            { 'django': '2.0', 'cms': 3.7 },
+            { 'django': 2.1, 'cms': 3.6 },
+            { 'django': 2.1, 'cms': 3.7 },
           ]
 
     steps:
