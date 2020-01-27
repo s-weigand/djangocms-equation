@@ -15,13 +15,9 @@ djangocms-equation
         :target: https://djangocms-equation.readthedocs.io/en/latest/?badge=latest
         :alt: Documentation Status
 
-.. image:: https://pyup.io/repos/github/s-weigand/djangocms-equation/shield.svg
-        :target: https://pyup.io/repos/github/s-weigand/djangocms-equation/
-        :alt: Python Updates
-
-.. image:: https://badges.greenkeeper.io/s-weigand/djangocms-equation.svg
-        :target: https://greenkeeper.io/
-        :alt: Typescript/Javascript Updates
+.. image:: https://api.dependabot.com/badges/status?host=github&repo=s-weigand/djangocms-equation
+        :target: https://dependabot.com
+        :alt: Dependabot Status
 
 .. image:: https://codecov.io/gh/s-weigand/djangocms-equation/branch/master/graph/badge.svg
         :target: https://codecov.io/gh/s-weigand/djangocms-equation
