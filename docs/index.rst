@@ -3,15 +3,21 @@ Welcome to djangocms-equation's documentation!
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :caption: For Users:
 
    readme
    installation
    usage
-   modules
-   contributing
    authors
    history
+
+
+.. toctree::
+   :maxdepth: 2
+   :caption: For Contributors:
+
+   contributing
+   python_source_docs
 
 Indices and tables
 ==================

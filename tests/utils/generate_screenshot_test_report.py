@@ -11,7 +11,7 @@ except ImportError:
 
 
 def get_screenshot_test_base_folder():
-    if "TRAVIS" in os.environ:
+    if "GITHUB_WORKSPACE" in os.environ:
         tox_env_name = ""
     else:
         tox_env_name = os.getenv("TOX_ENV_NAME", "")
@@ -23,7 +23,7 @@ def get_screenshot_test_base_folder():
     return dir_path
 
 
-def generate_test_screenshot_report(percy_local_develop=False):
+def generate_test_screenshot_report(file_prefix=False):
     test_env_name = os.getenv("TOX_ENV_NAME", "stand alone")
     screen_shot_dict = OrderedDict()
     base_path = get_screenshot_test_base_folder()
@@ -33,7 +33,7 @@ def generate_test_screenshot_report(percy_local_develop=False):
                 sub_root, test_name = os.path.split(root)
                 _, browser_name = os.path.split(sub_root)
                 screenshot_caption = os.path.splitext(filename)[0]
-                if "TRAVIS" in os.environ or percy_local_develop:
+                if "GITHUB_WORKSPACE" in os.environ or file_prefix:
                     if not base_path.endswith(test_name):
                         screenshot_path = "./{}/{}/{}".format(
                             browser_name, test_name, quote(filename)
@@ -76,7 +76,7 @@ def generate_test_screenshot_report(percy_local_develop=False):
 </figure>"""
     report_filenames = []
 
-    if "TRAVIS" in os.environ or percy_local_develop:
+    if "GITHUB_WORKSPACE" in os.environ or file_prefix:
         for browser_name, screen_shots_subdict in screen_shot_dict.items():
             for test_name, screen_shots in screen_shots_subdict.items():
                 report_filename = "{}_{}.html".format(browser_name, test_name)

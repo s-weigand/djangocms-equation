@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
-
+"""
+Module containing the plugins implementation
+"""
 from __future__ import unicode_literals
 
 from django.utils.translation import ugettext as _
@@ -14,6 +16,10 @@ from .settings import KATEX_EQUATION_SETTINGS
 
 @plugin_pool.register_plugin  # register the plugin
 class EquationPlugin(CMSPluginBase):
+    """
+    Implementation of the actual plugin.
+    """
+
     model = EquationPluginModel  # model where plugin data are saved
     name = _("Equation")  # name of the plugin in the interface
     form = EquationForm
@@ -67,9 +73,41 @@ class EquationPlugin(CMSPluginBase):
         return context
 
     def icon_src(self, instance):
+        """
+        Returns the path to an icon which is shown in the text editor,
+        this is used in django-cms==3.4 only
+
+        Parameters
+        ----------
+        instance : EquationPluginModel
+            Instance of the plugins Model
+
+        Returns
+        -------
+        str
+            Path to the icon.
+        """
         return "djangocms_equation/img/LaTeX_logo.svg"
 
     def icon_alt(self, instance):
+        """
+        Returns the alt text for the shown icon,
+        this is used in django-cms==3.4 only
+
+        Parameters
+        ----------
+        instance : EquationPluginModel
+            Instance of the plugins Model
+
+        Returns
+        -------
+        str
+            Path to the icon.
+
+        See Also
+        --------
+        icon_src
+        """
         if self.is_in_text_editor(instance) and instance.is_inline:
             format_str = "${tex_code}$"
         else:

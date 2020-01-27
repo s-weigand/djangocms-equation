@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, print_function, unicode_literals
-
+import sys
 from shutil import rmtree
 
 
@@ -26,6 +26,12 @@ def run():
     from app_helper import runner
 
     runner.cms("djangocms_equation")
+
+
+def doc_setup():
+    from app_helper import runner
+
+    runner.setup('djangocms_equation', sys.modules[__name__], use_cms=True)
 
 
 if __name__ == "__main__":
