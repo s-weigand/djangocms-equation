@@ -5,8 +5,7 @@
 [![Code Coverage](https://codecov.io/gh/s-weigand/djangocms-equation/branch/master/graph/badge.svg)](https://codecov.io/gh/s-weigand/djangocms-equation)
 [![This project is using Percy.io for visual regression testing.](https://percy.io/static/images/percy-badge.svg)](https://percy.io/s-weigand/djangocms-equation)
 
-[![Python Updates](https://pyup.io/repos/github/s-weigand/djangocms-equation/shield.svg)](https://pyup.io/repos/github/s-weigand/djangocms-equation/)
-[![Typescript/Javascript Updates](https://badges.greenkeeper.io/s-weigand/djangocms-equation.svg)](https://greenkeeper.io/)
+[![Dependabot Status](https://api.dependabot.com/badges/status?host=github&repo=s-weigand/djangocms-equation)](https://dependabot.com)
 [![Codacy code quality](https://api.codacy.com/project/badge/Grade/f3c0be01f67b43b082810a0d86a79b4d)](https://www.codacy.com/manual/s.weigand.phy/djangocms-equation?utm_source=github.com&utm_medium=referral&utm_content=s-weigand/djangocms-equation&utm_campaign=Badge_Grade)
 [![Code style Python: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Code style TypeScript: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg)](https://prettier.io/)
