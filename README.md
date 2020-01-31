@@ -27,7 +27,7 @@ DjangoCMS plugin to write equations, utilizing KaTeX
 Install the plugin from PyPi
 
 ```bash
-$ pip install djangocms_equation
+$ pip install djangocms-equation
 ```
 
 Add it to the installed apps in the `settings.py` of your django-cms
