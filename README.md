@@ -12,7 +12,7 @@
 
 DjangoCMS plugin to write equations, utilizing KaTeX
 
-![](./demo.gif)
+![](https://github.com/s-weigand/djangocms-equation/blob/master/demo.gif?raw=true)
 
 - Free software: Apache Software License 2.0
 - Documentation: <https://djangocms-equation.readthedocs.io>.
