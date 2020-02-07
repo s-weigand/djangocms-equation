@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+  <h1> Screenshots of test-env: {{test_env_name}} <br>browser: {{browser_name}}</h1>
+    <h2> Test: {{test_name}}</h2>
+    {% for screen_shot in screen_shots %}
+      <figure class="image" style="padding: 1rem;">
+        <figcaption><h3>{{screen_shot.caption}}</h3></figcaption>
+        <img
+          src="{{screen_shot.path}}"
+          alt="{{screen_shot.filename}}"
+          style="border: solid black 1px;"
+        />
+      </figure>
+    {% endfor %}
+  </body>
+</html>
