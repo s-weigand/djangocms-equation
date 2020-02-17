@@ -24,56 +24,43 @@ def get_screenshot_test_base_folder():
     else:
         tox_env_name = os.getenv("TOX_ENV_NAME", "")
     dir_path = UTILS_PATH / f"../../test_screenshots/{tox_env_name}"
-    dir_path = str(dir_path.resolve())
-    print("DIRPATH NEW: ", dir_path)
-    return dir_path
+    return dir_path.resolve()
 
 
 def generate_test_screenshot_report(file_prefix=False):
     test_env_name = os.getenv("TOX_ENV_NAME", "stand alone")
     screen_shot_dict = OrderedDict()
     base_path = get_screenshot_test_base_folder()
-    for root, _, filenames in os.walk(base_path):
-        for filename in sorted(filenames):
-            if filename.endswith(".png"):
-                sub_root, test_name = os.path.split(root)
-                _, browser_name = os.path.split(sub_root)
-                screenshot_caption = os.path.splitext(filename)[0]
-                if "GITHUB_WORKSPACE" in os.environ or file_prefix:
-                    if not base_path.endswith(test_name):
-                        screenshot_path = "./{}/{}/{}".format(
-                            browser_name, test_name, quote(filename)
-                        )
+    for file_path in base_path.rglob("*.png"):
+        browser_name, test_name, filename = list(file_path.parts)[-3:]
+        screenshot_caption = os.path.splitext(filename)[0]
+        if "GITHUB_WORKSPACE" in os.environ or not file_prefix:
+            rel_path = (
+                file_path.with_name(quote(filename)).relative_to(base_path).as_posix()
+            )
+            screenshot_path = f"./{rel_path}"
+        else:
+            screenshot_path = file_path.as_uri()
 
-                    else:
-                        screenshot_path = "./{}/{}".format(
-                            browser_name, quote(filename)
-                        )
-                else:
-                    screenshot_path = os.path.abspath(
-                        os.path.join(root, quote(filename))
-                    )
-                    screenshot_path = r"file:///{}".format(screenshot_path)
+        if browser_name not in screen_shot_dict:
+            screen_shot_dict[browser_name] = {}
 
-                if browser_name not in screen_shot_dict:
-                    screen_shot_dict[browser_name] = {}
-
-                if test_name not in screen_shot_dict[browser_name]:
-                    screen_shot_dict[browser_name][test_name] = [
-                        {
-                            "caption": screenshot_caption,
-                            "path": screenshot_path,
-                            "filename": filename,
-                        }
-                    ]
-                else:
-                    screen_shot_dict[browser_name][test_name] += [
-                        {
-                            "caption": screenshot_caption,
-                            "path": screenshot_path,
-                            "filename": filename,
-                        }
-                    ]
+        if test_name not in screen_shot_dict[browser_name]:
+            screen_shot_dict[browser_name][test_name] = [
+                {
+                    "caption": screenshot_caption,
+                    "path": screenshot_path,
+                    "filename": filename,
+                }
+            ]
+        else:
+            screen_shot_dict[browser_name][test_name] += [
+                {
+                    "caption": screenshot_caption,
+                    "path": screenshot_path,
+                    "filename": filename,
+                }
+            ]
     report_filenames = []
 
     env = Environment(loader=FileSystemLoader(str(UTILS_PATH.resolve())))
@@ -96,4 +83,4 @@ def generate_test_screenshot_report(file_prefix=False):
 
 
 if __name__ == "__main__":
-    generate_test_screenshot_report(True)
+    generate_test_screenshot_report(False)
