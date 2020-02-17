@@ -23,7 +23,7 @@ def get_screenshot_test_base_folder():
         tox_env_name = ""
     else:
         tox_env_name = os.getenv("TOX_ENV_NAME", "")
-    dir_path = UTILS_PATH / f"../../test_screenshots/{tox_env_name}"
+    dir_path = UTILS_PATH.joinpath("..", "..", "test_screenshots", tox_env_name)
     return dir_path.resolve()
 
 
@@ -38,7 +38,7 @@ def generate_test_screenshot_report(file_prefix=False):
             rel_path = (
                 file_path.with_name(quote(filename)).relative_to(base_path).as_posix()
             )
-            screenshot_path = f"./{rel_path}"
+            screenshot_path = "./{}".format(rel_path)
         else:
             screenshot_path = file_path.as_uri()
 
