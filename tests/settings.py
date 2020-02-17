@@ -21,7 +21,7 @@ def run():
     from .utils.generate_screenshot_test_report import get_screenshot_test_base_folder
 
     # clean screenshots from last run
-    rmtree(get_screenshot_test_base_folder(), ignore_errors=True)
+    rmtree(str(get_screenshot_test_base_folder()), ignore_errors=True)
     # run test and generate new screenshots
     from app_helper import runner
 
@@ -31,7 +31,7 @@ def run():
 def doc_setup():
     from app_helper import runner
 
-    runner.setup('djangocms_equation', sys.modules[__name__], use_cms=True)
+    runner.setup("djangocms_equation", sys.modules[__name__], use_cms=True)
 
 
 if __name__ == "__main__":

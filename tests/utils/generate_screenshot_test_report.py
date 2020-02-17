@@ -24,13 +24,13 @@ def get_screenshot_test_base_folder():
     else:
         tox_env_name = os.getenv("TOX_ENV_NAME", "")
     dir_path = UTILS_PATH.joinpath("..", "..", "test_screenshots", tox_env_name)
-    return dir_path.resolve()
+    return dir_path
 
 
 def generate_test_screenshot_report(file_prefix=False):
     test_env_name = os.getenv("TOX_ENV_NAME", "stand alone")
     screen_shots_dict = OrderedDict()
-    base_path = get_screenshot_test_base_folder()
+    base_path = get_screenshot_test_base_folder().resolve()
     for file_path in base_path.rglob("*.png"):
         browser_name, test_name, filename = list(file_path.parts)[-3:]
         screenshot_caption = os.path.splitext(filename)[0]

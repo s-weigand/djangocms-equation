@@ -43,10 +43,9 @@ def get_docker_ip():
 
 def screen_shot_path(filename, browser_name, sub_dir=""):
     base_folder = get_screenshot_test_base_folder()
-    dir_path = os.path.join(base_folder, browser_name, sub_dir)
-    if not os.path.isdir(dir_path):
-        os.makedirs(dir_path)
-    return os.path.join(dir_path, filename)
+    dir_path = base_folder.joinpath(browser_name, sub_dir)
+    dir_path.mkdir(parents=True, exist_ok=True)
+    return str(dir_path.joinpath(filename))
 
 
 def get_browser_instance(
