@@ -31,7 +31,9 @@ def generate_test_screenshot_report(file_prefix=False):
     test_env_name = os.getenv("TOX_ENV_NAME", "stand alone")
     screen_shots_dict = OrderedDict()
     base_path = get_screenshot_test_base_folder().resolve()
-    for file_path in base_path.rglob("*.png"):
+    for file_path in sorted(
+        base_path.rglob("*.png"), key=lambda file_path: file_path.name
+    ):
         browser_name, test_name, filename = list(file_path.parts)[-3:]
         screenshot_caption = os.path.splitext(filename)[0]
         if "GITHUB_WORKSPACE" in os.environ or not file_prefix:
