@@ -29,7 +29,7 @@ def get_screenshot_test_base_folder():
 
 def generate_test_screenshot_report(file_prefix=False):
     test_env_name = os.getenv("TOX_ENV_NAME", "stand alone")
-    screen_shot_dict = OrderedDict()
+    screen_shots_dict = OrderedDict()
     base_path = get_screenshot_test_base_folder()
     for file_path in base_path.rglob("*.png"):
         browser_name, test_name, filename = list(file_path.parts)[-3:]
@@ -42,30 +42,23 @@ def generate_test_screenshot_report(file_prefix=False):
         else:
             screenshot_path = file_path.as_uri()
 
-        if browser_name not in screen_shot_dict:
-            screen_shot_dict[browser_name] = {}
+        if browser_name not in screen_shots_dict:
+            screen_shots_dict[browser_name] = {}
 
-        if test_name not in screen_shot_dict[browser_name]:
-            screen_shot_dict[browser_name][test_name] = [
-                {
-                    "caption": screenshot_caption,
-                    "path": screenshot_path,
-                    "filename": filename,
-                }
-            ]
+        screen_shot_dict = {
+            "caption": screenshot_caption,
+            "path": screenshot_path,
+            "filename": filename,
+        }
+        if test_name not in screen_shots_dict[browser_name]:
+            screen_shots_dict[browser_name][test_name] = [screen_shot_dict]
         else:
-            screen_shot_dict[browser_name][test_name] += [
-                {
-                    "caption": screenshot_caption,
-                    "path": screenshot_path,
-                    "filename": filename,
-                }
-            ]
+            screen_shots_dict[browser_name][test_name] += [screen_shot_dict]
     report_filenames = []
 
     env = Environment(loader=FileSystemLoader(str(UTILS_PATH.resolve())))
     template = env.get_template("report_template.html")
-    for browser_name, screen_shots_subdict in screen_shot_dict.items():
+    for browser_name, screen_shots_subdict in screen_shots_dict.items():
         for test_name, screen_shots in screen_shots_subdict.items():
             report_filename = "{}_{}.html".format(browser_name, test_name)
             report_path = Path(base_path) / report_filename
