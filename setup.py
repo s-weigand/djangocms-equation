@@ -58,6 +58,6 @@ setup(
         "Source": "https://github.com/s-weigand/djangocms-equation",
         "Tracker": "https://github.com/s-weigand/djangocms-equation/issues",
     },
-    version="0.1.0",
+    version="0.1.1",
     zip_safe=False,
 )
