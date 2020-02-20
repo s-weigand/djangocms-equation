@@ -47,7 +47,7 @@ setup(
     long_description=readme + "\n\n" + history,
     long_description_content_type="text/markdown",
     include_package_data=True,
-    keywords="djangocms-equation",
+    keywords="djangocms-equation django-cms django cms equation latex katex mhchem",
     name="djangocms-equation",
     packages=find_packages(include=["djangocms_equation"]),
     python_requires=">=3.5",
