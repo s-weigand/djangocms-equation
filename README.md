@@ -1,7 +1,6 @@
 # djangocms-equation
 
 [![PyPi Version](https://img.shields.io/pypi/v/djangocms-equation.svg)](https://pypi.org/project/djangocms-equation/)
-[![Conda Version](https://img.shields.io/conda/vn/conda-forge/djangocms-equation.svg)](https://anaconda.org/conda-forge/djangocms-equation)
 [![Supported Python Versions](https://img.shields.io/pypi/pyversions/djangocms-equation.svg)](https://pypi.org/project/djangocms-equation/)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
