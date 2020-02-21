@@ -7,7 +7,6 @@ Welcome to djangocms-equation's documentation!
 
    readme
    installation
-   usage
    authors
    history
 
