@@ -68,7 +68,8 @@ Ready to contribute? Here's how to set up `djangocms_equation` for local develop
 
     $ mkvirtualenv djangocms_equation
     $ cd djangocms-equation/
-    $ python setup.py develop
+    $ pip install -r requirements_dev.txt
+    $ pip install -e .
 
 4. Create a branch for local development::
 
@@ -77,11 +78,13 @@ Ready to contribute? Here's how to set up `djangocms_equation` for local develop
    Now you can make your changes locally.
 
 5. When you're done making changes, check that your changes pass flake8 and the
-   tests, including testing other Python versions with tox::
+   tests, including testing other Python versions with tox and docker-compose_::
 
+    $ docker-compose up -d
     $ tox
 
-   To get flake8 and tox, just pip install them into your virtualenv.
+   Docker compose is needed for the integration tests, which use selenium_
+   and the `selenium docker images`_.
 
 6. Commit your changes and push your branch to GitHub::
 
@@ -100,9 +103,14 @@ Before you submit a pull request, check that it meets these guidelines:
 2. If the pull request adds functionality, the docs should be updated. Put
    your new functionality into a function with a docstring, and add the
    feature to the list in README.rst.
-3. The pull request should work for Python 2.7, 3.5, 3.6 and 3.7. Check
+3. The pull request should work for Python 3.5, 3.6 and 3.7. Check
    https://github.com/s-weigand/djangocms-equation/actions
    and make sure that the tests pass for all supported Python versions.
+
+.. note::
+  Due to racing conditions in the integration tests, which I couldn't completely eliminate,
+  the CI might fail for some tests.
+  In this case just write a comment, so I know to restart the test suite.
 
 Tips
 ----
@@ -124,3 +132,7 @@ $ git push
 $ git push --tags
 
 Github actions will then deploy to PyPI if tests pass.
+
+.. _docker-compose: https://docs.docker.com/compose/install/
+.. _selenium: https://selenium-python.readthedocs.io/
+.. _selenium docker images: https://github.com/SeleniumHQ/docker-selenium
