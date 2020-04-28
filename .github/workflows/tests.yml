@@ -173,6 +173,7 @@ jobs:
           pip install -U pip
           pip install -U -e .
           pip install -U -r requirements_dev.txt
+          pip install -U 'webdriver_manager==2.3.0'
           pip install 'django==${{ matrix.version_combinations.django }}.*' 'django-cms==${{ matrix.version_combinations.cms }}.*'
       - name: Show installed packages
         run: pip freeze
