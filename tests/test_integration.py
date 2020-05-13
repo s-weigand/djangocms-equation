@@ -38,8 +38,9 @@ if CMS_VERSION_TUPLE < PATCHED_CMS_VERSION_TUPLE:
 else:
     USE_JS_INJECTION = False
 
+
 # uncomment the next line if the server throws errors
-@override_settings(DEBUG=False)
+# @override_settings(DEBUG=True)
 @override_settings(ALLOWED_HOSTS=["*"])
 class TestIntegrationChrome(BaseTestCaseMixin, StaticLiveServerTestCase):
     """
