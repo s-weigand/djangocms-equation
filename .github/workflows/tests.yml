@@ -102,11 +102,11 @@ jobs:
         run: pip freeze
 
       - name: Run tests django==${{ matrix.version_combinations.django }} && django-cms==${{ matrix.version_combinations.cms }}
-        run: |
-          coverage erase
-          coverage run setup.py test
-          coverage report
-          coverage xml
+        env:
+          PYTEST_ARGS: '-vv --cov=djangocms_equation --cov-config .coveragerc'
+        uses: GabrielBB/xvfb-action@v1.0
+        with:
+          run: python setup.py test
 
       - name: Upload Screenshots Artifact on fail
         if: failure()
@@ -114,6 +114,7 @@ jobs:
         with:
           name: screenshots
           path: test_screenshots
+
       - name: Generate screenshot report
         if: matrix.version_combinations.django == 2.1 && matrix.version_combinations.cms == 3.7 && matrix.python-version == 3.7 && (github.ref == 'refs/heads/master' || github.base_ref == 'master' )
         run: |
@@ -179,11 +180,11 @@ jobs:
         run: pip freeze
 
       - name: Run tests django==${{ matrix.version_combinations.django }} && django-cms==${{ matrix.version_combinations.cms }}
-        run: |
-          coverage erase
-          coverage run setup.py test
-          coverage report
-          coverage xml
+        env:
+          PYTEST_ARGS: '-vv --cov=djangocms_equation --cov-config .coveragerc'
+        uses: GabrielBB/xvfb-action@v1.0
+        with:
+          run: python setup.py test
 
       - name: Upload Screenshots Artifact on fail
         if: failure()
