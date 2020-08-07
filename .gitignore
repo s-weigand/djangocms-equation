@@ -112,3 +112,6 @@ package-lock.json
 test_screenshots
 
 djangocms_equation/static/**/**
+
+# test db
+local.sqlite
