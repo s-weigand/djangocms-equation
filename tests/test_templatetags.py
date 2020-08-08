@@ -9,4 +9,4 @@ from django.test import TestCase
 
 class TestTemplateTags(TestCase):
     def test_format_float_dot_delimiter(self):
-        self.assertEquals(format_float_dot_delimiter(2.0), "2.0")
+        self.assertEqual(format_float_dot_delimiter(2.0), "2.0")

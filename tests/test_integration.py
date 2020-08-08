@@ -662,7 +662,7 @@ class TestIntegrationChrome(BaseTestCaseMixin, StaticLiveServerTestCase):
         self.browser.get(self.live_server_url + "/?edit")
         self.screenshot.take("start_page_user_logged_in.png", "test_login_user")
         cms_navigation = self.wait_get_element_css(".cms-toolbar-item-navigation span")
-        self.assertEquals(
+        self.assertEqual(
             cms_navigation.text,
             "example.com",
             cms_navigation.get_attribute("innerHTML"),
