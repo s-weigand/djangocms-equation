@@ -107,7 +107,6 @@ ENV/
 
 # js modules
 node_modules
-package-lock.json
 
 test_screenshots
 
