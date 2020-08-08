@@ -1,4 +1,4 @@
-name: "Tests"
+name: 'Tests'
 on: [push, pull_request]
 
 jobs:
@@ -61,15 +61,15 @@ jobs:
         python-version: [3.6, 3.7]
         version_combinations:
           [
-            { "django": 1.11, "cms": 3.4 },
-            { "django": 1.11, "cms": 3.5 },
-            { "django": 1.11, "cms": 3.6 },
-            { "django": 1.11, "cms": 3.7 },
-            { "django": "2.0", "cms": 3.6 },
-            { "django": "2.0", "cms": 3.7 },
-            { "django": 2.1, "cms": 3.7 },
-            { "django": 2.1, "cms": 3.6 },
-            { "django": 2.2, "cms": 3.7 },
+            { 'django': 1.11, 'cms': 3.4 },
+            { 'django': 1.11, 'cms': 3.5 },
+            { 'django': 1.11, 'cms': 3.6 },
+            { 'django': 1.11, 'cms': 3.7 },
+            { 'django': '2.0', 'cms': 3.6 },
+            { 'django': '2.0', 'cms': 3.7 },
+            { 'django': 2.1, 'cms': 3.7 },
+            { 'django': 2.1, 'cms': 3.6 },
+            { 'django': 2.2, 'cms': 3.7 },
           ]
 
     steps:
@@ -81,7 +81,7 @@ jobs:
           node-version: 12.x
       - name: Compile assets
         run: |
-          npm i
+          npm ci
           npm run publish
       - name: Start docker-compose
         run: |
@@ -103,10 +103,8 @@ jobs:
 
       - name: Run tests django==${{ matrix.version_combinations.django }} && django-cms==${{ matrix.version_combinations.cms }}
         env:
-          PYTEST_ARGS: "-vv --cov=djangocms_equation --cov-config .coveragerc  --reruns 2 --reruns-delay 5"
-        uses: GabrielBB/xvfb-action@v1.0
-        with:
-          run: python setup.py test
+          PYTEST_ARGS: '-vv --cov=djangocms_equation --cov-config .coveragerc  --reruns 5 --reruns-delay 5'
+        run: python setup.py test
 
       - name: Upload Screenshots Artifact on fail
         if: failure()
@@ -123,7 +121,7 @@ jobs:
         if: matrix.version_combinations.django == 2.1 && matrix.version_combinations.cms == 3.7 && matrix.python-version == 3.7 && (github.ref == 'refs/heads/master' || github.base_ref == 'master' )
         uses: percy/snapshot-action@v0.1.1
         with:
-          build-directory: "test_screenshots"
+          build-directory: 'test_screenshots'
           verbose: true
         env:
           PERCY_TOKEN: ${{ secrets.PERCY_TOKEN }}
@@ -139,14 +137,14 @@ jobs:
       matrix:
         version_combinations:
           [
-            { "django": 1.11, "cms": 3.4 },
-            { "django": 1.11, "cms": 3.5 },
-            { "django": 1.11, "cms": 3.6 },
-            { "django": 1.11, "cms": 3.7 },
-            { "django": "2.0", "cms": 3.6 },
-            { "django": "2.0", "cms": 3.7 },
-            { "django": 2.1, "cms": 3.6 },
-            { "django": 2.1, "cms": 3.7 },
+            { 'django': 1.11, 'cms': 3.4 },
+            { 'django': 1.11, 'cms': 3.5 },
+            { 'django': 1.11, 'cms': 3.6 },
+            { 'django': 1.11, 'cms': 3.7 },
+            { 'django': '2.0', 'cms': 3.6 },
+            { 'django': '2.0', 'cms': 3.7 },
+            { 'django': 2.1, 'cms': 3.6 },
+            { 'django': 2.1, 'cms': 3.7 },
           ]
 
     steps:
@@ -158,7 +156,7 @@ jobs:
           node-version: 12.x
       - name: Compile assets
         run: |
-          npm i
+          npm ci
           npm run publish
       - name: Start docker-compose
         run: |
@@ -181,10 +179,8 @@ jobs:
 
       - name: Run tests django==${{ matrix.version_combinations.django }} && django-cms==${{ matrix.version_combinations.cms }}
         env:
-          PYTEST_ARGS: "-vv --cov=djangocms_equation --cov-config .coveragerc  --reruns 2 --reruns-delay 5"
-        uses: GabrielBB/xvfb-action@v1.0
-        with:
-          run: python setup.py test
+          PYTEST_ARGS: '-vv --cov=djangocms_equation --cov-config .coveragerc  --reruns 5 --reruns-delay 5'
+        run: python setup.py test
 
       - name: Upload Screenshots Artifact on fail
         if: failure()

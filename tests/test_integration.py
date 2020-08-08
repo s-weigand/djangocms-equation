@@ -29,7 +29,7 @@ from .utils.helper_functions import (
     retry_on_browser_exception,
 )
 
-INTERACTIVE = True
+INTERACTIVE = False
 
 CMS_VERSION_TUPLE = tuple(map(int, cms_version.split(".")))
 PATCHED_CMS_VERSION_TUPLE = (3, 8)
