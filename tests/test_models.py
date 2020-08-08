@@ -14,7 +14,7 @@ class TestModel(TestCase):
             font_size_value=1,
             font_size_unit="rem",
         )
-        self.assertEquals(equation.__str__(), r"$\int^{a}_{b}$")
+        self.assertEqual(equation.__str__(), r"$\int^{a}_{b}$")
 
     def test_create_equation_not_inline(self):
         equation = mixer.blend(
@@ -24,4 +24,4 @@ class TestModel(TestCase):
             font_size_value=1,
             font_size_unit="rem",
         )
-        self.assertEquals(equation.__str__(), r"$$\int^{a}_{b}$$")
+        self.assertEqual(equation.__str__(), r"$$\int^{a}_{b}$$")

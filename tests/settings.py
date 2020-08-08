@@ -6,6 +6,7 @@ from shutil import rmtree
 
 
 HELPER_SETTINGS = {
+    "TEST_RUNNER": "app_helper.pytest_runner.PytestTestRunner",
     "INSTALLED_APPS": ["djangocms_text_ckeditor", "djangocms_equation"],
     "CMS_LANGUAGES": {1: [{"code": "en", "name": "English"}]},
     "LANGUAGE_CODE": "en",

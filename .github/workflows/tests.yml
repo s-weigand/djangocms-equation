@@ -1,4 +1,4 @@
-name: "Tests"
+name: 'Tests'
 on: [push, pull_request]
 
 jobs:
@@ -61,15 +61,13 @@ jobs:
         python-version: [3.6, 3.7]
         version_combinations:
           [
-            { "django": 1.11, "cms": 3.4 },
-            { "django": 1.11, "cms": 3.5 },
-            { "django": 1.11, "cms": 3.6 },
-            { "django": 1.11, "cms": 3.7 },
-            { "django": "2.0", "cms": 3.6 },
-            { "django": "2.0", "cms": 3.7 },
-            { "django": 2.1, "cms": 3.7 },
-            { "django": 2.1, "cms": 3.6 },
-            { "django": 2.2, "cms": 3.7 },
+            { 'django': 1.11, 'cms': 3.4 },
+            { 'django': 1.11, 'cms': 3.5 },
+            { 'django': 1.11, 'cms': 3.6 },
+            { 'django': 1.11, 'cms': 3.7 },
+            { 'django': 2.1, 'cms': 3.7 },
+            { 'django': 2.1, 'cms': 3.6 },
+            { 'django': 2.2, 'cms': 3.7 },
           ]
 
     steps:
@@ -81,7 +79,7 @@ jobs:
           node-version: 12.x
       - name: Compile assets
         run: |
-          npm i
+          npm ci
           npm run publish
       - name: Start docker-compose
         run: |
@@ -102,11 +100,12 @@ jobs:
         run: pip freeze
 
       - name: Run tests django==${{ matrix.version_combinations.django }} && django-cms==${{ matrix.version_combinations.cms }}
+        env:
+          PYTEST_ARGS: '-vv --reruns 10'
         run: |
           coverage erase
           coverage run setup.py test
           coverage report
-          coverage xml
 
       - name: Upload Screenshots Artifact on fail
         if: failure()
@@ -114,15 +113,16 @@ jobs:
         with:
           name: screenshots
           path: test_screenshots
+
       - name: Generate screenshot report
-        if: matrix.version_combinations.django == 2.1 && matrix.version_combinations.cms == 3.7 && matrix.python-version == 3.7 && (github.ref == 'refs/heads/master' || github.base_ref == 'master' )
+        if: matrix.version_combinations.django == 2.2 && matrix.version_combinations.cms == 3.7 && matrix.python-version == 3.7 && (github.ref == 'refs/heads/master' || github.base_ref == 'master' )
         run: |
           python tests/utils/generate_screenshot_test_report.py
       - name: Percy Upload
-        if: matrix.version_combinations.django == 2.1 && matrix.version_combinations.cms == 3.7 && matrix.python-version == 3.7 && (github.ref == 'refs/heads/master' || github.base_ref == 'master' )
+        if: matrix.version_combinations.django == 2.2 && matrix.version_combinations.cms == 3.7 && matrix.python-version == 3.7 && (github.ref == 'refs/heads/master' || github.base_ref == 'master' )
         uses: percy/snapshot-action@v0.1.1
         with:
-          build-directory: "test_screenshots"
+          build-directory: 'test_screenshots'
           verbose: true
         env:
           PERCY_TOKEN: ${{ secrets.PERCY_TOKEN }}
@@ -138,14 +138,12 @@ jobs:
       matrix:
         version_combinations:
           [
-            { "django": 1.11, "cms": 3.4 },
-            { "django": 1.11, "cms": 3.5 },
-            { "django": 1.11, "cms": 3.6 },
-            { "django": 1.11, "cms": 3.7 },
-            { "django": "2.0", "cms": 3.6 },
-            { "django": "2.0", "cms": 3.7 },
-            { "django": 2.1, "cms": 3.6 },
-            { "django": 2.1, "cms": 3.7 },
+            { 'django': 1.11, 'cms': 3.4 },
+            { 'django': 1.11, 'cms': 3.5 },
+            { 'django': 1.11, 'cms': 3.6 },
+            { 'django': 1.11, 'cms': 3.7 },
+            { 'django': 2.1, 'cms': 3.6 },
+            { 'django': 2.1, 'cms': 3.7 },
           ]
 
     steps:
@@ -157,7 +155,7 @@ jobs:
           node-version: 12.x
       - name: Compile assets
         run: |
-          npm i
+          npm ci
           npm run publish
       - name: Start docker-compose
         run: |
@@ -179,11 +177,12 @@ jobs:
         run: pip freeze
 
       - name: Run tests django==${{ matrix.version_combinations.django }} && django-cms==${{ matrix.version_combinations.cms }}
+        env:
+          PYTEST_ARGS: '-vv --reruns 10'
         run: |
           coverage erase
           coverage run setup.py test
           coverage report
-          coverage xml
 
       - name: Upload Screenshots Artifact on fail
         if: failure()
