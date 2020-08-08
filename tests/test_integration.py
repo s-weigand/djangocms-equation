@@ -6,6 +6,8 @@ from time import sleep
 
 from cms import __version__ as cms_version
 from cms.api import add_plugin, create_page
+
+import django
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from django.test import override_settings
 from django.test.testcases import LiveServerThread, QuietWSGIRequestHandler
@@ -64,9 +66,17 @@ class LiveServerSingleThread(LiveServerThread):
         )
 
 
-class StaticServerSingleThreadedTestCase(StaticLiveServerTestCase):
-    "A thin sub-class which only sets the single-threaded server as a class"
-    server_thread_class = LiveServerSingleThread
+DJANGO_VERSION_TUPLE = tuple([int(i) for i in django.__version__.split(".")])
+
+if DJANGO_VERSION_TUPLE >= (2, 1, 4):
+
+    class StaticServerSingleThreadedTestCase(StaticLiveServerTestCase):
+        "A thin sub-class which only sets the single-threaded server as a class"
+        server_thread_class = LiveServerSingleThread
+
+
+else:
+    StaticServerSingleThreadedTestCase = StaticLiveServerTestCase
 
 
 # uncomment the next line if the server throws errors
