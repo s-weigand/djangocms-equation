@@ -13,7 +13,7 @@ with open("HISTORY.md") as history_file:
 
 requirements = [
     "django-cms>=3.4,<3.8",
-    "django>=1.11,<3.0",
+    "django>=1.11,!=2.0.*,<3.0",
     "djangocms-text-ckeditor>=3.2.1",
 ]
 
@@ -28,7 +28,6 @@ setup(
         "Environment :: Web Environment",
         "Framework :: Django",
         "Framework :: Django :: 1.11",
-        "Framework :: Django :: 2.0",
         "Framework :: Django :: 2.1",
         "Framework :: Django :: 2.2",
         "Intended Audience :: Developers",

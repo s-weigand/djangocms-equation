@@ -65,8 +65,6 @@ jobs:
             { 'django': 1.11, 'cms': 3.5 },
             { 'django': 1.11, 'cms': 3.6 },
             { 'django': 1.11, 'cms': 3.7 },
-            { 'django': '2.0', 'cms': 3.6 },
-            { 'django': '2.0', 'cms': 3.7 },
             { 'django': 2.1, 'cms': 3.7 },
             { 'django': 2.1, 'cms': 3.6 },
             { 'django': 2.2, 'cms': 3.7 },
@@ -117,11 +115,11 @@ jobs:
           path: test_screenshots
 
       - name: Generate screenshot report
-        if: matrix.version_combinations.django == 2.1 && matrix.version_combinations.cms == 3.7 && matrix.python-version == 3.7 && (github.ref == 'refs/heads/master' || github.base_ref == 'master' )
+        if: matrix.version_combinations.django == 2.2 && matrix.version_combinations.cms == 3.7 && matrix.python-version == 3.7 && (github.ref == 'refs/heads/master' || github.base_ref == 'master' )
         run: |
           python tests/utils/generate_screenshot_test_report.py
       - name: Percy Upload
-        if: matrix.version_combinations.django == 2.1 && matrix.version_combinations.cms == 3.7 && matrix.python-version == 3.7 && (github.ref == 'refs/heads/master' || github.base_ref == 'master' )
+        if: matrix.version_combinations.django == 2.2 && matrix.version_combinations.cms == 3.7 && matrix.python-version == 3.7 && (github.ref == 'refs/heads/master' || github.base_ref == 'master' )
         uses: percy/snapshot-action@v0.1.1
         with:
           build-directory: 'test_screenshots'
@@ -144,8 +142,6 @@ jobs:
             { 'django': 1.11, 'cms': 3.5 },
             { 'django': 1.11, 'cms': 3.6 },
             { 'django': 1.11, 'cms': 3.7 },
-            { 'django': '2.0', 'cms': 3.6 },
-            { 'django': '2.0', 'cms': 3.7 },
             { 'django': 2.1, 'cms': 3.6 },
             { 'django': 2.1, 'cms': 3.7 },
           ]
