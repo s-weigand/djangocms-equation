@@ -103,8 +103,11 @@ jobs:
 
       - name: Run tests django==${{ matrix.version_combinations.django }} && django-cms==${{ matrix.version_combinations.cms }}
         env:
-          PYTEST_ARGS: '-vv --cov=djangocms_equation --cov-config .coveragerc  --reruns 5 --reruns-delay 5'
-        run: python setup.py test
+          PYTEST_ARGS: '-vv --reruns 5 --reruns-delay 5'
+        run: |
+          coverage erase
+          coverage run setup.py test
+          coverage report
 
       - name: Upload Screenshots Artifact on fail
         if: failure()
@@ -179,8 +182,11 @@ jobs:
 
       - name: Run tests django==${{ matrix.version_combinations.django }} && django-cms==${{ matrix.version_combinations.cms }}
         env:
-          PYTEST_ARGS: '-vv --cov=djangocms_equation --cov-config .coveragerc  --reruns 5 --reruns-delay 5'
-        run: python setup.py test
+          PYTEST_ARGS: '-vv --reruns 5 --reruns-delay 5'
+        run: |
+          coverage erase
+          coverage run setup.py test
+          coverage report
 
       - name: Upload Screenshots Artifact on fail
         if: failure()
