@@ -8,6 +8,9 @@ from cms import __version__ as cms_version
 from cms.api import add_plugin, create_page
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from django.test import override_settings
+from django.test.testcases import LiveServerThread, QuietWSGIRequestHandler
+from django.core.servers.basehttp import WSGIServer
+
 from app_helper.base_test import BaseTestCaseMixin
 from selenium.common.exceptions import (
     ElementClickInterceptedException,
@@ -39,10 +42,37 @@ else:
     USE_JS_INJECTION = False
 
 
+class LiveServerSingleThread(LiveServerThread):
+    """
+    From: https://stackoverflow.com/a/51750516/3990615
+
+    Runs a single threaded server rather than multi threaded.
+    Reverts https://github.com/django/django/pull/7832
+    """
+
+    def _create_server(self):
+
+        """
+        the keep-alive fixes introduced in Django 2.1.4 (934acf1126995f6e6ccba5947ec8f7561633c27f)
+        cause problems when serving the static files in a stream.
+        We disable the helper handle method that calls handle_one_request multiple times.
+        """
+        QuietWSGIRequestHandler.handle = QuietWSGIRequestHandler.handle_one_request
+
+        return WSGIServer(
+            (self.host, self.port), QuietWSGIRequestHandler, allow_reuse_address=False
+        )
+
+
+class StaticServerSingleThreadedTestCase(StaticLiveServerTestCase):
+    "A thin sub-class which only sets the single-threaded server as a class"
+    server_thread_class = LiveServerSingleThread
+
+
 # uncomment the next line if the server throws errors
 # @override_settings(DEBUG=True)
 @override_settings(ALLOWED_HOSTS=["*"])
-class TestIntegrationChrome(BaseTestCaseMixin, StaticLiveServerTestCase):
+class TestIntegrationChrome(BaseTestCaseMixin, StaticServerSingleThreadedTestCase):
     """
     Baseclass for Integration tests with Selenium running in a docker.
     The settings default to chrome (see. docker-compose.yml),
