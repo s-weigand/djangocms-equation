@@ -1,6 +1,6 @@
 # History
 
-## 0.2.0 (future)
+## 0.2.0 (2020-08-09)
 
 - Added upgraded KaTeX to 0.12.0
 - Dropped support for Django 2.0
