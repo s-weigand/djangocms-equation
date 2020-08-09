@@ -207,7 +207,7 @@ jobs:
           node-version: 12.x
       - name: Compile assets
         run: |
-          npm i
+          npm ci
           npm run publish
       - name: Set up Python 3.7
         uses: actions/setup-python@v1
