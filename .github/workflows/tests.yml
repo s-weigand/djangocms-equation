@@ -53,12 +53,12 @@ jobs:
         run: |
           make --directory=docs clean linkcheck
 
-  test-py36-37:
+  test-py36-38:
     runs-on: ubuntu-latest
     needs: [flake8, docs]
     strategy:
       matrix:
-        python-version: [3.6, 3.7]
+        python-version: [3.6, 3.7, 3.8]
         version_combinations:
           [
             { 'django': 1.11, 'cms': 3.4 },
@@ -123,6 +123,7 @@ jobs:
         uses: percy/snapshot-action@v0.1.1
         with:
           build-directory: 'test_screenshots'
+          flags: '-c .ci.percy.yml'
           verbose: true
         env:
           PERCY_TOKEN: ${{ secrets.PERCY_TOKEN }}
@@ -198,7 +199,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
-    needs: [test-py36-37, test-py35]
+    needs: [test-py36-38, test-py35]
     steps:
       - uses: actions/checkout@v1
       - name: Setup Node.js
@@ -207,7 +208,7 @@ jobs:
           node-version: 12.x
       - name: Compile assets
         run: |
-          npm i
+          npm ci
           npm run publish
       - name: Set up Python 3.7
         uses: actions/setup-python@v1
