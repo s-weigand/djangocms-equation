@@ -1,6 +1,5 @@
 pip>=18.1
 bump2version>=0.5.10
-twine>=1.12.1
 wheel>=0.32.1
 
 #docs
