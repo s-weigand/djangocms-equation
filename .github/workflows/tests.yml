@@ -1,4 +1,4 @@
-name: 'Tests'
+name: "Tests"
 on: [push, pull_request]
 
 jobs:
@@ -61,13 +61,13 @@ jobs:
         python-version: [3.6, 3.7, 3.8]
         version_combinations:
           [
-            { 'django': 1.11, 'cms': 3.4 },
-            { 'django': 1.11, 'cms': 3.5 },
-            { 'django': 1.11, 'cms': 3.6 },
-            { 'django': 1.11, 'cms': 3.7 },
-            { 'django': 2.1, 'cms': 3.7 },
-            { 'django': 2.1, 'cms': 3.6 },
-            { 'django': 2.2, 'cms': 3.7 },
+            { "django": 1.11, "cms": 3.4 },
+            { "django": 1.11, "cms": 3.5 },
+            { "django": 1.11, "cms": 3.6 },
+            { "django": 1.11, "cms": 3.7 },
+            { "django": 2.1, "cms": 3.7 },
+            { "django": 2.1, "cms": 3.6 },
+            { "django": 2.2, "cms": 3.7 },
           ]
 
     steps:
@@ -93,15 +93,19 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install -U pip wheel
-          pip install -U -e .
+          pip install .
           pip install -U -r requirements_dev.txt
           pip install 'django==${{ matrix.version_combinations.django }}.*' 'django-cms==${{ matrix.version_combinations.cms }}.*'
+      - name: Generate screenshot report
+        if: matrix.version_combinations.django != 2.2
+        run: |
+          pip install -U 'django-classy-tags<2' 'django-sekizai<2'
       - name: Show installed packages
         run: pip freeze
 
       - name: Run tests django==${{ matrix.version_combinations.django }} && django-cms==${{ matrix.version_combinations.cms }}
         env:
-          PYTEST_ARGS: '-vv --reruns 10'
+          PYTEST_ARGS: "-vv --reruns 10"
         run: |
           coverage erase
           coverage run setup.py test
@@ -122,8 +126,8 @@ jobs:
         if: matrix.version_combinations.django == 2.2 && matrix.version_combinations.cms == 3.7 && matrix.python-version == 3.7 && (github.ref == 'refs/heads/master' || github.base_ref == 'master' )
         uses: percy/snapshot-action@v0.1.1
         with:
-          build-directory: 'test_screenshots'
-          flags: '-c .ci.percy.yml'
+          build-directory: "test_screenshots"
+          flags: "-c .ci.percy.yml"
           verbose: true
         env:
           PERCY_TOKEN: ${{ secrets.PERCY_TOKEN }}
@@ -139,12 +143,12 @@ jobs:
       matrix:
         version_combinations:
           [
-            { 'django': 1.11, 'cms': 3.4 },
-            { 'django': 1.11, 'cms': 3.5 },
-            { 'django': 1.11, 'cms': 3.6 },
-            { 'django': 1.11, 'cms': 3.7 },
-            { 'django': 2.1, 'cms': 3.6 },
-            { 'django': 2.1, 'cms': 3.7 },
+            { "django": 1.11, "cms": 3.4 },
+            { "django": 1.11, "cms": 3.5 },
+            { "django": 1.11, "cms": 3.6 },
+            { "django": 1.11, "cms": 3.7 },
+            { "django": 2.1, "cms": 3.6 },
+            { "django": 2.1, "cms": 3.7 },
           ]
 
     steps:
@@ -170,16 +174,16 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install -U pip wheel
-          pip install -U -e .
+          pip install .
           pip install -U -r requirements_dev.txt
           pip install -U 'webdriver_manager==2.3.0'
-          pip install 'django==${{ matrix.version_combinations.django }}.*' 'django-cms==${{ matrix.version_combinations.cms }}.*'
+          pip install 'django==${{ matrix.version_combinations.django }}.*' 'django-cms==${{ matrix.version_combinations.cms }}.*' 'django-classy-tags<2' 'django-sekizai<2'
       - name: Show installed packages
         run: pip freeze
 
       - name: Run tests django==${{ matrix.version_combinations.django }} && django-cms==${{ matrix.version_combinations.cms }}
         env:
-          PYTEST_ARGS: '-vv --reruns 10'
+          PYTEST_ARGS: "-vv --reruns 10"
         run: |
           coverage erase
           coverage run setup.py test
