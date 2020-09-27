@@ -71,13 +71,17 @@ Ready to contribute? Here's how to set up ``djangocms_equation`` for local devel
     $ pip install -r requirements_dev.txt
     $ pip install -e .
 
-4. Create a branch for local development::
+4. Install the ``pre-commit`` hooks, for quality assurance::
+
+    $ pre-commit install && pre-commit install -t pre-push
+
+5. Create a branch for local development::
 
     $ git checkout -b name-of-your-bugfix-or-feature
 
    Now you can make your changes locally.
 
-5. When you're done making changes, check that your changes pass flake8 and the
+6. When you're done making changes, check that your changes pass flake8 and the
    tests, including testing other Python versions with tox and docker-compose_::
 
     $ docker-compose up -d
@@ -86,13 +90,13 @@ Ready to contribute? Here's how to set up ``djangocms_equation`` for local devel
    Docker compose is needed for the integration tests, which use selenium_
    and the `selenium docker images`_.
 
-6. Commit your changes and push your branch to GitHub::
+7. Commit your changes and push your branch to GitHub::
 
     $ git add .
     $ git commit -m "Your detailed description of your changes."
     $ git push origin name-of-your-bugfix-or-feature
 
-7. Submit a pull request through the GitHub website.
+8. Submit a pull request through the GitHub website.
 
 Pull Request Guidelines
 -----------------------
