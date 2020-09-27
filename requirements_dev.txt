@@ -6,7 +6,7 @@ wheel>=0.32.1
 Sphinx>=3.2.0
 sphinx-rtd-theme>=0.5.0
 sphinx-copybutton>=0.3.0
-myst-parser>=0.12.7
+myst-parser>=0.12.7; python_version > '3.6'
 
 # quality asurence
 pre-commit>=2.6.0; python_version > '3.6'
