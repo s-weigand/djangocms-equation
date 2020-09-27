@@ -1,8 +1,5 @@
-# -*- coding: utf-8 -*-
-from __future__ import absolute_import, print_function, unicode_literals
-
-from mixer.backend.django import mixer
 from django.test import TestCase
+from mixer.backend.django import mixer
 
 
 class TestModel(TestCase):

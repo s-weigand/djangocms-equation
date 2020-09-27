@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Top-level package for djangocms-equation."""
 
 __author__ = """Sebastian Weigand"""

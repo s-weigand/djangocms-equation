@@ -24,7 +24,7 @@ const replace_empty_lines = (tex_code: string): string => {
 }
 
 // Global copy handler to modify behavior on .katex elements.
-document.addEventListener('copy', function(event: ClipboardEvent) {
+document.addEventListener('copy', function (event: ClipboardEvent) {
   const selection = window.getSelection() as Selection
   if (selection.isCollapsed) {
     return // default action OK if selection is empty

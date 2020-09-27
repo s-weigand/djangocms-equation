@@ -62,7 +62,7 @@ jobs:
 
   test-py36-38:
     runs-on: ubuntu-latest
-    needs: [flake8, docs]
+    needs: [pre-commit, docs]
     strategy:
       matrix:
         python-version: [3.6, 3.7, 3.8]
@@ -146,7 +146,7 @@ jobs:
 
   test-py35:
     runs-on: ubuntu-latest
-    needs: [flake8, docs]
+    needs: [pre-commit, docs]
     strategy:
       matrix:
         version_combinations:

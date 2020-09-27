@@ -1,13 +1,14 @@
-# -*- coding: utf-8 -*-
 # taken from
 # https://github.com/divio/djangocms-attributes-field/blob/master/tests/test_migrations.py
 # original from
 # http://tech.octopus.energy/news/2016/01/21/testing-for-missing-migrations-in-django.html
 
-from __future__ import absolute_import, print_function, unicode_literals
+
 from django.core.management import call_command
-from django.test import TestCase, override_settings
-from django.utils.six import text_type, StringIO
+from django.test import TestCase
+from django.test import override_settings
+from django.utils.six import StringIO
+from django.utils.six import text_type
 
 
 class TestMigrations(TestCase):

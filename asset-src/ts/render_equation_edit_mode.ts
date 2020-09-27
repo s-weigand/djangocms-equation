@@ -6,7 +6,7 @@ if (document.readyState === 'complete') {
   init_render_edit_mode(false)
   init_ckeditor_rendering(false)
 } else {
-  document.addEventListener('DOMContentLoaded', function(event) {
+  document.addEventListener('DOMContentLoaded', function (event) {
     init_render_edit_mode(false)
     init_ckeditor_rendering(false)
   })

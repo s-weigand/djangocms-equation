@@ -1,14 +1,13 @@
-# -*- coding: utf-8 -*-
-from __future__ import absolute_import, print_function, unicode_literals
-
 import os
-from pathlib import Path
 from collections import OrderedDict
+from pathlib import Path
+
+from jinja2 import Environment
+from jinja2 import FileSystemLoader
 
 # from django.conf import settings
 # from django.template.loader import render_to_string, get_template
 
-from jinja2 import Environment, FileSystemLoader
 
 try:
     from urllib.parse import quote
@@ -31,15 +30,11 @@ def generate_test_screenshot_report(file_prefix=False):
     test_env_name = os.getenv("TOX_ENV_NAME", "stand alone")
     screen_shots_dict = OrderedDict()
     base_path = get_screenshot_test_base_folder().resolve()
-    for file_path in sorted(
-        base_path.rglob("*.png"), key=lambda file_path: file_path.name
-    ):
+    for file_path in sorted(base_path.rglob("*.png"), key=lambda file_path: file_path.name):
         browser_name, test_name, filename = list(file_path.parts)[-3:]
         screenshot_caption = os.path.splitext(filename)[0]
         if "GITHUB_WORKSPACE" in os.environ or not file_prefix:
-            rel_path = (
-                file_path.with_name(quote(filename)).relative_to(base_path).as_posix()
-            )
+            rel_path = file_path.with_name(quote(filename)).relative_to(base_path).as_posix()
             screenshot_path = "./{}".format(rel_path)
         else:
             screenshot_path = file_path.as_uri()

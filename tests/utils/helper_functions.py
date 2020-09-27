@@ -1,26 +1,21 @@
-# -*- coding: utf-8 -*-
-from __future__ import absolute_import, print_function, unicode_literals
-
 import functools
 import os
 import re
 import socket
 from time import sleep
 
-from selenium.webdriver import Chrome, Firefox
+from selenium.common.exceptions import ElementNotInteractableException
+from selenium.common.exceptions import JavascriptException
+from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import StaleElementReferenceException
+from selenium.common.exceptions import TimeoutException
+from selenium.webdriver import Chrome
+from selenium.webdriver import Firefox
+from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.remote.webdriver import WebDriver as RemoteWebdriver
-from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
-from urllib3.exceptions import NewConnectionError, MaxRetryError
-
-from selenium.common.exceptions import (
-    NoSuchElementException,
-    TimeoutException,
-    ElementNotInteractableException,
-    StaleElementReferenceException,
-    JavascriptException,
-)
-
+from urllib3.exceptions import MaxRetryError
+from urllib3.exceptions import NewConnectionError
 from webdriver_manager.chrome import ChromeDriverManager
 from webdriver_manager.firefox import GeckoDriverManager
 
@@ -55,11 +50,7 @@ def get_browser_instance(
         raise InvalidBrowserNameException(
             "Only the browser_names 'Chrome' and 'FireFox' are supported"
         )
-    if (
-        interactive
-        and browser_name == "FireFox"
-        and "GITHUB_WORKSPACE" not in os.environ
-    ):
+    if interactive and browser_name == "FireFox" and "GITHUB_WORKSPACE" not in os.environ:
         options = Options()
         # allows to copy paste in console when in interactive session
         options.preferences.update({"devtools.selfxss.count": 100})
@@ -125,9 +116,7 @@ def retry_on_browser_exception(
                         func.__name__, args, kwargs
                     )
                     if func_wrapper.test_name != "":
-                        error_information += ", run by the test: {}".format(
-                            func_wrapper.test_name
-                        )
+                        error_information += ", run by the test: {}".format(func_wrapper.test_name)
                     if not func_wrapper.suppress_report:
                         print()
                         print(type(e).__name__, ": ")
@@ -175,9 +164,7 @@ def hide_elements(browser, css_selectors):
     exception_counter = 0
     for css_selector in css_selectors:
         try:
-            script_code = 'document.querySelector("{}").style.display="none"'.format(
-                css_selector
-            )
+            script_code = 'document.querySelector("{}").style.display="none"'.format(css_selector)
             browser.execute_script(script_code)
         except JavascriptException:
             exception_counter += 1
@@ -197,9 +184,7 @@ def normalize_screenshot(browser):
             "outline: none;}",
         ],
     )
-    hide_elements(
-        browser, [".cms-messages", "#nprogress"]  # popup messages  # progress bar
-    )
+    hide_elements(browser, [".cms-messages", "#nprogress"])  # popup messages  # progress bar
 
 
 class ScreenCreator:
@@ -219,9 +204,7 @@ class ScreenCreator:
             filename = "#{}_{}".format(self.counter, filename)
             # this is to prevent visual diffs with percy
             normalize_screenshot(self.browser)
-            self.browser.save_screenshot(
-                screen_shot_path(filename, self.browser_name, sub_dir)
-            )
+            self.browser.save_screenshot(screen_shot_path(filename, self.browser_name, sub_dir))
             if current_frames and self.browser_name == "FireFox":
                 for current_frame in current_frames:
                     self.browser.switch_to.frame(current_frame)

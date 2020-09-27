@@ -1,10 +1,6 @@
-# -*- coding: utf-8 -*-
-from __future__ import absolute_import, print_function, unicode_literals
-
-from djangocms_equation.templatetags.djangocms_equation_tags import (
-    format_float_dot_delimiter,
-)
 from django.test import TestCase
+
+from djangocms_equation.templatetags.djangocms_equation_tags import format_float_dot_delimiter
 
 
 class TestTemplateTags(TestCase):

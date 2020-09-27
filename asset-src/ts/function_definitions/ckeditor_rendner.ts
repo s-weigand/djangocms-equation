@@ -28,7 +28,7 @@ const generateMutationCallback = ({
 }: ArgsGenerateMutationCallback): MutationCallback => {
   const mutation_callback = (records: MutationRecord[]) => {
     debug_printer(debug, `running MutationCallback ${debugName}`)
-    records.forEach(function(record: MutationRecord) {
+    records.forEach(function (record: MutationRecord) {
       let addedNodeList = record.addedNodes
       let i = addedNodeList.length - 1
       for (; i > -1; i--) {
@@ -102,7 +102,7 @@ const CKEditor_render_equation = (rootIFrameNode: Node, debug = false) => {
             nodeName: 'IFRAME',
             callbackFuncs: [
               CKEditor_render_equation_normal,
-              foo => {
+              (foo) => {
                 debug_printer(debug, '#### IFRAME created\n', foo)
               },
             ],
@@ -138,7 +138,7 @@ const CKEditor_render_equation_normal = (
           {
             nodeName: 'SPAN',
             callbackFuncs: [
-              foo => {
+              (foo) => {
                 render_spans(editorIFrameBody)
               },
             ],
@@ -177,7 +177,7 @@ export const init_ckeditor_rendering = (debug = false) => {
       {
         nodeName: 'P',
         callbackFuncs: [
-          foo => {
+          (foo) => {
             render_spans(document.body as HTMLBodyElement)
           },
         ],
