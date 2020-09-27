@@ -26,7 +26,7 @@ known_first_party = ["djangocms_equation"]
 force_single_line = true
 
 [tool.interrogate]
-exclude = ["setup.py", "docs", "tests", ".eggs"]
+exclude = ["setup.py", "docs", "tests", ".eggs", "djangocms_equation/migrations"]
 ignore-init-module = true
 fail-under=100
 verbose = 1
