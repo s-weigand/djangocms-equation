@@ -7,6 +7,7 @@
 [![Test Status](https://github.com/s-weigand/djangocms-equation/workflows/Tests/badge.svg)](https://github.com/s-weigand/djangocms-equation/actions)
 [![Documentation Status](https://readthedocs.org/projects/djangocms-equation/badge/?version=latest)](https://djangocms-equation.readthedocs.io/en/latest/?badge=latest)
 [![Code Coverage](https://codecov.io/gh/s-weigand/djangocms-equation/branch/master/graph/badge.svg)](https://codecov.io/gh/s-weigand/djangocms-equation)
+[![Docstring Coverage](https://raw.githubusercontent.com/s-weigand/djangocms-equation/master/docs/_static/interrogate_badge.svg)](https://github.com/econchick/interrogate)
 [![This project is using Percy.io for visual regression testing.](https://percy.io/static/images/percy-badge.svg)](https://percy.io/s-weigand/djangocms-equation)
 
 [![Dependabot Status](https://api.dependabot.com/badges/status?host=github&repo=s-weigand/djangocms-equation)](https://dependabot.com)
