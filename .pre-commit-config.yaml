@@ -73,6 +73,7 @@ repos:
       - id: interrogate
         name: Update interrogate badge
         args: [-g, docs/_static]
+        exclude: 'docs|tests'
         always_run: true
         types: [python]
         stages: [push]
