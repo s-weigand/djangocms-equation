@@ -178,7 +178,7 @@ export const init_live_editor_render = (debug = true): void => {
     render_text(tex_in, tex_out, debug)
   }
   icon_container.addEventListener('click', () => {
-    change_orientation(icon_container, (debug = debug))
+    change_orientation(icon_container, debug)
   })
 
   update_font_size()
