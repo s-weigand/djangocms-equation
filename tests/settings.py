@@ -1,9 +1,7 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
-from __future__ import absolute_import, print_function, unicode_literals
+
 import sys
 from shutil import rmtree
-
 
 HELPER_SETTINGS = {
     "TEST_RUNNER": "app_helper.pytest_runner.PytestTestRunner",

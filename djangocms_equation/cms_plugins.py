@@ -1,13 +1,8 @@
-# -*- coding: utf-8 -*-
-"""
-Module containing the plugins implementation
-"""
-from __future__ import unicode_literals
-
-from django.utils.translation import ugettext as _
+"""Module containing the plugins implementation."""
 
 from cms.plugin_base import CMSPluginBase
 from cms.plugin_pool import plugin_pool
+from django.utils.translation import ugettext as _
 
 from .forms import EquationForm
 from .models import EquationPluginModel
@@ -16,9 +11,7 @@ from .settings import KATEX_EQUATION_SETTINGS
 
 @plugin_pool.register_plugin  # register the plugin
 class EquationPlugin(CMSPluginBase):
-    """
-    Implementation of the actual plugin.
-    """
+    """Implementation of the actual plugin."""
 
     model = EquationPluginModel  # model where plugin data are saved
     name = _("Equation")  # name of the plugin in the interface
@@ -42,9 +35,7 @@ class EquationPlugin(CMSPluginBase):
     ]
 
     def render(self, context, instance, placeholder):
-        """
-        Method that renders the Plugin with self.render_template and
-        the data in instance
+        """Render the Plugin with self.render_template and the data in instance.
 
         Parameters
         ----------
@@ -60,7 +51,6 @@ class EquationPlugin(CMSPluginBase):
         dict
             [description]
         """
-
         if not self.is_in_text_editor(instance):
             instance.is_inline = False
         context.update(
@@ -73,9 +63,9 @@ class EquationPlugin(CMSPluginBase):
         return context
 
     def icon_src(self, instance):
-        """
-        Returns the path to an icon which is shown in the text editor,
-        this is used in django-cms==3.4 only
+        """Return the path to an icon which is shown in the text editor.
+
+        This is used in django-cms==3.4 only.
 
         Parameters
         ----------
@@ -90,9 +80,9 @@ class EquationPlugin(CMSPluginBase):
         return "djangocms_equation/img/LaTeX_logo.svg"
 
     def icon_alt(self, instance):
-        """
-        Returns the alt text for the shown icon,
-        this is used in django-cms==3.4 only
+        """Return the alt text for the shown icon.
+
+        This is used in django-cms==3.4 only.
 
         Parameters
         ----------
@@ -115,9 +105,7 @@ class EquationPlugin(CMSPluginBase):
         return format_str.format(tex_code=instance.tex_code)
 
     def is_in_text_editor(self, instance):
-        """
-        Method to check if the plugin was added to a text plugin ('djangocms-text-ckeditor')
-        or to page as stand alone element.
+        """Check if the plugin was added to a text plugin.
 
         Parameters
         ----------

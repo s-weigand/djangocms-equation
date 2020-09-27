@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 #
 # djangocms_equation documentation build configuration file, created by
 # sphinx-quickstart on Fri Jun  9 13:47:02 2017.
@@ -22,11 +21,11 @@ import os
 import sys
 
 sys.path.insert(0, os.path.abspath(".."))
-from tests.settings import doc_setup
+from tests.settings import doc_setup  # noqa: E402
 
 doc_setup()
 
-import djangocms_equation
+import djangocms_equation  # noqa: E402
 
 # -- General configuration ---------------------------------------------
 
@@ -58,16 +57,16 @@ templates_path = ["_templates"]
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
 #
-source_suffix = ['.rst', '.md']
+source_suffix = [".rst", ".md"]
 # source_suffix = ".rst"
 
 # The master toctree document.
 master_doc = "index"
 
 # General information about the project.
-project = u"djangocms-equation"
-copyright = u"2019, Sebastian Weigand"
-author = u"Sebastian Weigand"
+project = "djangocms-equation"
+copyright = "2019, Sebastian Weigand"
+author = "Sebastian Weigand"
 
 # The version info for the project you're documenting, acts as replacement
 # for |version| and |release|, also used in various other places throughout
@@ -97,7 +96,7 @@ pygments_style = "sphinx"
 todo_include_todos = False
 
 
-linkcheck_ignore = [r'https://github\.com/s-weigand/djangocms-equation/actions']
+linkcheck_ignore = [r"https://github\.com/s-weigand/djangocms-equation/actions"]
 
 
 # -- Options for HTML output -------------------------------------------
@@ -150,8 +149,8 @@ latex_documents = [
     (
         master_doc,
         "djangocms_equation.tex",
-        u"djangocms-equation Documentation",
-        u"Sebastian Weigand",
+        "djangocms-equation Documentation",
+        "Sebastian Weigand",
         "manual",
     )
 ]
@@ -161,9 +160,7 @@ latex_documents = [
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [
-    (master_doc, "djangocms_equation", u"djangocms-equation Documentation", [author], 1)
-]
+man_pages = [(master_doc, "djangocms_equation", "djangocms-equation Documentation", [author], 1)]
 
 
 # -- Options for Texinfo output ----------------------------------------
@@ -175,11 +172,10 @@ texinfo_documents = [
     (
         master_doc,
         "djangocms_equation",
-        u"djangocms-equation Documentation",
+        "djangocms-equation Documentation",
         author,
         "djangocms_equation",
         "One line description of project.",
         "Miscellaneous",
     )
 ]
-

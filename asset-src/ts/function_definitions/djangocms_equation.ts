@@ -34,7 +34,7 @@ export const init_render_edit_mode = (debug = true): void => {
   // gets injected to windows by the javascript code of django-cms
   const CMS = (window as any).CMS
   if (CMS !== undefined) {
-    CMS.$(window).on('cms-content-refresh', function() {
+    CMS.$(window).on('cms-content-refresh', function () {
       render_full_page()
     })
   }

@@ -1,38 +1,31 @@
-# -*- coding: utf-8 -*-
-from __future__ import absolute_import, print_function, unicode_literals
-
 import os
 from time import sleep
 
-from cms import __version__ as cms_version
-from cms.api import add_plugin, create_page
-
 import django
-from django.contrib.staticfiles.testing import StaticLiveServerTestCase
-from django.test import override_settings
-from django.test.testcases import LiveServerThread, QuietWSGIRequestHandler
-from django.core.servers.basehttp import WSGIServer
-
 from app_helper.base_test import BaseTestCaseMixin
-from selenium.common.exceptions import (
-    ElementClickInterceptedException,
-    ElementNotInteractableException,
-    JavascriptException,
-    NoSuchElementException,
-    StaleElementReferenceException,
-    TimeoutException,
-)
+from cms import __version__ as cms_version
+from cms.api import add_plugin
+from cms.api import create_page
+from django.contrib.staticfiles.testing import StaticLiveServerTestCase
+from django.core.servers.basehttp import WSGIServer
+from django.test import override_settings
+from django.test.testcases import LiveServerThread
+from django.test.testcases import QuietWSGIRequestHandler
+from selenium.common.exceptions import ElementClickInterceptedException
+from selenium.common.exceptions import ElementNotInteractableException
+from selenium.common.exceptions import JavascriptException
+from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import StaleElementReferenceException
+from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from selenium.webdriver.support import ui
 
-from .utils.helper_functions import (
-    ScreenCreator,
-    get_browser_instance,
-    get_own_ip,
-    get_page_placeholders,
-    normalize_screenshot,
-    retry_on_browser_exception,
-)
+from .utils.helper_functions import ScreenCreator
+from .utils.helper_functions import get_browser_instance
+from .utils.helper_functions import get_own_ip
+from .utils.helper_functions import get_page_placeholders
+from .utils.helper_functions import normalize_screenshot
+from .utils.helper_functions import retry_on_browser_exception
 
 INTERACTIVE = False
 
@@ -114,7 +107,7 @@ class TestIntegrationChrome(BaseTestCaseMixin, StaticServerSingleThreadedTestCas
 
     @classmethod
     def setUpClass(cls):
-        super(TestIntegrationChrome, cls).setUpClass()
+        super().setUpClass()
         cls.browser = get_browser_instance(
             cls.browser_port,
             cls.desire_capabilities,
@@ -129,7 +122,7 @@ class TestIntegrationChrome(BaseTestCaseMixin, StaticServerSingleThreadedTestCas
     @classmethod
     def tearDownClass(cls):
         cls.browser.quit()
-        super(TestIntegrationChrome, cls).tearDownClass()
+        super().tearDownClass()
 
     def setUp(self):
         # This is needed so the user will be recreated each time,
@@ -155,7 +148,7 @@ class TestIntegrationChrome(BaseTestCaseMixin, StaticServerSingleThreadedTestCas
         self.placeholder = get_page_placeholders(testpage, "en").get(slot="content")
         self.logout_user()
         self.screenshot.reset_counter()
-        super(TestIntegrationChrome, self).setUp()
+        super().setUp()
 
     @classmethod
     def wait_get_element_css(cls, css_selector):
@@ -164,9 +157,7 @@ class TestIntegrationChrome(BaseTestCaseMixin, StaticServerSingleThreadedTestCas
 
     @classmethod
     def wait_get_elements_css(cls, css_selector):
-        cls.wait.until(
-            lambda driver: driver.find_elements_by_css_selector(css_selector)
-        )
+        cls.wait.until(lambda driver: driver.find_elements_by_css_selector(css_selector))
         return cls.browser.find_elements_by_css_selector(css_selector)
 
     @classmethod
@@ -177,9 +168,7 @@ class TestIntegrationChrome(BaseTestCaseMixin, StaticServerSingleThreadedTestCas
     def element_is_displayed_css(self, css_selector):
         if self.element_exists(css_selector):
             try:
-                return self.browser.find_element_by_css_selector(
-                    css_selector
-                ).is_displayed()
+                return self.browser.find_element_by_css_selector(css_selector).is_displayed()
             except (
                 ElementNotInteractableException,
                 StaleElementReferenceException,
@@ -206,9 +195,7 @@ class TestIntegrationChrome(BaseTestCaseMixin, StaticServerSingleThreadedTestCas
         else:
             if self.browser.find_element_by_css_selector(css_selector).is_displayed():
                 self.wait.until_not(
-                    lambda driver: driver.find_element_by_css_selector(
-                        css_selector
-                    ).is_displayed()
+                    lambda driver: driver.find_element_by_css_selector(css_selector).is_displayed()
                 )
 
     @retry_on_browser_exception(
@@ -220,13 +207,9 @@ class TestIntegrationChrome(BaseTestCaseMixin, StaticServerSingleThreadedTestCas
         except StaleElementReferenceException:
             pass
         else:
-            if not self.browser.find_element_by_css_selector(
-                css_selector
-            ).is_displayed():
+            if not self.browser.find_element_by_css_selector(css_selector).is_displayed():
                 self.wait.until(
-                    lambda driver: driver.find_element_by_css_selector(
-                        css_selector
-                    ).is_displayed()
+                    lambda driver: driver.find_element_by_css_selector(css_selector).is_displayed()
                 )
 
     def set_text_input_value(self, input, value):
@@ -309,9 +292,7 @@ class TestIntegrationChrome(BaseTestCaseMixin, StaticServerSingleThreadedTestCas
                 execution_count=execution_count + 1,
             )
 
-    def change_form_orientation(
-        self, test_name="test_equation_orientation", current_frames=None
-    ):
+    def change_form_orientation(self, test_name="test_equation_orientation", current_frames=None):
         orientation_changer = self.wait_get_element_css(".orientation_selector")
         orientation_changer.click()
         self.screenshot.take(
@@ -335,9 +316,7 @@ class TestIntegrationChrome(BaseTestCaseMixin, StaticServerSingleThreadedTestCas
             current_frames=current_frames,
         )
 
-    @retry_on_browser_exception(
-        exceptions=(TimeoutException, ElementNotInteractableException)
-    )
+    @retry_on_browser_exception(exceptions=(TimeoutException, ElementNotInteractableException))
     def enter_equation(
         self,
         self_test=False,
@@ -360,9 +339,7 @@ class TestIntegrationChrome(BaseTestCaseMixin, StaticServerSingleThreadedTestCas
         latex_input = self.click_element_css("#id_tex_code")
         if font_size_value != 1 or font_size_unit != "rem" or is_inline is True:
             try:
-                self.browser.find_element_by_css_selector(
-                    ".collapse.advanced.collapsed"
-                )
+                self.browser.find_element_by_css_selector(".collapse.advanced.collapsed")
             except NoSuchElementException:
                 pass
             else:
@@ -381,9 +358,7 @@ class TestIntegrationChrome(BaseTestCaseMixin, StaticServerSingleThreadedTestCas
                 self.click_element_css("#djangocms_equation_font_size_unit")
                 # unit_option
                 self.click_element_css(
-                    "#djangocms_equation_font_size_unit option[value={}]".format(
-                        font_size_unit
-                    )
+                    "#djangocms_equation_font_size_unit option[value={}]".format(font_size_unit)
                 )
 
             if is_inline is True:
@@ -392,7 +367,7 @@ class TestIntegrationChrome(BaseTestCaseMixin, StaticServerSingleThreadedTestCas
         # the click is needed for firefox to select the element
         latex_input = self.click_element_css("#id_tex_code")
         # the input of the equation is done here so the browsers
-        # have more time to render the settings, since this appers
+        # have more time to render the settings, since this appears
         # to be a problem on travis
         self.set_text_input_value(latex_input, tex_code)
 
@@ -403,13 +378,9 @@ class TestIntegrationChrome(BaseTestCaseMixin, StaticServerSingleThreadedTestCas
             current_frames=current_frames,
         )
         if test_orientation:
-            self.change_form_orientation(
-                test_name=test_name, current_frames=current_frames
-            )
+            self.change_form_orientation(test_name=test_name, current_frames=current_frames)
 
-    @retry_on_browser_exception(
-        exceptions=(StaleElementReferenceException, TimeoutException)
-    )
+    @retry_on_browser_exception(exceptions=(StaleElementReferenceException, TimeoutException))
     def open_stand_alone_add_modal(
         self,
         self_test=False,
@@ -424,26 +395,18 @@ class TestIntegrationChrome(BaseTestCaseMixin, StaticServerSingleThreadedTestCas
         # quick_search
         self.click_element_css(".cms-quicksearch input")
         if plugin_to_add == "equation":
-            plugin_option = self.wait_get_element_css(
-                '.cms-submenu-item a[href="EquationPlugin"]'
-            )
+            plugin_option = self.wait_get_element_css('.cms-submenu-item a[href="EquationPlugin"]')
         elif plugin_to_add == "text":
-            plugin_option = self.wait_get_element_css(
-                '.cms-submenu-item a[href="TextPlugin"]'
-            )
+            plugin_option = self.wait_get_element_css('.cms-submenu-item a[href="TextPlugin"]')
 
-        self.screenshot.take(
-            "plugin_add_modal.png", test_name, take_screen_shot=self_test
-        )
+        self.screenshot.take("plugin_add_modal.png", test_name, take_screen_shot=self_test)
         plugin_option.click()
 
     @retry_on_browser_exception(max_retry=1)
     def hide_structure_mode_cms_34(self):
         if CMS_VERSION_TUPLE < (3, 5):
             # content_link
-            self.click_element_css(
-                '.cms-toolbar-item-cms-mode-switcher a[href="?edit"]'
-            )
+            self.click_element_css('.cms-toolbar-item-cms-mode-switcher a[href="?edit"]')
 
     @retry_on_browser_exception(
         max_retry=2,
@@ -503,9 +466,7 @@ class TestIntegrationChrome(BaseTestCaseMixin, StaticServerSingleThreadedTestCas
             self_test=self_test, test_name=test_name, plugin_to_add="equation"
         )
         equation_edit_iframe = self.wait_get_element_css("iframe")
-        self.screenshot.take(
-            "equation_edit_iframe.png", test_name, take_screen_shot=self_test
-        )
+        self.screenshot.take("equation_edit_iframe.png", test_name, take_screen_shot=self_test)
         self.browser.switch_to.frame(equation_edit_iframe)
 
         self.enter_equation(
@@ -569,17 +530,13 @@ class TestIntegrationChrome(BaseTestCaseMixin, StaticServerSingleThreadedTestCas
                 current_frames=(text_edit_frame,),
             )
             plugin_select.click()
-            text_edit_pannel_iframe = self.wait_get_element_css(
-                "iframe.cke_panel_frame"
-            )
+            text_edit_pannel_iframe = self.wait_get_element_css("iframe.cke_panel_frame")
             self.browser.switch_to.frame(text_edit_pannel_iframe)
 
             # equation_options
             self.click_element_css('.cke_panel_listItem a[rel="EquationPlugin"]')
             text_edit_frame = switch_to_text_edit_frame()
-            equation_edit_iframe = self.wait_get_element_css(
-                "iframe.cke_dialog_ui_html"
-            )
+            equation_edit_iframe = self.wait_get_element_css("iframe.cke_dialog_ui_html")
             self.browser.switch_to.frame(equation_edit_iframe)
             return (text_edit_frame, equation_edit_iframe)
 
@@ -589,9 +546,7 @@ class TestIntegrationChrome(BaseTestCaseMixin, StaticServerSingleThreadedTestCas
         def add_text(text=" Some text for testing:", counter=0):
             switch_to_cke_wysiwyg_frame()
             self.wait_get_element_css("body p")
-            script_code = 'document.querySelector("body p").innerText=" {} "'.format(
-                text
-            )
+            script_code = 'document.querySelector("body p").innerText=" {} "'.format(text)
             self.browser.execute_script(script_code)
 
         @retry_on_browser_exception(exceptions=(TimeoutException), test_name=test_name)
@@ -654,9 +609,7 @@ class TestIntegrationChrome(BaseTestCaseMixin, StaticServerSingleThreadedTestCas
             pass
 
         if not test_orientation:
-            self.screenshot.take(
-                "equation_rendered.png", test_name, take_screen_shot=True
-            )
+            self.screenshot.take("equation_rendered.png", test_name, take_screen_shot=True)
             self.publish_and_take_screen_shot(True, test_name)
 
     def delete_plugin(self, delete_all=True):
@@ -667,9 +620,7 @@ class TestIntegrationChrome(BaseTestCaseMixin, StaticServerSingleThreadedTestCas
         for _ in delete_links:
             # since the delete links aren't visible the click is triggered
             # with javascript
-            self.browser.execute_script(
-                'document.querySelector("a[data-rel=delete]").click()'
-            )
+            self.browser.execute_script('document.querySelector("a[data-rel=delete]").click()')
             # delete_confirm
             self.click_element_css(".deletelink")
 
@@ -680,9 +631,7 @@ class TestIntegrationChrome(BaseTestCaseMixin, StaticServerSingleThreadedTestCas
                     self.placeholder,
                     "EquationPlugin",
                     language="en",
-                    tex_code="js~injection~hack~for~cms<{}.{}".format(
-                        *PATCHED_CMS_VERSION_TUPLE
-                    ),
+                    tex_code="js~injection~hack~for~cms<{}.{}".format(*PATCHED_CMS_VERSION_TUPLE),
                     is_inline=False,
                     font_size_value=1,
                     font_size_unit="rem",
@@ -760,15 +709,11 @@ class TestIntegrationChrome(BaseTestCaseMixin, StaticServerSingleThreadedTestCas
 
     def test_create_text_equation_2rem(self):
         self.js_injection_hack()
-        self.create_text_equation(
-            font_size_value=2, test_name="test_create_text_equation_2rem"
-        )
+        self.create_text_equation(font_size_value=2, test_name="test_create_text_equation_2rem")
 
     def test_create_text_equation_1_cm(self):
         self.js_injection_hack()
-        self.create_text_equation(
-            font_size_unit="cm", test_name="test_create_text_equation_1_cm"
-        )
+        self.create_text_equation(font_size_unit="cm", test_name="test_create_text_equation_1_cm")
 
     def test_create_text_equation_inline_True(self):
         self.js_injection_hack()

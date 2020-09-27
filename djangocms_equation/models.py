@@ -1,15 +1,9 @@
-# -*- coding: utf-8 -*-
-"""
-Database models for djangocms-equation.
-"""
-from __future__ import unicode_literals
+"""Database models for djangocms-equation."""
 
+from cms.models import CMSPlugin
 from django.db import models
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
-
-from cms.models import CMSPlugin
-
 
 ALLOWED_FONT_SIZE_UNITS = (
     ("cm", "cm"),
@@ -35,33 +29,22 @@ Allowed values for font-size units see https://www.w3schools.com/cssref/pr_font_
 
 @python_2_unicode_compatible
 class EquationPluginModel(CMSPlugin):
-    """
-    Database model of saved Equations.
-    """
+    """Database model of saved Equations."""
 
     tex_code = models.TextField(_("tex_code"), blank=True)
-    """
-    Latex code of the equation.
-    """
+    """Latex code of the equation."""
     is_inline = models.BooleanField(_("is_inline"), blank=True)
-    """
-    If it should be displayed inline or be stand alone.
-    """
+    """If it should be displayed inline or be stand alone."""
 
     font_size_value = models.FloatField(_("font_size_value"), default=1)
-    """
-    Value of the font-size with unit font_size_unit.
-    """
+    """Value of the font-size with unit font_size_unit."""
     font_size_unit = models.CharField(
         _("font_size_unit"), max_length=5, choices=ALLOWED_FONT_SIZE_UNITS
     )
-    """
-    Value of the font-size with size value font_size_value.
-    """
+    """Value of the font-size with size value font_size_value."""
 
     def __str__(self):
-        """
-        Returns string representation of the Equation
+        """Return string representation of the Equation.
 
         Returns
         -------

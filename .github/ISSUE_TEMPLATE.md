@@ -1,6 +1,6 @@
-* djangocms-equation version:
-* Python version:
-* Operating System:
+- djangocms-equation version:
+- Python version:
+- Operating System:
 
 ### Description
 
