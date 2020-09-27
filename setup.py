@@ -14,7 +14,7 @@ with open("HISTORY.md") as history_file:
 requirements = [
     "django-cms>=3.4,<3.8",
     "django>=1.11,!=2.0.*,<3.0",
-    "djangocms-text-ckeditor>=3.2.1",
+    "djangocms-text-ckeditor>=3.2.1,<4.0.0",
 ]
 
 setup(

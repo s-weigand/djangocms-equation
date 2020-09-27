@@ -1,13 +1,13 @@
-name: "Tests"
+name: 'Tests'
 on: [push, pull_request]
 
 jobs:
   flake8:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
       - name: Set up Python 3.7
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v2
         with:
           python-version: 3.7
       - name: Install dependencies
@@ -21,9 +21,9 @@ jobs:
   docs:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
       - name: Set up Python 3.7
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v2
         with:
           python-version: 3.7
       - name: Install dependencies
@@ -38,9 +38,9 @@ jobs:
   docs-links:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
       - name: Set up Python 3.7
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v2
         with:
           python-version: 3.7
       - name: Install dependencies
@@ -61,17 +61,17 @@ jobs:
         python-version: [3.6, 3.7, 3.8]
         version_combinations:
           [
-            { "django": 1.11, "cms": 3.4 },
-            { "django": 1.11, "cms": 3.5 },
-            { "django": 1.11, "cms": 3.6 },
-            { "django": 1.11, "cms": 3.7 },
-            { "django": 2.1, "cms": 3.7 },
-            { "django": 2.1, "cms": 3.6 },
-            { "django": 2.2, "cms": 3.7 },
+            { 'django': 1.11, 'cms': 3.4 },
+            { 'django': 1.11, 'cms': 3.5 },
+            { 'django': 1.11, 'cms': 3.6 },
+            { 'django': 1.11, 'cms': 3.7 },
+            { 'django': 2.1, 'cms': 3.7 },
+            { 'django': 2.1, 'cms': 3.6 },
+            { 'django': 2.2, 'cms': 3.7 },
           ]
 
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
 
       - name: Setup Node.js
         uses: actions/setup-node@v1
@@ -86,7 +86,7 @@ jobs:
           docker-compose up -d
           docker-compose ps
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
 
@@ -105,11 +105,12 @@ jobs:
 
       - name: Run tests django==${{ matrix.version_combinations.django }} && django-cms==${{ matrix.version_combinations.cms }}
         env:
-          PYTEST_ARGS: "-vv --reruns 10"
+          PYTEST_ARGS: '-vv --reruns 10'
         run: |
           coverage erase
           coverage run setup.py test
           coverage report
+          coverage xml
 
       - name: Upload Screenshots Artifact on fail
         if: failure()
@@ -126,8 +127,8 @@ jobs:
         if: matrix.version_combinations.django == 2.2 && matrix.version_combinations.cms == 3.7 && matrix.python-version == 3.7 && (github.ref == 'refs/heads/master' || github.base_ref == 'master' )
         uses: percy/snapshot-action@v0.1.1
         with:
-          build-directory: "test_screenshots"
-          flags: "-c .ci.percy.yml"
+          build-directory: 'test_screenshots'
+          flags: '-c .ci.percy.yml'
           verbose: true
         env:
           PERCY_TOKEN: ${{ secrets.PERCY_TOKEN }}
@@ -143,16 +144,16 @@ jobs:
       matrix:
         version_combinations:
           [
-            { "django": 1.11, "cms": 3.4 },
-            { "django": 1.11, "cms": 3.5 },
-            { "django": 1.11, "cms": 3.6 },
-            { "django": 1.11, "cms": 3.7 },
-            { "django": 2.1, "cms": 3.6 },
-            { "django": 2.1, "cms": 3.7 },
+            { 'django': 1.11, 'cms': 3.4 },
+            { 'django': 1.11, 'cms': 3.5 },
+            { 'django': 1.11, 'cms': 3.6 },
+            { 'django': 1.11, 'cms': 3.7 },
+            { 'django': 2.1, 'cms': 3.6 },
+            { 'django': 2.1, 'cms': 3.7 },
           ]
 
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
 
       - name: Setup Node.js
         uses: actions/setup-node@v1
@@ -167,7 +168,7 @@ jobs:
           docker-compose up -d
           docker-compose ps
       - name: Set up Python 3.5
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v2
         with:
           python-version: 3.5
 
@@ -183,11 +184,12 @@ jobs:
 
       - name: Run tests django==${{ matrix.version_combinations.django }} && django-cms==${{ matrix.version_combinations.cms }}
         env:
-          PYTEST_ARGS: "-vv --reruns 10"
+          PYTEST_ARGS: '-vv --reruns 10'
         run: |
           coverage erase
           coverage run setup.py test
           coverage report
+          coverage xml
 
       - name: Upload Screenshots Artifact on fail
         if: failure()
@@ -205,7 +207,7 @@ jobs:
     if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
     needs: [test-py36-38, test-py35]
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
       - name: Setup Node.js
         uses: actions/setup-node@v1
         with:
@@ -215,7 +217,7 @@ jobs:
           npm ci
           npm run publish
       - name: Set up Python 3.7
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v2
         with:
           python-version: 3.7
       - name: Install dependencies
