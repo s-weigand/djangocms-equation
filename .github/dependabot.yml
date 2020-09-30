@@ -18,3 +18,9 @@ updates:
       - dependency-name: django
         versions:
           - '>= 3.a, < 4'
+  # Maintain dependencies for GitHub Actions
+  - package-ecosystem: 'github-actions'
+    directory: '/'
+    schedule:
+      interval: 'daily'
+      time: '04:00'
