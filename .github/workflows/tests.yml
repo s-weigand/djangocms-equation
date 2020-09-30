@@ -3,7 +3,7 @@ on: [push, pull_request]
 
 jobs:
   misspell:
-    name: misspell
+    name: Check spelling
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -16,16 +16,18 @@ jobs:
           locale: 'US'
 
   pre-commit:
+    name: Run Quality Assurance
     runs-on: ubuntu-latest
     steps:
       - name: Check out repo
         uses: actions/checkout@v2
       - name: Set up Python
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v2
       - name: Run pre-commit
         uses: pre-commit/action@v2.0.0
 
   docs:
+    name: Build docs
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -43,6 +45,7 @@ jobs:
           make --directory=docs clean html
 
   docs-links:
+    name: Check Links in docs
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -61,6 +64,7 @@ jobs:
           make --directory=docs clean linkcheck
 
   test-py36-38:
+    name: py${{ matrix.python-version }} dj${{ matrix.version_combinations.django }} cms${{ matrix.version_combinations.cms }}
     runs-on: ubuntu-latest
     needs: [pre-commit, docs]
     strategy:
@@ -145,6 +149,7 @@ jobs:
           file: ./coverage.xml
 
   test-py35:
+    name: py3.5 dj${{ matrix.version_combinations.django }} cms${{ matrix.version_combinations.cms }}
     runs-on: ubuntu-latest
     needs: [pre-commit, docs]
     strategy:
@@ -210,6 +215,7 @@ jobs:
           file: ./coverage.xml
 
   deploy:
+    name: Upload new version to PyPi
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
     needs: [test-py36-38, test-py35]
