@@ -21,7 +21,7 @@ const katex_delimiters_setting: RenderMathInElementOptions = {
   ],
 }
 
-export const render_full_page = (target = document.body): void => {
+export const render_elements_in_target = (target = document.body): void => {
   renderMathInElement(target, {
     ...katex_delimiters_setting,
   })
@@ -29,13 +29,13 @@ export const render_full_page = (target = document.body): void => {
 
 export const init_render_edit_mode = (debug = true): void => {
   debug_printer(debug, 'init_render_edit_mode did run')
-  render_full_page()
+  render_elements_in_target()
   // window needs to be cast to any since the property 'CMS'
   // gets injected to windows by the javascript code of django-cms
   const CMS = (window as any).CMS
   if (CMS !== undefined) {
     CMS.$(window).on('cms-content-refresh', function () {
-      render_full_page()
+      render_elements_in_target()
     })
   }
 

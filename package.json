@@ -45,11 +45,12 @@
   "dependencies": {},
   "devDependencies": {
     "@types/katex": "^0.11.0",
-    "katex": "^0.12.0",
     "@types/node": "^14.11.8",
+    "katex": "^0.12.0",
     "less": "^3.10.3",
     "parcel": "^1.12.4",
     "sass": "^1.27.0",
+    "selector-observer": "^2.1.6",
     "tslint": "^6.0.0",
     "tslint-config-prettier": "^1.18.0",
     "tslint-config-standard": "^9.0.0",
