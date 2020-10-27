@@ -136,7 +136,7 @@ jobs:
           python tests/utils/generate_screenshot_test_report.py
       - name: Percy Upload
         if: matrix.version_combinations.django == 2.2 && matrix.version_combinations.cms == 3.7 && matrix.python-version == 3.7 && (github.ref == 'refs/heads/master' || github.base_ref == 'master' )
-        uses: percy/snapshot-action@v0.1.1
+        uses: percy/snapshot-action@v0.1.2
         with:
           build-directory: 'test_screenshots'
           flags: '-c .ci.percy.yml'
