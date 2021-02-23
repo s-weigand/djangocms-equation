@@ -24,4 +24,4 @@ webdriver_manager>=1.8.2
 
 # pinned due to issue
 # https://github.com/django-cms/django-cms/issues/6980
-django-treebeard<4.5
+django-treebeard<4.6
