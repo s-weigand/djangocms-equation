@@ -63,6 +63,6 @@ setup(
         "Tracker": "https://github.com/s-weigand/djangocms-equation/issues",
         "Changelog": "https://djangocms-equation.readthedocs.io/en/latest/history.html",
     },
-    version="0.2.2",
+    version="0.2.3",
     zip_safe=False,
 )
