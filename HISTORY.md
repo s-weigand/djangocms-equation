@@ -1,5 +1,9 @@
 # History
 
+## 0.2.3 (2021-05-04)
+
+- Upgraded KaTeX to 0.13.5
+
 ## 0.2.2 (2021-03-29)
 
 - Added official python 3.9 support
