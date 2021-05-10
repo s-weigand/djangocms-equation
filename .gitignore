@@ -107,6 +107,7 @@ ENV/
 
 # js modules
 node_modules
+.parcel-cache
 
 test_screenshots
 
