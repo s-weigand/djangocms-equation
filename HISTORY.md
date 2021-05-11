@@ -1,5 +1,10 @@
 # History
 
+## 0.2.4 (2021-05-11)
+
+- Upgraded KaTeX to 0.13.9
+- Updated javascript dependencies to fix security issues
+
 ## 0.2.3 (2021-05-04)
 
 - Upgraded KaTeX to 0.13.5
