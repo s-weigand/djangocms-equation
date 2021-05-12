@@ -22,7 +22,7 @@ jobs:
           path: ~/.cache/pre-commit
           key: pre-commit-autoupdate
       - name: Update pre-commit config packages
-        uses: technote-space/create-pr-action@v2
+        uses: technote-space/create-pr-action@v2.0.28
         with:
           GITHUB_TOKEN: ${{ secrets.ACTION_TRIGGER_TOKEN }}
           EXECUTE_COMMANDS: |
