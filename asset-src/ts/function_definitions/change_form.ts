@@ -26,9 +26,8 @@ const update_live_element_font_size = (
 }
 
 const is_in_text_editor = (debug = false) => {
-  const ckeditor_iframe: HTMLIFrameElement | null = window.parent.document.querySelector(
-    'iframe.cke_dialog_ui_html'
-  )
+  const ckeditor_iframe: HTMLIFrameElement | null =
+    window.parent.document.querySelector('iframe.cke_dialog_ui_html')
   debug_printer(
     debug,
     'is_in_text_editor\nchange forms parent is: ',
@@ -43,9 +42,8 @@ const is_in_text_editor = (debug = false) => {
 
 const use_displayMode_rendering = (debug = false) => {
   const is_in_ckeditor = is_in_text_editor(debug)
-  const inline_checkbox: HTMLInputElement | null = document.querySelector(
-    '#id_is_inline'
-  )
+  const inline_checkbox: HTMLInputElement | null =
+    document.querySelector('#id_is_inline')
   debug_printer(
     debug,
     'use_displayMode_rendering\ninline_checkbox is: ',
