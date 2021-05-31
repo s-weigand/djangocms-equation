@@ -44,7 +44,7 @@
   },
   "homepage": "https://github.com/s-weigand/djangocms-equation",
   "devDependencies": {
-    "@parcel/transformer-sass": "^2.0.0-beta.2",
+    "@parcel/transformer-sass": "^2.0.0-nightly.690",
     "@types/katex": "^0.11.0",
     "@types/node": "^15.3.0",
     "katex": "^0.13.11",
