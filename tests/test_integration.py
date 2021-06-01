@@ -59,7 +59,7 @@ class LiveServerSingleThread(LiveServerThread):
         )
 
 
-DJANGO_VERSION_TUPLE = tuple([int(i) for i in django.__version__.split(".")])
+DJANGO_VERSION_TUPLE = tuple(int(i) for i in django.__version__.split("."))
 
 if DJANGO_VERSION_TUPLE >= (2, 1, 4):
 
