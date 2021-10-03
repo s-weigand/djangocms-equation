@@ -127,17 +127,17 @@ jobs:
 
       - name: Upload Screenshots Artifact on fail
         if: failure()
-        uses: actions/upload-artifact@master
+        uses: actions/upload-artifact@v2
         with:
           name: screenshots
           path: test_screenshots
 
       - name: Generate screenshot report
-        if: matrix.version_combinations.django == 2.2 && matrix.version_combinations.cms == 3.7 && matrix.python-version == 3.7 && (github.ref == 'refs/heads/master' || github.base_ref == 'master' )
+        if: matrix.version_combinations.django == 2.2 && matrix.version_combinations.cms == 3.7 && matrix.python-version == 3.7 && (github.ref == 'refs/heads/main' || github.base_ref == 'main' )
         run: |
           python tests/utils/generate_screenshot_test_report.py
       - name: Percy Upload
-        if: matrix.version_combinations.django == 2.2 && matrix.version_combinations.cms == 3.7 && matrix.python-version == 3.7 && (github.ref == 'refs/heads/master' || github.base_ref == 'master' )
+        if: matrix.version_combinations.django == 2.2 && matrix.version_combinations.cms == 3.7 && matrix.python-version == 3.7 && (github.ref == 'refs/heads/main' || github.base_ref == 'main' )
         uses: percy/snapshot-action@v0.1.2
         with:
           build-directory: 'test_screenshots'

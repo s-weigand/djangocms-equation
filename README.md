@@ -6,8 +6,8 @@
 
 [![Test Status](https://github.com/s-weigand/djangocms-equation/workflows/Tests/badge.svg)](https://github.com/s-weigand/djangocms-equation/actions)
 [![Documentation Status](https://readthedocs.org/projects/djangocms-equation/badge/?version=latest)](https://djangocms-equation.readthedocs.io/en/latest/?badge=latest)
-[![Code Coverage](https://codecov.io/gh/s-weigand/djangocms-equation/branch/master/graph/badge.svg)](https://codecov.io/gh/s-weigand/djangocms-equation)
-[![Docstring Coverage](https://raw.githubusercontent.com/s-weigand/djangocms-equation/master/docs/_static/interrogate_badge.svg)](https://github.com/econchick/interrogate)
+[![Code Coverage](https://codecov.io/gh/s-weigand/djangocms-equation/branch/main/graph/badge.svg)](https://codecov.io/gh/s-weigand/djangocms-equation)
+[![Docstring Coverage](https://raw.githubusercontent.com/s-weigand/djangocms-equation/main/docs/_static/interrogate_badge.svg)](https://github.com/econchick/interrogate)
 [![This project is using Percy.io for visual regression testing.](https://percy.io/static/images/percy-badge.svg)](https://percy.io/s-weigand/djangocms-equation)
 
 [![Codacy code quality](https://api.codacy.com/project/badge/Grade/f3c0be01f67b43b082810a0d86a79b4d)](https://www.codacy.com/manual/s.weigand.phy/djangocms-equation?utm_source=github.com&utm_medium=referral&utm_content=s-weigand/djangocms-equation&utm_campaign=Badge_Grade)
@@ -21,7 +21,7 @@
 
 DjangoCMS plugin to write equations, utilizing KaTeX
 
-![](https://github.com/s-weigand/djangocms-equation/blob/master/demo.gif?raw=true)
+![](https://github.com/s-weigand/djangocms-equation/blob/main/demo.gif?raw=true)
 
 ## Features
 
