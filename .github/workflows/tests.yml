@@ -108,7 +108,8 @@ jobs:
           pip install -U .
           pip install -U -r requirements_dev.txt
           pip install 'django==${{ matrix.version_combinations.django }}.*' 'django-cms==${{ matrix.version_combinations.cms }}.*'
-      - name: Generate screenshot report
+
+      - name: Install dependencies django != 2.2
         if: matrix.version_combinations.django != 2.2
         run: |
           pip install -U 'django-classy-tags<2' 'django-sekizai<2'
