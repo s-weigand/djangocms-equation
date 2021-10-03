@@ -60,8 +60,8 @@ templates_path = ["_templates"]
 source_suffix = [".rst", ".md"]
 # source_suffix = ".rst"
 
-# The master toctree document.
-master_doc = "index"
+# The main toctree document.
+main_doc = "index"
 
 # General information about the project.
 project = "djangocms-equation"
@@ -147,7 +147,7 @@ latex_elements = {
 # [howto, manual, or own class]).
 latex_documents = [
     (
-        master_doc,
+        main_doc,
         "djangocms_equation.tex",
         "djangocms-equation Documentation",
         "Sebastian Weigand",
@@ -160,7 +160,7 @@ latex_documents = [
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [(master_doc, "djangocms_equation", "djangocms-equation Documentation", [author], 1)]
+man_pages = [(main_doc, "djangocms_equation", "djangocms-equation Documentation", [author], 1)]
 
 
 # -- Options for Texinfo output ----------------------------------------
@@ -170,7 +170,7 @@ man_pages = [(master_doc, "djangocms_equation", "djangocms-equation Documentatio
 #  dir menu entry, description, category)
 texinfo_documents = [
     (
-        master_doc,
+        main_doc,
         "djangocms_equation",
         "djangocms-equation Documentation",
         author,
