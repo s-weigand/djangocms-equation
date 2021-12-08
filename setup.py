@@ -13,7 +13,7 @@ with open("HISTORY.md") as history_file:
 
 requirements = [
     "django-cms>=3.4,<3.8",
-    "django>=1.11,!=2.0.*,<3.0",
+    "django>=1.11,!=2.0.0.a,<5.0",
     "djangocms-text-ckeditor>=3.2.1,<4.0.0",
 ]
 
