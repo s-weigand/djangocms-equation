@@ -1,5 +1,11 @@
 name: 'Tests'
-on: [push, pull_request]
+on:
+  push:
+    tags:
+      - v**
+    branches-ignore:
+      - 'dependabot/**'
+  pull_request:
 
 jobs:
   misspell:
