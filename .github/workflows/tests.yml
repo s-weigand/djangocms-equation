@@ -5,6 +5,7 @@ on:
       - v**
     branches-ignore:
       - 'dependabot/**'
+      - 'create-pr-action/**'
   pull_request:
 
 jobs:
