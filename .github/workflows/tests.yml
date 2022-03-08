@@ -77,7 +77,7 @@ jobs:
     needs: [pre-commit, docs]
     strategy:
       matrix:
-        python-version: [3.6, 3.7, 3.8, 3.9]
+        python-version: [3.7, 3.8, 3.9]
         version_combinations:
           [
             { 'django': 1.11, 'cms': 3.4 },

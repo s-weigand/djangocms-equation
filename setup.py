@@ -40,7 +40,6 @@ setup(
         "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
         "Topic :: Internet :: WWW/HTTP :: Dynamic Content :: Message Boards",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
@@ -54,7 +53,7 @@ setup(
     keywords="djangocms-equation django-cms django cms equation latex katex mhchem",
     name="djangocms-equation",
     packages=find_packages(include=["djangocms_equation"]),
-    python_requires=">=3.6",
+    python_requires=">=3.7",
     test_suite="tests.settings.run",
     url="https://github.com/s-weigand/djangocms-equation",
     project_urls={
