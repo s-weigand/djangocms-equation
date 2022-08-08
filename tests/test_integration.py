@@ -67,7 +67,6 @@ if DJANGO_VERSION_TUPLE >= (2, 1, 4):
         "A thin sub-class which only sets the single-threaded server as a class"
         server_thread_class = LiveServerSingleThread
 
-
 else:
     StaticServerSingleThreadedTestCase = StaticLiveServerTestCase
 

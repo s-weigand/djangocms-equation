@@ -2,7 +2,7 @@ exclude: 'djangocms_equation/migrations|djangocms_equation/templates/djangocms_e
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.0.1
+    rev: v4.3.0
     hooks:
       - id: check-ast
       - id: check-builtin-literals
@@ -13,17 +13,17 @@ repos:
         args: [--remove]
 
   - repo: https://github.com/asottile/pyupgrade
-    rev: v2.28.0
+    rev: v2.37.3
     hooks:
       - id: pyupgrade
         args: [--py3-plus]
   - repo: https://github.com/python/black
-    rev: 21.9b0
+    rev: 22.6.0
     hooks:
       - id: black
         language_version: python3
   - repo: https://github.com/pre-commit/mirrors-prettier
-    rev: v2.4.1 # Use the sha or tag you want to point at
+    rev: v2.7.1 # Use the sha or tag you want to point at
     hooks:
       - id: prettier
   - repo: https://gitlab.com/pycqa/flake8
@@ -31,7 +31,7 @@ repos:
     hooks:
       - id: flake8
   - repo: https://github.com/PyCQA/isort
-    rev: 5.9.3
+    rev: 5.10.1
     hooks:
       - id: isort
   - repo: https://github.com/PyCQA/pydocstyle
@@ -46,7 +46,7 @@ repos:
         exclude: 'docs|tests'
 
   - repo: https://github.com/myint/rstcheck
-    rev: '3f92957478422df87bd730abde66f089cc1ee19b'
+    rev: 'v6.0.0.post1'
     hooks:
       - id: rstcheck
         additional_dependencies: [sphinx, rstcheck]
@@ -63,7 +63,7 @@ repos:
         files: '.py|.rst'
 
   - repo: https://github.com/asottile/yesqa
-    rev: v1.2.3
+    rev: v1.4.0
     hooks:
       - id: yesqa
         additional_dependencies: [flake8-docstrings]
